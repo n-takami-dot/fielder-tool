@@ -812,6 +812,9 @@ async function loadStoreInfo(){
     sv();
     setSyncDots('ok','読込完了 '+new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}));
     renderDash();
+    if(detailName && document.getElementById('view-detail').classList.contains('active')){
+      renderDetail(detailName);
+    }
   }catch(e){setSyncDots('err','読込エラー');}
 }
 
@@ -840,6 +843,10 @@ async function loadRecords(){
       records=records.concat(fetched);
     }
     sv();
+    // ダッシュボードを再描画
+    if(document.getElementById('view-dash').classList.contains('active')){
+      renderDash();
+    }
     // 詳細画面が開いていれば訪問履歴を再描画
     if(detailName && document.getElementById('view-detail').classList.contains('active')){
       renderDetail(detailName);
