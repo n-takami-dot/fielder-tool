@@ -188,7 +188,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .sync-card{background:var(--card);border:0.5px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;}
 .sync-btn{display:inline-flex;align-items:center;gap:8px;font-size:var(--fs-sm);font-weight:600;padding:13px 22px;border:none;border-radius:10px;background:var(--accent);color:#fff;cursor:pointer;}
 .sync-btn:disabled{opacity:.5;}
-.warn-box{background:#FEF3C7;border-radius:8px;padding:11px 14px;font-size:var(--fs-xs);color:#92400E;margin-top:12px;line-height:1.7;}
 .result-badge{display:inline-block;font-size:var(--fs-xs);padding:3px 8px;border-radius:99px;}
 .rb-new{background:#D1FAE5;color:#065F46;}.rb-upd{background:#DBEAFE;color:#1E40AF;}
 .reg-item{background:var(--card);border:0.5px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px;cursor:pointer;}
@@ -202,6 +201,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .con-lbl{font-size:var(--fs-xs);color:var(--sub);margin-bottom:8px;}
 .con-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
 .admin-filter-banner{background:#EFF6FF;border:0.5px solid #BFDBFE;border-radius:8px;padding:10px 14px;font-size:var(--fs-xs);color:#1E40AF;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+
+/* 訪問履歴 削除ボタン */
+.tl-del-btn{display:inline-flex;align-items:center;gap:4px;font-size:var(--fs-xs);color:#DC2626;background:none;border:0.5px solid #FCA5A5;border-radius:99px;padding:4px 10px;cursor:pointer;margin-top:8px;opacity:.75;}
+.tl-del-btn:active{opacity:1;background:#FEE2E2;}
 
 /* 当月実績バッジ */
 .month-badge{display:inline-flex;align-items:center;gap:6px;background:#EDE9FE;border-radius:8px;padding:6px 12px;font-size:var(--fs-xs);color:#5B21B6;font-weight:500;}
@@ -331,7 +334,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
           <button class="sync-btn" id="sync-btn" onclick="syncStores()"><i class="ti ti-refresh"></i> 同期する</button>
           <div style="display:flex;align-items:center;gap:5px;"><div class="sdot" id="sdot2"></div><span id="stext2" style="font-size:var(--fs-xs);color:var(--muted);"></span></div>
         </div>
-        <div class="warn-box"><i class="ti ti-alert-triangle"></i> マスタ情報のみ更新。訪問記録・フェーズは上書きされません。</div>
+
         <div id="sync-result" style="display:none;margin-top:14px;"></div>
       </div>
       <div id="reg-header" style="margin-bottom:12px;"></div>
@@ -507,11 +510,12 @@ function renderDetail(sname){
     </div>`;
   const rcls={s:'sel-s',p:'sel-p',f:'sel-f'};const rlbl={s:'合意・達成',p:'検討中',f:'見送り'};
   const recs=records.filter(r=>r.storeName===sname).sort((a,b)=>b.date.localeCompare(a.date));
-  document.getElementById('d-timeline').innerHTML=recs.length?recs.map((r,i)=>`<div class="tl-item"><div class="tl-dc"><div class="tl-dot"></div>${i<recs.length-1?'<div class="tl-line"></div>':''}</div><div class="tl-body"><div class="tl-date">${r.date}${r.fielder?' ／ '+r.fielder:''}</div><div class="tl-card"><div class="tl-row">${r.goal!=null?`<span class="badge ${GCLS[r.goal]}">${GOALS[r.goal]}</span>`:''} ${r.phase?`<span class="badge gn">Ph.${r.phase} ${PHASES[r.phase-1].n}</span>`:''} ${r.result?`<span class="badge ${rcls[r.result]||'gn'}">${rlbl[r.result]||''}</span>`:''}</div>${r.memo?`<div class="tl-memo">${r.memo}</div>`:''} ${r.next?`<div class="tl-next"><i class="ti ti-arrow-right"></i> ${r.next}</div>`:''} ${r.nextDate?`<div style="font-size:var(--fs-xs);color:var(--muted);margin-top:3px;">次回：${r.nextDate}${r.priority?' （'+r.priority+'）':''}</div>`:''}</div></div></div>`).join(''):`<div class="empty">訪問記録がありません</div>`;
+  const canDelete=r=>isAdmin()||(r.fielder===cu);
+  document.getElementById('d-timeline').innerHTML=recs.length?recs.map((r,i)=>`<div class="tl-item" id="tl-${r.id}"><div class="tl-dc"><div class="tl-dot"></div>${i<recs.length-1?'<div class="tl-line"></div>':''}</div><div class="tl-body"><div class="tl-date">${r.date}${r.fielder?' ／ '+r.fielder:''}</div><div class="tl-card"><div class="tl-row">${r.goal!=null?`<span class="badge ${GCLS[r.goal]}">${GOALS[r.goal]}</span>`:''} ${r.phase?`<span class="badge gn">Ph.${r.phase} ${PHASES[r.phase-1].n}</span>`:''} ${r.result?`<span class="badge ${rcls[r.result]||'gn'}">${rlbl[r.result]||''}</span>`:''}</div>${r.memo?`<div class="tl-memo">${r.memo}</div>`:''} ${r.next?`<div class="tl-next"><i class="ti ti-arrow-right"></i> ${r.next}</div>`:''} ${r.nextDate?`<div style="font-size:var(--fs-xs);color:var(--muted);margin-top:3px;">次回：${r.nextDate}${r.priority?' （'+r.priority+'）':''}</div>`:''} ${canDelete(r)?`<button class="tl-del-btn" onclick="deleteRec('${r.id}')"><i class="ti ti-trash" style="font-size:14px;"></i> 削除</button>`:''}</div></div></div>`).join(''):`<div class="empty">訪問記録がありません</div>`;
 }
 function openEdit(){
   const info=getInfo(detailName);const c=info.contact||{};
-  editConst={hq:info.hqConstraint,pop:info.popOk,promo:info.promoOk};
+  editConst={};
   document.getElementById('edit-body').innerHTML=`
     <div style="margin-bottom:14px;"><div class="sec-hd">担当者情報</div>
       <div class="cg2"><div class="field"><label>担当者名</label><input id="ec-name" value="${c.name||''}" placeholder="山田 太郎"></div><div class="field"><label>役職</label><input id="ec-role" value="${c.role||''}" placeholder="店長"></div></div>
@@ -523,9 +527,9 @@ function openEdit(){
     </div>
     <div><div class="sec-hd">環境情報</div>
       <div class="con-grid">
-        <div class="con-card"><div class="con-lbl">本部制約</div><div class="toggle-row">${['強','中','弱'].map(v=>{const cl=v==='強'?'r':v==='中'?'a':'g';return`<button class="tg-btn${editConst.hq===v?' on-'+cl:''}" onclick="togC(this,'hq','${v}','${cl}')">${v}</button>`;}).join('')}</div></div>
-        <div class="con-card"><div class="con-lbl">POP設置</div><div class="toggle-row">${['可','不可'].map(v=>{const cl=v==='可'?'g':'r';return`<button class="tg-btn${editConst.pop===v?' on-'+cl:''}" onclick="togC(this,'pop','${v}','${cl}')">${v}</button>`;}).join('')}</div></div>
-        <div class="con-card"><div class="con-lbl">プロモ活動</div><div class="toggle-row">${['可','不可'].map(v=>{const cl=v==='可'?'g':'r';return`<button class="tg-btn${editConst.promo===v?' on-'+cl:''}" onclick="togC(this,'promo','${v}','${cl}')">${v}</button>`;}).join('')}</div></div>
+        <div class="con-card"><div class="con-lbl">本部制約</div><div class="toggle-row">${['強','中','弱'].map(v=>{const cl=v==='強'?'r':v==='中'?'a':'g';return`<button class="tg-btn${info.hqConstraint===v?' on-'+cl:''}" onclick="togC(this,'hq','${v}','${cl}')">${v}</button>`;}).join('')}</div></div>
+        <div class="con-card"><div class="con-lbl">POP設置</div><div class="toggle-row">${['可','不可'].map(v=>{const cl=v==='可'?'g':'r';return`<button class="tg-btn${info.popOk===v?' on-'+cl:''}" onclick="togC(this,'pop','${v}','${cl}')">${v}</button>`;}).join('')}</div></div>
+        <div class="con-card"><div class="con-lbl">プロモ活動</div><div class="toggle-row">${['可','不可'].map(v=>{const cl=v==='可'?'g':'r';return`<button class="tg-btn${info.promoOk===v?' on-'+cl:''}" onclick="togC(this,'promo','${v}','${cl}')">${v}</button>`;}).join('')}</div></div>
       </div>
     </div>`;
   document.getElementById('edit-area').style.display='block';
@@ -533,16 +537,44 @@ function openEdit(){
 }
 function togC(btn,type,val,cls){btn.parentElement.querySelectorAll('.tg-btn').forEach(b=>b.className='tg-btn');btn.classList.add('on-'+cls);editConst[type]=val;}
 function closeEdit(){document.getElementById('edit-area').style.display='none';}
+async function deleteRec(id){
+  if(!confirm('この訪問記録を削除しますか？'))return;
+  const idx=records.findIndex(r=>String(r.id)===String(id));
+  if(idx<0)return;
+  records.splice(idx,1);sv();
+  // UIからも即時除去
+  const el=document.getElementById('tl-'+id);if(el)el.remove();
+  try{
+    await postGAS({action:'deleteRecord',id:String(id)});
+    toast('削除しました','ok');
+  }catch(e){
+    toast('ローカル削除済み（サーバー同期失敗）','err');
+  }
+}
 async function saveEdit(){
   const info=getInfo(detailName);
-  const contact={name:document.getElementById('ec-name').value.trim(),role:document.getElementById('ec-role').value.trim(),auth:document.getElementById('ec-auth').value,rel:document.getElementById('ec-rel').value,keyman:document.getElementById('ec-km').value};
+  const contact={
+    name:document.getElementById('ec-name').value.trim(),
+    role:document.getElementById('ec-role').value.trim(),
+    auth:document.getElementById('ec-auth').value,
+    rel:document.getElementById('ec-rel').value,
+    keyman:document.getElementById('ec-km').value
+  };
   const issue1=document.getElementById('ec-issue1').value.trim();
   const issue2=document.getElementById('ec-issue2').value.trim();
-  const updated={...info,contact,issue1,issue2,hqConstraint:editConst.hq||info.hqConstraint,popOk:editConst.pop||info.popOk,promoOk:editConst.promo||info.promoOk};
+  const updated={
+    ...info,contact,issue1,issue2,
+    hqConstraint:'hq' in editConst?editConst.hq:info.hqConstraint,
+    popOk:'pop' in editConst?editConst.pop:info.popOk,
+    promoOk:'promo' in editConst?editConst.promo:info.promoOk
+  };
   sInfo[detailName]=updated;sv();
-  const btn=document.getElementById('save-edit-btn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span> 送信中...';
-  try{await postGAS({action:'saveStoreInfo',storeName:detailName,fielder:cu,contacts:[contact],issues:[{text:issue1},{text:issue2}],hqConstraint:updated.hqConstraint,popOk:updated.popOk,promoOk:updated.promoOk,goal:updated.goal,phase:updated.phase,lastVisit:updated.lastVisit});toast('保存しました','ok');}
-  catch(e){toast('送信エラー：ローカル保存済み','err');}
+  const btn=document.getElementById('save-edit-btn');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> 送信中...';
+  try{
+    await postGAS({action:'saveStoreInfo',storeName:detailName,fielder:cu,contacts:[contact],issues:[{text:issue1},{text:issue2}],hqConstraint:updated.hqConstraint,popOk:updated.popOk,promoOk:updated.promoOk,goal:updated.goal,phase:updated.phase,lastVisit:updated.lastVisit});
+    toast('保存しました','ok');
+  }catch(e){toast('送信エラー：ローカル保存済み','err');}
   btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> 保存';
   closeEdit();renderDetail(detailName);
 }
@@ -650,7 +682,15 @@ async function saveRec(){
     btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> 保存・送信';
   }
 }
-function clearRec(){['r-memo','r-next'].forEach(id=>{document.getElementById(id).value='';});document.getElementById('r-store').value='';document.getElementById('r-nextdate').value='';document.getElementById('r-pri').value='';document.querySelectorAll('.res-tile').forEach(t=>t.className='res-tile');selGoal=null;selPhase=null;curRes=null;goalChangeMode=false;phaseChecks={};renderGoalArea(null);renderPhaseTiles();}
+function clearRec(){
+  ['r-memo','r-next'].forEach(id=>{document.getElementById(id).value='';});
+  document.getElementById('r-store').value='';
+  document.getElementById('r-nextdate').value='';
+  document.getElementById('r-pri').value='';
+  document.querySelectorAll('.res-tile').forEach(t=>t.className='res-tile');
+  selGoal=null;selPhase=null;curRes=null;goalChangeMode=false;phaseChecks={};
+  renderGoalArea(null);renderPhaseTiles();
+}
 async function syncStores(){
   const btn=document.getElementById('sync-btn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span> 同期中...';
   setSyncDots('spin','同期中...');
