@@ -556,14 +556,17 @@ async function deleteRec(id){
   deletedIds.add(String(id));
   // その店舗の記録が0件になったらゴール・フェーズをリセット
   const remaining=records.filter(r=>r.storeName===storeName);
-  if(remaining.length===0 && sInfo[storeName]){
-    sInfo[storeName]={...sInfo[storeName],goal:null,phase:0,lastVisit:null};
-    // GASの店舗情報も更新
-    const info=sInfo[storeName];
-    postGAS({action:'saveStoreInfo',storeName,fielder:cu,
-      contacts:[info.contact||{}],
+  if(remaining.length===0){
+    const info=getInfo(storeName);
+    const c=info.contact||{};
+    sInfo[storeName]={...info,goal:null,phase:0,lastVisit:null};
+    sv();
+    postGAS({action:'saveStoreInfo',storeName,fielder:info.fielder||cu,
+      contacts:[{name:c.name||'',role:c.role||'',auth:c.auth||'',rel:c.rel||'',keyman:c.keyman||''}],
       issues:[{text:info.issue1||''},{text:info.issue2||''}],
-      hqConstraint:info.hqConstraint||'',popOk:info.popOk||'',promoOk:info.promoOk||'',
+      hqConstraint:info.hqConstraint||'',
+      popOk:info.popOk||'',
+      promoOk:info.promoOk||'',
       goal:null,phase:0,lastVisit:''
     }).catch(()=>{});
   }
