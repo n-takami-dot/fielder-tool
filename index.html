@@ -548,8 +548,6 @@ async function deleteRec(id){
   const el=document.getElementById('tl-'+id);if(el)el.remove();
   try{
     await postGAS({action:'deleteRecord',id:String(id)});
-    deletedIds.delete(String(id));
-    sv();
     toast('削除しました','ok');
   }catch(e){
     toast('ローカル削除済み（サーバー同期失敗）','err');
@@ -833,6 +831,10 @@ async function loadRecords(){
       records=records.concat(fetched);
     }
     sv();
+    // 詳細画面が開いていれば訪問履歴を再描画
+    if(detailName && document.getElementById('view-detail').classList.contains('active')){
+      renderDetail(detailName);
+    }
   }catch(e){}
 }
 
