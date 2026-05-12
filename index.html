@@ -393,6 +393,15 @@ function ld(){
 function sv(){try{localStorage.setItem(SK,JSON.stringify(stores));localStorage.setItem(RK,JSON.stringify(records));localStorage.setItem(IK,JSON.stringify(sInfo));localStorage.setItem(DK,JSON.stringify([...deletedIds]));}catch(e){}}
 function isAdmin(){return cu===ADMIN;}
 function getInfo(n){return sInfo[n]||{goal:null,phase:0,lastVisit:null,contact:{},issue1:'',issue2:'',hqConstraint:'',popOk:'',promoOk:''};}
+function fmtDate(v){
+  if(!v)return '';
+  // すでに YYYY-MM-DD 形式ならそのまま
+  if(/^\d{4}-\d{2}-\d{2}$/.test(String(v)))return String(v);
+  // Date オブジェクトや ISO 文字列の場合は変換
+  const d=new Date(v);
+  if(isNaN(d.getTime()))return String(v);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
 function initials(n){return n.replace(/\s/g,'').slice(0,2);}
 function setSyncDots(state,msg){
   ['sdot','sdot2'].forEach(id=>{const d=document.getElementById(id);if(d)d.className='sdot '+state;});
@@ -460,7 +469,7 @@ function renderDash(){
     const bar=info.goal==null?'':PHASES.map((_,pi)=>{const n=pi+1;return`<div class="phb ${n<info.phase?'done':n===info.phase?'cur':'todo'}">${n}</div>`;}).join('');
     return`<div class="store-card" onclick="goView('detail','${s.name.replace(/'/g,"\\'")}')">
       <div class="sc-top"><div><div class="sc-name">${s.name}</div><div class="sc-chain">${s.chain||''}</div></div>${rk}</div>
-      <div class="sc-bottom"><div class="sc-badges">${gl}${bar?`<div class="ph-bar" style="margin-left:4px;">${bar}</div>`:''}</div><div class="sc-date">${info.lastVisit?'最終：'+info.lastVisit:''}</div></div>
+      <div class="sc-bottom"><div class="sc-badges">${gl}${bar?`<div class="ph-bar" style="margin-left:4px;">${bar}</div>`:''}</div><div class="sc-date">${info.lastVisit?'最終：'+fmtDate(info.lastVisit):''}</div></div>
     </div>`;
   }).join('');
 }
@@ -785,7 +794,7 @@ async function loadStoreInfo(){
         ...existing,
         goal:goalIdx,
         phase:Number(item.phase||0),
-        lastVisit:item.lastVisit||existing.lastVisit||null,
+        lastVisit:fmtDate(item.lastVisit||existing.lastVisit||''),
         contact:{
           name:item.contactName||'',
           role:item.contactRole||'',
@@ -819,9 +828,9 @@ async function loadRecords(){
         goalIdx=idx>=0?idx:null;
       }
       return{
-        id:r.id,storeName:r.storeName,date:r.date,fielder:r.fielder,
+        id:r.id,storeName:r.storeName,date:fmtDate(r.date),fielder:r.fielder,
         goal:goalIdx,phase:Number(r.phase||0),result:r.result,
-        memo:r.memo||"",next:r.next||"",nextDate:r.nextDate||"",priority:r.priority||""
+        memo:r.memo||"",next:r.next||"",nextDate:fmtDate(r.nextDate),priority:r.priority||""
       };
     });
     if(isAdmin()){
