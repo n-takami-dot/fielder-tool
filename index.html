@@ -806,27 +806,28 @@ async function loadStoreInfo(){
 
 async function loadRecords(){
   try{
-    const fielderParam=isAdmin()?'':cu;
-    const res=await fetch(GAS+'?action=getRecords&fielder='+encodeURIComponent(fielderParam));
+    const fielderParam=isAdmin()?"":cu;
+    const res=await fetch(GAS+"?action=getRecords&fielder="+encodeURIComponent(fielderParam));
     const json=await res.json();
     if(!json.records)return;
-    // スプレッドシートの記録とローカルをマージ（IDで重複排除）
-    const existingIds=new Set(records.map(r=>String(r.id)));
-    json.records.forEach(r=>{
-      if(!r.storeName)return;
-      if(existingIds.has(String(r.id)))return;
-      // ゴール名からインデックスに変換
+    const fetched=json.records.filter(r=>r.storeName).map(r=>{
       let goalIdx=null;
-      if(r.goal!==null&&r.goal!==''){
+      if(r.goal!==null&&r.goal!==""){
         const idx=GOALS.indexOf(r.goal);
         goalIdx=idx>=0?idx:null;
       }
-      records.push({
+      return{
         id:r.id,storeName:r.storeName,date:r.date,fielder:r.fielder,
         goal:goalIdx,phase:Number(r.phase||0),result:r.result,
-        memo:r.memo||'',next:r.next||'',nextDate:r.nextDate||'',priority:r.priority||''
-      });
+        memo:r.memo||"",next:r.next||"",nextDate:r.nextDate||"",priority:r.priority||""
+      };
     });
+    if(isAdmin()){
+      records=fetched;
+    }else{
+      records=records.filter(r=>r.fielder&&r.fielder!==cu);
+      records=records.concat(fetched);
+    }
     sv();
   }catch(e){}
 }
