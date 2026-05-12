@@ -277,9 +277,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
       <div class="rec-sec">
         <div class="sec-hd"><i class="ti ti-check"></i> 訪問結果</div>
         <div class="result-grid">
-          <div class="res-tile" onclick="selRes(this,'s')"><i class="ti ti-circle-check"></i>合意・達成</div>
-          <div class="res-tile" onclick="selRes(this,'p')"><i class="ti ti-clock"></i>検討中</div>
-          <div class="res-tile" onclick="selRes(this,'f')"><i class="ti ti-circle-x"></i>見送り</div>
+          <div class="res-tile" onclick="selRes(this,'合意・達成')"><i class="ti ti-circle-check"></i>合意・達成</div>
+          <div class="res-tile" onclick="selRes(this,'検討中')"><i class="ti ti-clock"></i>検討中</div>
+          <div class="res-tile" onclick="selRes(this,'見送り')"><i class="ti ti-circle-x"></i>見送り</div>
         </div>
       </div>
       <div class="rec-sec">
@@ -518,7 +518,8 @@ function renderDetail(sname){
       <div><div class="ii-lbl">POP設置</div><div class="ii-val">${info.popOk?`<span class="tg-btn ${bCls[info.popOk]||''}" style="cursor:default;">${info.popOk}</span>`:'—'}</div></div>
       <div><div class="ii-lbl">プロモ活動</div><div class="ii-val">${info.promoOk?`<span class="tg-btn ${bCls[info.promoOk]||''}" style="cursor:default;">${info.promoOk}</span>`:'—'}</div></div>
     </div>`;
-  const rcls={s:'sel-s',p:'sel-p',f:'sel-f'};const rlbl={s:'合意・達成',p:'検討中',f:'見送り'};
+  const rcls={'合意・達成':'sel-s','検討中':'sel-p','見送り':'sel-f','s':'sel-s','p':'sel-p','f':'sel-f'};
+  const rlbl={'合意・達成':'合意・達成','検討中':'検討中','見送り':'見送り','s':'合意・達成','p':'検討中','f':'見送り'};
   const recs=records.filter(r=>r.storeName===sname).sort((a,b)=>b.date.localeCompare(a.date));
   const canDelete=r=>isAdmin()||(r.fielder===cu);
   document.getElementById('d-timeline').innerHTML=recs.length?recs.map((r,i)=>`<div class="tl-item" id="tl-${r.id}"><div class="tl-dc"><div class="tl-dot"></div>${i<recs.length-1?'<div class="tl-line"></div>':''}</div><div class="tl-body"><div class="tl-date">${r.date}${r.fielder?' ／ '+r.fielder:''}</div><div class="tl-card"><div class="tl-row">${r.goal!=null?`<span class="badge ${GCLS[r.goal]}">${GOALS[r.goal]}</span>`:''} ${r.phase?`<span class="badge gn">Ph.${r.phase} ${PHASES[r.phase-1].n}</span>`:''} ${r.result?`<span class="badge ${rcls[r.result]||'gn'}">${rlbl[r.result]||''}</span>`:''}</div>${r.memo?`<div class="tl-memo">${r.memo}</div>`:''} ${r.next?`<div class="tl-next"><i class="ti ti-arrow-right"></i> ${r.next}</div>`:''} ${r.nextDate?`<div style="font-size:var(--fs-xs);color:var(--muted);margin-top:3px;">次回：${r.nextDate}${r.priority?' （'+r.priority+'）':''}</div>`:''} ${canDelete(r)?`<button class="tl-del-btn" onclick="deleteRec('${r.id}')"><i class="ti ti-trash" style="font-size:14px;"></i> 削除</button>`:''}</div></div></div>`).join(''):`<div class="empty">訪問記録がありません</div>`;
