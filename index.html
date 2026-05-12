@@ -551,10 +551,25 @@ async function deleteRec(id){
   if(!confirm('この訪問記録を削除しますか？'))return;
   const idx=records.findIndex(r=>String(r.id)===String(id));
   if(idx<0)return;
+  const storeName=records[idx].storeName;
   records.splice(idx,1);
   deletedIds.add(String(id));
+  // その店舗の記録が0件になったらゴール・フェーズをリセット
+  const remaining=records.filter(r=>r.storeName===storeName);
+  if(remaining.length===0 && sInfo[storeName]){
+    sInfo[storeName]={...sInfo[storeName],goal:null,phase:0,lastVisit:null};
+    // GASの店舗情報も更新
+    const info=sInfo[storeName];
+    postGAS({action:'saveStoreInfo',storeName,fielder:cu,
+      contacts:[info.contact||{}],
+      issues:[{text:info.issue1||''},{text:info.issue2||''}],
+      hqConstraint:info.hqConstraint||'',popOk:info.popOk||'',promoOk:info.promoOk||'',
+      goal:null,phase:0,lastVisit:''
+    }).catch(()=>{});
+  }
   sv();
   const el=document.getElementById('tl-'+id);if(el)el.remove();
+  renderDash();
   try{
     await postGAS({action:'deleteRecord',id:String(id)});
     toast('削除しました','ok');
