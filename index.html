@@ -378,8 +378,8 @@ const MEMBERS=[
   {name:'松尾 奈緒美',color:'#E0F2FE',tc:'#0C4A6E'},
 ];
 const ADMIN='管理者';
-const SK='fd_s',RK='fd_r',IK='fd_i',CK='fd_c';
-let stores=[],records=[],sInfo={},cu=null,detailName=null;
+const SK='fd_s',RK='fd_r',IK='fd_i',CK='fd_c',DK='fd_d';
+let stores=[],records=[],sInfo={},deletedIds=new Set(),cu=null,detailName=null;
 let selGoal=null,selPhase=null,curRes=null,editConst={},goalChangeMode=false,phaseChecks={};
 let fGoal='',fRank='',fPhase='';
 
@@ -387,9 +387,10 @@ function ld(){
   try{stores=JSON.parse(localStorage.getItem(SK)||'[]');}catch(e){stores=[];}
   try{records=JSON.parse(localStorage.getItem(RK)||'[]');}catch(e){records=[];}
   try{sInfo=JSON.parse(localStorage.getItem(IK)||'{}');}catch(e){sInfo={};}
+  try{deletedIds=new Set(JSON.parse(localStorage.getItem(DK)||'[]'));}catch(e){deletedIds=new Set();}
   try{cu=localStorage.getItem(CK)||null;}catch(e){}
 }
-function sv(){try{localStorage.setItem(SK,JSON.stringify(stores));localStorage.setItem(RK,JSON.stringify(records));localStorage.setItem(IK,JSON.stringify(sInfo));}catch(e){}}
+function sv(){try{localStorage.setItem(SK,JSON.stringify(stores));localStorage.setItem(RK,JSON.stringify(records));localStorage.setItem(IK,JSON.stringify(sInfo));localStorage.setItem(DK,JSON.stringify([...deletedIds]));}catch(e){}}
 function isAdmin(){return cu===ADMIN;}
 function getInfo(n){return sInfo[n]||{goal:null,phase:0,lastVisit:null,contact:{},issue1:'',issue2:'',hqConstraint:'',popOk:'',promoOk:''};}
 function initials(n){return n.replace(/\s/g,'').slice(0,2);}
@@ -541,11 +542,14 @@ async function deleteRec(id){
   if(!confirm('この訪問記録を削除しますか？'))return;
   const idx=records.findIndex(r=>String(r.id)===String(id));
   if(idx<0)return;
-  records.splice(idx,1);sv();
-  // UIからも即時除去
+  records.splice(idx,1);
+  deletedIds.add(String(id));
+  sv();
   const el=document.getElementById('tl-'+id);if(el)el.remove();
   try{
     await postGAS({action:'deleteRecord',id:String(id)});
+    deletedIds.delete(String(id));
+    sv();
     toast('削除しました','ok');
   }catch(e){
     toast('ローカル削除済み（サーバー同期失敗）','err');
@@ -810,7 +814,7 @@ async function loadRecords(){
     const res=await fetch(GAS+"?action=getRecords&fielder="+encodeURIComponent(fielderParam));
     const json=await res.json();
     if(!json.records)return;
-    const fetched=json.records.filter(r=>r.storeName).map(r=>{
+    const fetched=json.records.filter(r=>r.storeName&&!deletedIds.has(String(r.id))).map(r=>{
       let goalIdx=null;
       if(r.goal!==null&&r.goal!==""){
         const idx=GOALS.indexOf(r.goal);
