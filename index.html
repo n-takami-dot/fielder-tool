@@ -481,18 +481,19 @@ function renderDetail(sname){
   const hqCls={強:'on-r',中:'on-a',弱:'on-g'};const bCls={可:'on-g',不可:'on-r'};
   const relCls=r=>!r?'gn':r.startsWith('A')?'g1':r.startsWith('B')?'g0':r.startsWith('C')?'g2':'rS';
 
+  const fmtNum=v=>v?Number(String(v).replace(/,/g,'')).toLocaleString('ja-JP')||v:null;
   // 当月前年実績
   const cmKey=currentMonthKey();
   const cmLabel=currentMonthLabel();
   const cmVal=s[cmKey]||'';
-  const monthBadge=cmVal?`<div class="month-badge" style="margin-top:8px;"><i class="ti ti-calendar-stats"></i> ${cmLabel}前年実績：${cmVal}</div>`:'';
+  const monthBadge=cmVal?`<div class="month-badge" style="margin-top:8px;"><i class="ti ti-calendar-stats"></i> ${cmLabel}前年実績：${fmtNum(cmVal)}</div>`:'';
 
   document.getElementById('d-master').innerHTML=`<div class="ic-label"><i class="ti ti-building"></i> 店舗マスタ</div>
     <div class="ig">
       <div><div class="ii-lbl">チェーン名</div><div class="ii-val">${s.chain||'—'}</div></div>
       <div><div class="ii-lbl">弊社担当者</div><div class="ii-val">${s.pic||'—'}</div></div>
       <div><div class="ii-lbl">売上ランク</div><div class="ii-val">${s.rank?`<span class="badge r${s.rank}">${s.rank}</span>`:'—'}</div></div>
-      <div><div class="ii-lbl">前年実績</div><div class="ii-val">${s.prevResult||'—'}</div></div>
+      <div><div class="ii-lbl">前年実績</div><div class="ii-val">${fmtNum(s.prevResult)||'—'}</div></div>
     </div>
     ${monthBadge}
     ${s.note?`<div style="font-size:var(--fs-xs);color:var(--muted);margin-top:10px;">${s.note}</div>`:''}`;
