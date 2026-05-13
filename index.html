@@ -375,7 +375,14 @@ function currentMonthLabel(){
   return m+'月';
 }
 
-const MEMBERS=[
+const AVATAR_COLORS=[
+  {color:'#DBEAFE',tc:'#1E40AF'},{color:'#D1FAE5',tc:'#065F46'},
+  {color:'#FEF3C7',tc:'#92400E'},{color:'#EDE9FE',tc:'#5B21B6'},
+  {color:'#FCE7F3',tc:'#9D174D'},{color:'#E0F2FE',tc:'#0C4A6E'},
+  {color:'#FFEDD5',tc:'#9A3412'},{color:'#DCFCE7',tc:'#166534'},
+  {color:'#F3E8FF',tc:'#6B21A8'},{color:'#FEE2E2',tc:'#991B1B'},
+];
+let MEMBERS=[
   {name:'大石 佐輝子',color:'#DBEAFE',tc:'#1E40AF'},
   {name:'三木 敬子',color:'#D1FAE5',tc:'#065F46'},
   {name:'垂井 明美',color:'#FEF3C7',tc:'#92400E'},
@@ -776,12 +783,26 @@ function renderRegList(){
 }
 // ── 起動時自動読み込み ──
 async function autoLoad(){
-  // まず店舗マスタを同期（ローカルが空なら必ず、あれば静かにバックグラウンドで）
+  await loadMembers();
   await syncStoresSilent();
-  // 店舗情報（フェーズ・担当者・課題）を読み込む
   await loadStoreInfo();
-  // 訪問記録を読み込む
   await loadRecords();
+}
+
+async function loadMembers(){
+  try{
+    const res=await fetch(GAS+'?action=getMembers');
+    const json=await res.json();
+    if(!json.members||json.members.length===0)return;
+    MEMBERS=json.members.map((name,i)=>{
+      const col=AVATAR_COLORS[i%AVATAR_COLORS.length];
+      return{name,color:col.color,tc:col.tc};
+    });
+    // ログイン画面が表示中なら再描画
+    if(document.getElementById('view-login').classList.contains('active')){
+      renderLogin();
+    }
+  }catch(e){}
 }
 
 async function syncStoresSilent(){
@@ -886,7 +907,7 @@ async function loadRecords(){
 }
 
 async function postGAS(data){const res=await fetch(GAS,{method:'POST',body:JSON.stringify(data)});if(!res.ok)throw new Error('HTTP '+res.status);return res.json();}
-ld();if(cu){login(cu);}else{renderLogin();}
+ld();if(cu){login(cu);}else{renderLogin();loadMembers();}
 </script>
 </body>
 </html>
