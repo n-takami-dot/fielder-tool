@@ -716,8 +716,8 @@ async function saveRec(){
     await postGAS({action:'saveStoreInfo',storeName:sn,fielder:cu,contacts:[updated.contact||{}],issues:[{text:updated.issue1||''},{text:updated.issue2||''}],hqConstraint:updated.hqConstraint||'',popOk:updated.popOk||'',promoOk:updated.promoOk||'',goal:selGoal,phase:selPhase,lastVisit:today});
     setSyncDots('ok','送信完了 '+new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}));
     toast('保存・送信しました','ok');
-    // ★ ボタンリセットしてから画面遷移
     btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> 保存・送信';
+    clearRec();
     goView('dash');
   }catch(e){
     setSyncDots('err','送信失敗（ローカル保存済）');toast('送信エラー：ローカル保存済み','err');
