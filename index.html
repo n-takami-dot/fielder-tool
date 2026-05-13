@@ -173,7 +173,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 
 /* 訪問結果 */
 .result-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
-.res-tile{padding:16px 8px;border-radius:12px;border:1.5px solid var(--border);cursor:pointer;background:var(--card);text-align:center;font-size:var(--fs-sm);color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:6px;}
+.res-tile{padding:16px 8px;border-radius:12px;border:1.5px solid var(--border);cursor:pointer;background:var(--card);text-align:center;font-size:var(--fs-sm);color:var(--sub);display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;font-family:inherit;-webkit-appearance:none;}
 .res-tile i{font-size:26px;}
 .res-tile:active{opacity:.8;}
 .res-tile.sel-s{background:#D1FAE5;border-color:#059669;color:#065F46;}
@@ -283,9 +283,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
       <div class="rec-sec">
         <div class="sec-hd"><i class="ti ti-check"></i> 訪問結果</div>
         <div class="result-grid">
-          <div class="res-tile" onclick="selRes(this,'合意・達成')"><i class="ti ti-circle-check"></i>合意・達成</div>
-          <div class="res-tile" onclick="selRes(this,'検討中')"><i class="ti ti-clock"></i>検討中</div>
-          <div class="res-tile" onclick="selRes(this,'見送り')"><i class="ti ti-circle-x"></i>見送り</div>
+          <button class="res-tile" onclick="selRes(this,'合意・達成')"><i class="ti ti-circle-check"></i>合意・達成</button>
+          <button class="res-tile" onclick="selRes(this,'検討中')"><i class="ti ti-clock"></i>検討中</button>
+          <button class="res-tile" onclick="selRes(this,'見送り')"><i class="ti ti-circle-x"></i>見送り</button>
         </div>
       </div>
       <div class="rec-sec">
@@ -689,7 +689,12 @@ function toggleCheck(phaseN,condIdx){
   const condList=document.querySelector(`#pt-${phaseN} .cond-list`);if(!condList)return;
   condList.innerHTML=p.conds.map((c,ci)=>{const checked=checks.includes(ci);return`<div class="cond-item" onclick="toggleCheck(${phaseN},${ci})"><div class="cond-cb${checked?' checked':''}">${checked?'<i class="ti ti-check" style="font-size:12px;color:#fff;"></i>':''}</div><div class="cond-text${checked?' checked':''}">${c}</div></div>`;}).join('');
 }
-function selRes(tile,type){document.querySelectorAll('.res-tile').forEach(t=>t.className='res-tile');tile.classList.add('sel-'+type);curRes=type;}
+function selRes(tile,type){
+  const clsMap={'合意・達成':'sel-s','検討中':'sel-p','見送り':'sel-f'};
+  document.querySelectorAll('.res-tile').forEach(t=>t.className='res-tile');
+  tile.classList.add(clsMap[type]||'sel-s');
+  curRes=type;
+}
 async function saveRec(){
   const sn=document.getElementById('r-store').value;
   if(!sn){alert('店舗を選択してください');return;}
