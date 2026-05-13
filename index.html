@@ -206,7 +206,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .con-card{background:var(--bg);border-radius:8px;padding:12px 14px;}
 .con-lbl{font-size:var(--fs-xs);color:var(--sub);margin-bottom:8px;}
 .con-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
-.admin-filter-banner{background:#EFF6FF;border:0.5px solid #BFDBFE;border-radius:8px;padding:10px 14px;font-size:var(--fs-xs);color:#1E40AF;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.uchite-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px;}
+.uchite-btn{padding:10px 8px;border-radius:10px;border:1.5px solid var(--border);background:var(--card);font-size:var(--fs-xs);color:var(--sub);cursor:pointer;text-align:center;font-family:inherit;}
+.uchite-btn.active{background:#DBEAFE;border-color:#2563EB;color:#1E40AF;font-weight:600;}
 
 /* 訪問履歴 削除ボタン */
 .tl-del-btn{display:inline-flex;align-items:center;gap:4px;font-size:var(--fs-xs);color:#DC2626;background:none;border:0.5px solid #FCA5A5;border-radius:99px;padding:4px 10px;cursor:pointer;margin-top:8px;opacity:.75;}
@@ -405,7 +407,7 @@ function ld(){
 }
 function sv(){try{localStorage.setItem(SK,JSON.stringify(stores));localStorage.setItem(RK,JSON.stringify(records));localStorage.setItem(IK,JSON.stringify(sInfo));localStorage.setItem(DK,JSON.stringify([...deletedIds]));}catch(e){}}
 function isAdmin(){return cu===ADMIN;}
-function getInfo(n){return sInfo[n]||{goal:null,phase:0,lastVisit:null,contact:{},issue1:'',issue2:'',hqConstraint:'',popOk:'',promoOk:''};}
+function getInfo(n){return sInfo[n]||{goal:null,phase:0,lastVisit:null,contact:{},issue1:'',uchiteSel:'',uchiteDetail:'',hqConstraint:'',popOk:'',promoOk:''};}
 function fmtDate(v){
   if(!v)return '';
   // すでに YYYY-MM-DD 形式ならそのまま
@@ -522,8 +524,8 @@ function renderDetail(sname){
     </div>
     <div style="border-top:0.5px solid #F3F4F6;padding-top:12px;">
       <div class="ig">
-        <div><div class="ii-lbl">課題①</div><div class="ii-val" style="font-weight:400;">${info.issue1||'—'}</div></div>
-        <div><div class="ii-lbl">課題②</div><div class="ii-val" style="font-weight:400;">${info.issue2||'—'}</div></div>
+        <div><div class="ii-lbl">お困りごと</div><div class="ii-val" style="font-weight:400;">${info.issue1||'—'}</div></div>
+        <div><div class="ii-lbl">打ち手</div><div class="ii-val" style="font-weight:400;">${info.uchiteSel?`<span class="badge gn" style="margin-right:4px;">${info.uchiteSel}</span>`:''}${info.uchiteDetail||(!info.uchiteSel?'—':'')}</div></div>
       </div>
     </div>`;
   document.getElementById('d-env').innerHTML=`<div class="ic-label"><i class="ti ti-shield"></i> 環境情報</div>
@@ -547,8 +549,14 @@ function openEdit(){
       <div class="cg3"><div class="field"><label>権限レベル</label><select id="ec-auth">${['','決裁者','承認者','担当者','担当補佐'].map(o=>`<option${c.auth===o?' selected':''}>${o}</option>`).join('')}</select></div><div class="field"><label>関係性</label><select id="ec-rel">${['','A 協力的・好意的','B 普通・中立','C やや消極的・様子見','D 非協力的・拒否的'].map(o=>`<option${c.rel===o?' selected':''}>${o}</option>`).join('')}</select></div><div class="field"><label>キーマン</label><select id="ec-km">${['','店長','副店長','部門担当者','バイヤー','本部担当','その他'].map(o=>`<option${c.keyman===o?' selected':''}>${o}</option>`).join('')}</select></div></div>
     </div>
     <div style="margin-bottom:14px;"><div class="sec-hd">店舗課題</div>
-      <div class="field"><label>課題①</label><textarea id="ec-issue1" style="min-height:70px;">${info.issue1||''}</textarea></div>
-      <div class="field"><label>課題②</label><textarea id="ec-issue2" style="min-height:70px;">${info.issue2||''}</textarea></div>
+      <div class="field"><label>お困りごと</label><textarea id="ec-issue1" style="min-height:70px;">${info.issue1||''}</textarea></div>
+      <div class="field"><label>打ち手</label>
+        <div class="uchite-grid">
+          ${['売場改善提案','フェイス拡大','POP設置','試食・実演提案'].map(v=>`<button type="button" class="uchite-btn${info.uchiteSel===v?' active':''}" onclick="selUchite(this,'${v}')">${v}</button>`).join('')}
+        </div>
+        <input id="ec-uchite-detail" placeholder="詳細を入力..." style="margin-top:8px;" value="${info.uchiteDetail||''}">
+        <input type="hidden" id="ec-uchite-sel" value="${info.uchiteSel||''}">
+      </div>
     </div>
     <div><div class="sec-hd">環境情報</div>
       <div class="con-grid">
@@ -561,6 +569,11 @@ function openEdit(){
   document.getElementById('edit-area').scrollIntoView({behavior:'smooth'});
 }
 function togC(btn,type,val,cls){btn.parentElement.querySelectorAll('.tg-btn').forEach(b=>b.className='tg-btn');btn.classList.add('on-'+cls);editConst[type]=val;}
+function selUchite(btn,val){
+  document.querySelectorAll('.uchite-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('ec-uchite-sel').value=val;
+}
 function closeEdit(){document.getElementById('edit-area').style.display='none';}
 async function deleteRec(id){
   if(!confirm('この訪問記録を削除しますか？'))return;
@@ -605,9 +618,10 @@ async function saveEdit(){
     keyman:document.getElementById('ec-km').value
   };
   const issue1=document.getElementById('ec-issue1').value.trim();
-  const issue2=document.getElementById('ec-issue2').value.trim();
+  const uchiteSel=document.getElementById('ec-uchite-sel').value;
+  const uchiteDetail=document.getElementById('ec-uchite-detail').value.trim();
   const updated={
-    ...info,contact,issue1,issue2,
+    ...info,contact,issue1,uchiteSel,uchiteDetail,
     hqConstraint:'hq' in editConst?editConst.hq:info.hqConstraint,
     popOk:'pop' in editConst?editConst.pop:info.popOk,
     promoOk:'promo' in editConst?editConst.promo:info.promoOk
@@ -616,7 +630,7 @@ async function saveEdit(){
   const btn=document.getElementById('save-edit-btn');
   btn.disabled=true;btn.innerHTML='<span class="spinner"></span> 送信中...';
   try{
-    await postGAS({action:'saveStoreInfo',storeName:detailName,fielder:cu,contacts:[contact],issues:[{text:issue1},{text:issue2}],hqConstraint:updated.hqConstraint,popOk:updated.popOk,promoOk:updated.promoOk,goal:updated.goal,phase:updated.phase,lastVisit:updated.lastVisit});
+    await postGAS({action:'saveStoreInfo',storeName:detailName,fielder:cu,contacts:[contact],issues:[{text:issue1}],uchiteSel:updated.uchiteSel,uchiteDetail:updated.uchiteDetail,hqConstraint:updated.hqConstraint,popOk:updated.popOk,promoOk:updated.promoOk,goal:updated.goal,phase:updated.phase,lastVisit:updated.lastVisit});
     toast('保存しました','ok');
   }catch(e){toast('送信エラー：ローカル保存済み','err');}
   btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> 保存';
@@ -720,7 +734,7 @@ async function saveRec(){
   setSyncDots('spin','送信中...');
   try{
     await postGAS({action:'saveRecord',storeName:sn,...rec,goal:GOALS[selGoal],phase:selPhase});
-    await postGAS({action:'saveStoreInfo',storeName:sn,fielder:cu,contacts:[updated.contact||{}],issues:[{text:updated.issue1||''},{text:updated.issue2||''}],hqConstraint:updated.hqConstraint||'',popOk:updated.popOk||'',promoOk:updated.promoOk||'',goal:selGoal,phase:selPhase,lastVisit:today});
+    await postGAS({action:'saveStoreInfo',storeName:sn,fielder:cu,contacts:[updated.contact||{}],issues:[{text:updated.issue1||''}],uchiteSel:updated.uchiteSel||'',uchiteDetail:updated.uchiteDetail||'',hqConstraint:updated.hqConstraint||'',popOk:updated.popOk||'',promoOk:updated.promoOk||'',goal:selGoal,phase:selPhase,lastVisit:today});
     setSyncDots('ok','送信完了 '+new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}));
     toast('保存・送信しました','ok');
     btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> 保存・送信';
@@ -855,7 +869,8 @@ async function loadStoreInfo(){
           keyman:item.contactKM||''
         },
         issue1:item.issue1||'',
-        issue2:item.issue2||'',
+        uchiteSel:item.uchiteSel||'',
+        uchiteDetail:item.uchiteDetail||'',
         popOk:item.popOk||'',
         promoOk:item.promoOk||'',
         hqConstraint:item.hqConstraint||''
