@@ -524,8 +524,8 @@ function renderDetail(sname){
     </div>
     <div style="border-top:0.5px solid #F3F4F6;padding-top:12px;">
       <div class="ig">
-        <div><div class="ii-lbl">お困りごと</div><div class="ii-val" style="font-weight:400;">${info.issue1||'—'}</div></div>
-        <div><div class="ii-lbl">打ち手</div><div class="ii-val" style="font-weight:400;">${info.uchiteSel?`<span class="badge gn">${info.uchiteSel}</span>`:'—'}${info.uchiteDetail?`<div style="margin-top:4px;font-weight:400;">${info.uchiteDetail}</div>`:''}</div></div>
+        <div style="grid-column:span 2;"><div class="ii-lbl">お困りごと</div><div class="ii-val" style="font-weight:400;">${info.issue1||'—'}</div></div>
+        <div style="grid-column:span 2;"><div class="ii-lbl">打ち手</div><div class="ii-val" style="font-weight:400;">${info.uchiteSel?`<span class="badge gn">${info.uchiteSel}</span>`:'—'}${info.uchiteDetail?`<div style="margin-top:4px;font-weight:400;">${info.uchiteDetail}</div>`:''}</div></div>
       </div>
     </div>`;
   document.getElementById('d-env').innerHTML=`<div class="ic-label"><i class="ti ti-shield"></i> 環境情報</div>
