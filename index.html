@@ -393,12 +393,21 @@ let MEMBERS=[
   {name:'松尾 奈緒美',color:'#E0F2FE',tc:'#0C4A6E'},
 ];
 const ADMIN='管理者';
-const SK='fd_s',RK='fd_r',IK='fd_i',CK='fd_c',DK='fd_d';
+const SK='fd_s',RK='fd_r',IK='fd_i',CK='fd_c',DK='fd_d',VK='fd_v';
+const APP_VERSION='3'; // データ構造変更時にこの数字を上げる
 let stores=[],records=[],sInfo={},deletedIds=new Set(),cu=null,detailName=null;
 let selGoal=null,selPhase=null,curRes=null,editConst={},goalChangeMode=false,phaseChecks={};
 let fGoal='',fRank='',fPhase='';
 
 function ld(){
+  // バージョンチェック：古いデータ構造の場合はクリア（ログインユーザーは保持）
+  const savedVersion=localStorage.getItem(VK);
+  if(savedVersion!==APP_VERSION){
+    const savedCu=localStorage.getItem(CK);
+    localStorage.clear();
+    if(savedCu)localStorage.setItem(CK,savedCu);
+    localStorage.setItem(VK,APP_VERSION);
+  }
   try{stores=JSON.parse(localStorage.getItem(SK)||'[]');}catch(e){stores=[];}
   try{records=JSON.parse(localStorage.getItem(RK)||'[]');}catch(e){records=[];}
   try{sInfo=JSON.parse(localStorage.getItem(IK)||'{}');}catch(e){sInfo={};}
