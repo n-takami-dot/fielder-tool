@@ -561,7 +561,7 @@ function openEdit(){
       <div class="field"><label>お困りごと</label><textarea id="ec-issue1" style="min-height:70px;">${info.issue1||''}</textarea></div>
       <div class="field"><label>打ち手</label>
         <div class="uchite-grid">
-          ${['売場改善提案','フェイス拡大','POP設置','試食・実演提案'].map(v=>`<button type="button" class="uchite-btn${info.uchiteSel===v?' active':''}" onclick="selUchite(this,'${v}')">${v}</button>`).join('')}
+          ${['棚割り提案','フェイス数増','平台展開','イベント提案','什器設置','コーナー化','POP設置','分析資料による発注提案'].map(v=>`<button type="button" class="uchite-btn${info.uchiteSel===v?' active':''}" onclick="selUchite(this,'${v}')">${v}</button>`).join('')}
         </div>
         <input id="ec-uchite-detail" placeholder="詳細を入力..." style="margin-top:8px;" value="${info.uchiteDetail||''}">
         <input type="hidden" id="ec-uchite-sel" value="${info.uchiteSel||''}">
