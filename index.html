@@ -275,7 +275,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
         <div class="field"><label>訪問店舗</label><select id="r-store" onchange="onStoreChange()"><option value="">選択してください</option></select></div>
       </div>
       <div class="rec-sec">
-        <div class="sec-hd"><i class="ti ti-target"></i> ゴール</div>
+        <div class="sec-hd"><i class="ti ti-target"></i> 目標</div>
         <div id="goal-area"></div>
       </div>
       <div class="rec-sec">
@@ -475,14 +475,14 @@ function renderDash(){
   const ph5=list.filter(s=>getInfo(s.name).phase>=5).length,ph3=list.filter(s=>getInfo(s.name).phase>=3).length;
   document.getElementById('kpi-row').innerHTML=`
     <div class="kpi-card"><div class="kpi-val">${total}</div><div class="kpi-lbl">担当店舗数</div></div>
-    <div class="kpi-card"><div class="kpi-val">${wg}</div><div class="kpi-lbl">ゴール設定済</div><div class="kpi-sub">未設定 ${total-wg}件</div></div>
+    <div class="kpi-card"><div class="kpi-val">${wg}</div><div class="kpi-lbl">目標設定済</div><div class="kpi-sub">未設定 ${total-wg}件</div></div>
     <div class="kpi-card"><div class="kpi-val">${ph3}</div><div class="kpi-lbl">提案中 Ph.03〜</div></div>
     <div class="kpi-card"><div class="kpi-val">${ph5}</div><div class="kpi-lbl">実施完了</div><div class="kpi-sub">${Math.round(ph5/Math.max(total,1)*100)}%</div></div>`;
   const goalOpts=['平台獲得','売場改善','多面展開','取り扱いアイテム増'];
   const rankOpts=['SA','S','A','B','C','D','E'];
   const phaseOpts=[{v:'0',l:'未設定'},{v:'1',l:'Ph.01'},{v:'2',l:'Ph.02'},{v:'3',l:'Ph.03'},{v:'4',l:'Ph.04'},{v:'5',l:'Ph.05'}];
   document.getElementById('filter-scroll').innerHTML=
-    `<select class="filter-chip" onchange="fGoal=this.value;renderDash()"><option value="">ゴール▾</option>${goalOpts.map(o=>`<option${fGoal===o?' selected':''}>${o}</option>`).join('')}</select>`+
+    `<select class="filter-chip" onchange="fGoal=this.value;renderDash()"><option value="">目標▾</option>${goalOpts.map(o=>`<option${fGoal===o?' selected':''}>${o}</option>`).join('')}</select>`+
     `<select class="filter-chip" onchange="fRank=this.value;renderDash()"><option value="">ランク▾</option>${rankOpts.map(o=>`<option${fRank===o?' selected':''}>${o}</option>`).join('')}</select>`+
     `<select class="filter-chip" onchange="fPhase=this.value;renderDash()"><option value="">フェーズ▾</option>${phaseOpts.map(o=>`<option value="${o.v}"${fPhase===o.v?' selected':''}>${o.l}</option>`).join('')}</select>`;
   if(!list.length){document.getElementById('store-list').innerHTML=`<div class="empty">該当する店舗がありません</div>`;return;}
@@ -668,9 +668,9 @@ function onStoreChange(){
 }
 function renderGoalArea(info){
   const area=document.getElementById('goal-area');
-  if(!info){area.innerHTML=`<div style="font-size:var(--fs-sm);color:var(--muted);padding:4px 0;">店舗を選択するとゴールが表示されます</div>`;return;}
+  if(!info){area.innerHTML=`<div style="font-size:var(--fs-sm);color:var(--muted);padding:4px 0;">店舗を選択すると目標が表示されます</div>`;return;}
   if(selGoal!=null&&!goalChangeMode){
-    area.innerHTML=`<div class="goal-banner ${GCLS[selGoal]}"><div><div class="gb-label">継続中のゴール</div><div class="gb-name">${GOALS[selGoal]}</div></div><button class="change-goal-btn" onclick="switchGoalMode()">変更する</button></div>`;
+    area.innerHTML=`<div class="goal-banner ${GCLS[selGoal]}"><div><div class="gb-label">継続中の目標</div><div class="gb-name">${GOALS[selGoal]}</div></div><button class="change-goal-btn" onclick="switchGoalMode()">変更する</button></div>`;
   } else {
     const hasGoal=selGoal!=null;
     area.innerHTML=(hasGoal?`<div class="goal-note">現在：${GOALS[selGoal]} — 変更する場合は選択してください</div>`:'')+
@@ -687,7 +687,7 @@ function pickGoal(gi){
 }
 function renderPhaseTiles(){
   const container=document.getElementById('r-phases');
-  if(selGoal===null){container.innerHTML=`<div style="font-size:var(--fs-sm);color:var(--muted);padding:8px 0;">ゴールを選択するとフェーズが表示されます</div>`;return;}
+  if(selGoal===null){container.innerHTML=`<div style="font-size:var(--fs-sm);color:var(--muted);padding:8px 0;">目標を選択するとフェーズが表示されます</div>`;return;}
   if(!selPhase)selPhase=1;
   container.innerHTML=PHASES.map((p,pi)=>{
     const n=pi+1;const isSel=selPhase===n;const checks=phaseChecks[n]||[];
@@ -728,7 +728,7 @@ function selRes(tile,type){
 async function saveRec(){
   const sn=document.getElementById('r-store').value;
   if(!sn){alert('店舗を選択してください');return;}
-  if(selGoal===null){alert('ゴールを選択してください');return;}
+  if(selGoal===null){alert('目標を選択してください');return;}
   if(!selPhase){alert('フェーズを選択してください');return;}
   const today=document.getElementById('r-date').value;
   const rec={id:Date.now(),storeName:sn,date:today,fielder:cu,goal:selGoal,phase:selPhase,result:curRes,
@@ -940,7 +940,6 @@ if('serviceWorker' in navigator){
       const newSW=reg.installing;
       newSW.addEventListener('statechange',()=>{
         if(newSW.state==='activated'){
-          // 新バージョン検出時にトーストで通知して自動リロード
           toast('アプリを最新版に更新しました','ok');
           setTimeout(()=>location.reload(),1500);
         }
