@@ -1,14 +1,14 @@
 const SS = SpreadsheetApp.getActiveSpreadsheet();
 const GOALS = ['平台獲得','売場改善','多面展開','取り扱いアイテム増'];
 const INFO_HEADERS = [
-  '店舗名','弊社担当者','目標','現在のフェーズ',
+  '店舗名','弊社担当者','ゴール','現在のフェーズ',
   '担当者名','役職','権限レベル','関係性','キーマン',
   'お困りごと','打ち手','打ち手詳細',
   '本部制約','POP設置','プロモーション活動','最終訪問日'
 ];
 const REC_HEADERS = [
   'ID','フィールダー','日付','店舗名',
-  '目標','フェーズ','結果',
+  'ゴール','フェーズ','結果',
   'メモ','次回アクション','次回訪問日','優先度'
 ];
 
@@ -17,7 +17,8 @@ function doGet(e) {
   if (action === 'getStores')    return getStores();
   if (action === 'getRecords')   return getRecords(e.parameter.fielder);
   if (action === 'getStoreInfo') return getStoreInfo();
-  if (action === 'getMembers')   return getMembers();
+  if (action === 'getMembers')        return getMembers();
+  if (action === 'getAdminPassword') return getAdminPassword();
   return json({ error: 'unknown action' });
 }
 
@@ -101,6 +102,13 @@ function getMembers() {
     .map(r => String(r[19] || ''))
     .filter(v => v !== '');
   return json({ members });
+}
+
+function getAdminPassword() {
+  const sheet = SS.getSheetByName('店舗マスタ');
+  // V1セル（行1・列22）にパスワードを格納
+  const pw = String(sheet.getRange(1, 22).getValue() || '');
+  return json({ pw });
 }
 
 function saveRecord(data) {

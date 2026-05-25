@@ -217,6 +217,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 /* 当月実績バッジ */
 .month-badge{display:inline-flex;align-items:center;gap:6px;background:#EDE9FE;border-radius:8px;padding:6px 12px;font-size:var(--fs-xs);color:#5B21B6;font-weight:500;}
 
+/* ── パスワードモーダル ── */
+.pw-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;}
+.pw-modal{background:var(--card);border-radius:16px;padding:28px 24px;width:100%;max-width:360px;box-shadow:0 20px 60px rgba(0,0,0,.2);}
+.pw-title{font-size:var(--fs-lg);font-weight:600;color:var(--text);margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+.pw-sub{font-size:var(--fs-sm);color:var(--sub);margin-bottom:20px;line-height:1.6;}
+.pw-input{width:100%;font-size:17px;padding:12px 14px;border:0.5px solid var(--border);border-radius:10px;margin-bottom:14px;-webkit-appearance:none;}
+.pw-input:focus{outline:none;border-color:var(--accent);}
+.pw-input.error{border-color:#DC2626;background:#FFF1F2;}
+.pw-err{font-size:var(--fs-xs);color:#DC2626;margin-bottom:12px;display:none;}
+.pw-btns{display:flex;gap:10px;}
+.pw-cancel{flex:1;padding:13px;font-size:var(--fs-sm);border:0.5px solid var(--border);border-radius:10px;background:var(--card);color:var(--sub);cursor:pointer;}
+.pw-ok{flex:2;padding:13px;font-size:var(--fs-sm);font-weight:600;border:none;border-radius:10px;background:var(--accent);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
+.pw-ok:disabled{opacity:.5;}
+
 /* toast */
 .toast-area{position:fixed;top:65px;left:0;right:0;display:flex;justify-content:center;pointer-events:none;z-index:100;}
 .toast{font-size:var(--fs-sm);font-weight:500;padding:11px 22px;border-radius:99px;opacity:0;transition:opacity .3s;box-shadow:0 4px 12px rgba(0,0,0,.1);}
@@ -228,6 +242,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 </head>
 <body>
 <div id="toast-area" class="toast-area"></div>
+
+<!-- パスワードモーダル -->
+<div id="pw-overlay" class="pw-overlay" style="display:none;">
+  <div class="pw-modal">
+    <div class="pw-title"><i class="ti ti-shield-lock"></i> 管理者認証</div>
+    <div class="pw-sub">管理者としてログインするにはパスワードを入力してください。</div>
+    <input type="password" id="pw-input" class="pw-input" placeholder="パスワード" onkeydown="if(event.key==='Enter')pwLogin()">
+    <div id="pw-err" class="pw-err">パスワードが違います</div>
+    <div class="pw-btns">
+      <button class="pw-cancel" onclick="pwClose()">キャンセル</button>
+      <button class="pw-ok" id="pw-ok-btn" onclick="pwLogin()"><i class="ti ti-shield-check"></i> ログイン</button>
+    </div>
+  </div>
+</div>
 
 <div class="screen active" id="scr-login">
   <div class="login-wrap">
@@ -247,6 +275,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
         <div class="sdot" id="sdot"></div>
         <span class="stext" id="stext"></span>
       </div>
+      <a id="admin-link" href="admin.html" style="display:none;font-size:var(--fs-xs);padding:5px 12px;border:0.5px solid var(--accent);border-radius:99px;background:var(--accent-light);color:var(--accent);text-decoration:none;font-weight:600;"><i class="ti ti-chart-bar"></i> 管理画面</a>
       <button class="t-switch" onclick="logout()">切替</button>
     </div>
   </div>
@@ -442,13 +471,16 @@ function renderLogin(){
   document.getElementById('scr-main').classList.remove('active');
   document.getElementById('member-grid').innerHTML=
     MEMBERS.map(m=>`<button class="f-btn" onclick="login('${m.name}')"><div class="f-avatar" style="background:${m.color};color:${m.tc};">${initials(m.name)}</div><div class="f-name">${m.name}</div></button>`).join('')+
-    `<button class="f-btn admin" onclick="login('${ADMIN}')"><i class="ti ti-shield-check" style="font-size:20px;"></i> 管理者</button>`;
+    `<button class="f-btn admin" onclick="pwOpen()"><i class="ti ti-shield-check" style="font-size:20px;"></i> 管理者</button>`;
 }
 function login(name){
   cu=name;try{localStorage.setItem(CK,name);}catch(e){}
   document.getElementById('scr-login').classList.remove('active');
   document.getElementById('scr-main').classList.add('active');
   document.getElementById('t-name').textContent=name+(isAdmin()?' （管理者）':'');
+  // 管理者のときだけ管理画面リンクを表示
+  const adminLink=document.getElementById('admin-link');
+  if(adminLink)adminLink.style.display=isAdmin()?'inline-flex':'none';
   goView('dash');
   // 起動時に自動でスプレッドシートから全データを読み込む
   autoLoad();
@@ -804,6 +836,39 @@ function renderRegList(){
     ?list.map(s=>`<div class="reg-item" onclick="goView('detail','${s.name.replace(/'/g,"\\'")}')"><div class="ri-name">${s.name}</div><div class="ri-sub">${s.chain?`<span>${s.chain}</span>`:''}${s.rank?`<span class="badge r${s.rank}">${s.rank}</span>`:''}${s.pic?`<span>${s.pic}</span>`:''}</div></div>`).join('')
     :`<div class="empty">担当店舗がありません</div>`;
 }
+// ── パスワード認証 ──
+function pwOpen(){
+  document.getElementById('pw-overlay').style.display='flex';
+  document.getElementById('pw-input').value='';
+  document.getElementById('pw-input').classList.remove('error');
+  document.getElementById('pw-err').style.display='none';
+  setTimeout(()=>document.getElementById('pw-input').focus(),100);
+}
+function pwClose(){
+  document.getElementById('pw-overlay').style.display='none';
+}
+async function pwLogin(){
+  const input=document.getElementById('pw-input').value;
+  if(!input)return;
+  const btn=document.getElementById('pw-ok-btn');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> 確認中...';
+  try{
+    const res=await fetch(GAS+'?action=getAdminPassword');
+    const json=await res.json();
+    if(String(json.pw)===String(input)){
+      pwClose();
+      login(ADMIN);
+    }else{
+      document.getElementById('pw-input').classList.add('error');
+      document.getElementById('pw-err').style.display='block';
+    }
+  }catch(e){
+    document.getElementById('pw-err').textContent='通信エラーが発生しました';
+    document.getElementById('pw-err').style.display='block';
+  }
+  btn.disabled=false;btn.innerHTML='<i class="ti ti-shield-check"></i> ログイン';
+}
+
 // ── 起動時自動読み込み ──
 async function autoLoad(){
   await loadMembers();
