@@ -312,6 +312,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
         <div class="phase-list" id="r-phases"></div>
       </div>
       <div class="rec-sec">
+        <div class="sec-hd"><i class="ti ti-tool"></i> 打ち手</div>
+        <div class="uchite-grid" id="r-uchite-grid">
+          <!-- onStoreChange時に動的生成 -->
+        </div>
+        <input id="r-uchite-detail" placeholder="打ち手の詳細を入力..." style="margin-top:8px;font-size:17px;padding:12px 14px;border:0.5px solid var(--border);border-radius:10px;width:100%;-webkit-appearance:none;" value="">
+        <input type="hidden" id="r-uchite-sel" value="">
+      </div>
+      <div class="rec-sec">
         <div class="sec-hd"><i class="ti ti-check"></i> 訪問結果</div>
         <div class="result-grid">
           <button class="res-tile" onclick="selRes(this,'合意・達成')"><i class="ti ti-circle-check"></i>合意・達成</button>
@@ -478,7 +486,6 @@ function login(name){
   document.getElementById('scr-login').classList.remove('active');
   document.getElementById('scr-main').classList.add('active');
   document.getElementById('t-name').textContent=name+(isAdmin()?' （管理者）':'');
-  // 管理者のときだけ管理画面リンクを表示
   const adminLink=document.getElementById('admin-link');
   if(adminLink)adminLink.style.display=isAdmin()?'inline-flex':'none';
   goView('dash');
@@ -591,13 +598,6 @@ function openEdit(){
     </div>
     <div style="margin-bottom:14px;"><div class="sec-hd">店舗課題</div>
       <div class="field"><label>お困りごと</label><textarea id="ec-issue1" style="min-height:70px;">${info.issue1||''}</textarea></div>
-      <div class="field"><label>打ち手</label>
-        <div class="uchite-grid">
-          ${['棚割り提案','フェイス数増','平台展開','イベント提案','什器設置','コーナー化','POP設置','分析資料による発注提案'].map(v=>`<button type="button" class="uchite-btn${info.uchiteSel===v?' active':''}" onclick="selUchite(this,'${v}')">${v}</button>`).join('')}
-        </div>
-        <input id="ec-uchite-detail" placeholder="詳細を入力..." style="margin-top:8px;" value="${info.uchiteDetail||''}">
-        <input type="hidden" id="ec-uchite-sel" value="${info.uchiteSel||''}">
-      </div>
     </div>
     <div><div class="sec-hd">環境情報</div>
       <div class="con-grid">
@@ -611,9 +611,13 @@ function openEdit(){
 }
 function togC(btn,type,val,cls){btn.parentElement.querySelectorAll('.tg-btn').forEach(b=>b.className='tg-btn');btn.classList.add('on-'+cls);editConst[type]=val;}
 function selUchite(btn,val){
-  document.querySelectorAll('.uchite-btn').forEach(b=>b.classList.remove('active'));
+  // 訪問入力側と編集側で共通使用（親要素で判定）
+  const grid=btn.closest('.uchite-grid');
+  if(grid)grid.querySelectorAll('.uchite-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('ec-uchite-sel').value=val;
+  // 訪問入力側
+  const rSel=document.getElementById('r-uchite-sel');
+  if(rSel)rSel.value=val;
 }
 function closeEdit(){document.getElementById('edit-area').style.display='none';}
 async function deleteRec(id){
@@ -659,10 +663,8 @@ async function saveEdit(){
     keyman:document.getElementById('ec-km').value
   };
   const issue1=document.getElementById('ec-issue1').value.trim();
-  const uchiteSel=document.getElementById('ec-uchite-sel').value;
-  const uchiteDetail=document.getElementById('ec-uchite-detail').value.trim();
   const updated={
-    ...info,contact,issue1,uchiteSel,uchiteDetail,
+    ...info,contact,issue1,
     hqConstraint:'hq' in editConst?editConst.hq:info.hqConstraint,
     popOk:'pop' in editConst?editConst.pop:info.popOk,
     promoOk:'promo' in editConst?editConst.promo:info.promoOk
@@ -687,16 +689,28 @@ function initRec(){
   // ★ ボタンリセット
   const btn=document.getElementById('save-rec-btn');
   btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> 保存・送信';
-  renderGoalArea(null);renderPhaseTiles();
+  renderGoalArea(null);renderPhaseTiles();renderUchiteGrid(null);
 }
 function onStoreChange(){
   const sn=document.getElementById('r-store').value;
   goalChangeMode=false;phaseChecks={};
-  if(!sn){selGoal=null;selPhase=null;renderGoalArea(null);renderPhaseTiles();return;}
+  if(!sn){selGoal=null;selPhase=null;renderGoalArea(null);renderPhaseTiles();renderUchiteGrid(null);return;}
   const info=getInfo(sn);
   selGoal=info.goal!=null?info.goal:null;
   selPhase=info.phase>0?info.phase:null;
-  renderGoalArea(info);renderPhaseTiles(info);
+  renderGoalArea(info);renderPhaseTiles(info);renderUchiteGrid(info);
+}
+function renderUchiteGrid(info){
+  const grid=document.getElementById('r-uchite-grid');
+  const detailInput=document.getElementById('r-uchite-detail');
+  const selInput=document.getElementById('r-uchite-sel');
+  if(!grid)return;
+  const currentSel=info?info.uchiteSel||'':'';
+  const currentDetail=info?info.uchiteDetail||'':'';
+  grid.innerHTML=['棚割り提案','フェイス数増','平台展開','イベント提案','什器設置','コーナー化','POP設置','分析資料による発注提案']
+    .map(v=>`<button type="button" class="uchite-btn${currentSel===v?' active':''}" onclick="selUchite(this,'${v}')">${v}</button>`).join('');
+  if(detailInput)detailInput.value=currentDetail;
+  if(selInput)selInput.value=currentSel;
 }
 function renderGoalArea(info){
   const area=document.getElementById('goal-area');
@@ -763,13 +777,15 @@ async function saveRec(){
   if(selGoal===null){alert('目標を選択してください');return;}
   if(!selPhase){alert('フェーズを選択してください');return;}
   const today=document.getElementById('r-date').value;
+  const uchiteSel=document.getElementById('r-uchite-sel').value;
+  const uchiteDetail=document.getElementById('r-uchite-detail').value.trim();
   const rec={id:Date.now(),storeName:sn,date:today,fielder:cu,goal:selGoal,phase:selPhase,result:curRes,
     memo:document.getElementById('r-memo').value.trim(),
     next:document.getElementById('r-next').value.trim(),
     nextDate:document.getElementById('r-nextdate').value,
     priority:document.getElementById('r-pri').value};
   records.push(rec);
-  const info=getInfo(sn);const updated={...info,goal:selGoal,phase:selPhase,lastVisit:today};
+  const info=getInfo(sn);const updated={...info,goal:selGoal,phase:selPhase,lastVisit:today,uchiteSel,uchiteDetail};
   sInfo[sn]=updated;sv();
   const btn=document.getElementById('save-rec-btn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span> 送信中...';
   setSyncDots('spin','送信中...');
@@ -791,9 +807,11 @@ function clearRec(){
   document.getElementById('r-store').value='';
   document.getElementById('r-nextdate').value='';
   document.getElementById('r-pri').value='';
+  document.getElementById('r-uchite-sel').value='';
+  document.getElementById('r-uchite-detail').value='';
   document.querySelectorAll('.res-tile').forEach(t=>t.className='res-tile');
   selGoal=null;selPhase=null;curRes=null;goalChangeMode=false;phaseChecks={};
-  renderGoalArea(null);renderPhaseTiles();
+  renderGoalArea(null);renderPhaseTiles();renderUchiteGrid(null);
 }
 async function syncStores(){
   const btn=document.getElementById('sync-btn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span> 同期中...';
@@ -844,9 +862,7 @@ function pwOpen(){
   document.getElementById('pw-err').style.display='none';
   setTimeout(()=>document.getElementById('pw-input').focus(),100);
 }
-function pwClose(){
-  document.getElementById('pw-overlay').style.display='none';
-}
+function pwClose(){document.getElementById('pw-overlay').style.display='none';}
 async function pwLogin(){
   const input=document.getElementById('pw-input').value;
   if(!input)return;
@@ -856,8 +872,7 @@ async function pwLogin(){
     const res=await fetch(GAS+'?action=getAdminPassword');
     const json=await res.json();
     if(String(json.pw)===String(input)){
-      pwClose();
-      login(ADMIN);
+      pwClose();login(ADMIN);
     }else{
       document.getElementById('pw-input').classList.add('error');
       document.getElementById('pw-err').style.display='block';
