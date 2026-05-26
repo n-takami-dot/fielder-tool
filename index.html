@@ -790,7 +790,7 @@ async function saveRec(){
   const btn=document.getElementById('save-rec-btn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span> 送信中...';
   setSyncDots('spin','送信中...');
   try{
-    await postGAS({action:'saveRecord',storeName:sn,...rec,goal:GOALS[selGoal],phase:selPhase});
+    await postGAS({action:'saveRecord',storeName:sn,...rec,goal:GOALS[selGoal],phase:selPhase,uchiteSel,uchiteDetail});
     await postGAS({action:'saveStoreInfo',storeName:sn,fielder:cu,contacts:[updated.contact||{}],issues:[{text:updated.issue1||''}],uchiteSel:updated.uchiteSel||'',uchiteDetail:updated.uchiteDetail||'',hqConstraint:updated.hqConstraint||'',popOk:updated.popOk||'',promoOk:updated.promoOk||'',goal:selGoal,phase:selPhase,lastVisit:today});
     setSyncDots('ok','送信完了 '+new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}));
     toast('保存・送信しました','ok');
@@ -988,7 +988,7 @@ async function loadRecords(){
       }
       return{
         id:r.id,storeName:r.storeName,date:fmtDate(r.date),fielder:r.fielder,
-        goal:goalIdx,phase:Number(r.phase||0),result:r.result,
+        goal:goalIdx,uchiteSel:r.uchiteSel||'',uchiteDetail:r.uchiteDetail||'',phase:Number(r.phase||0),result:r.result,
         memo:r.memo||"",next:r.next||"",nextDate:fmtDate(r.nextDate),priority:r.priority||""
       };
     });
