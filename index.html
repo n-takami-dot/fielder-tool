@@ -35,13 +35,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .f-name{font-size:var(--fs-sm);font-weight:500;color:var(--text);text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 
 /* ── トップバー ── */
-.topbar{background:var(--card);border-bottom:0.5px solid var(--border);padding:11px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
-.t-logo{font-size:var(--fs-md);font-weight:600;color:var(--text);}
-.t-right{display:flex;align-items:center;gap:10px;}
+.topbar{background:var(--card);border-bottom:0.5px solid var(--border);padding:8px 12px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;gap:8px;}
+.t-logo{font-size:var(--fs-sm);font-weight:600;color:var(--text);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.t-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
 .sdot{width:8px;height:8px;border-radius:50%;background:var(--muted);}
 .sdot.ok{background:#22C55E;}.sdot.err{background:#EF4444;}.sdot.spin{background:#F59E0B;}
 .stext{font-size:var(--fs-xs);color:var(--muted);}
-.t-switch{font-size:var(--fs-xs);padding:5px 12px;border:0.5px solid var(--border);border-radius:99px;background:transparent;color:var(--sub);cursor:pointer;}
+.t-switch{font-size:var(--fs-xs);padding:5px 10px;border:0.5px solid var(--border);border-radius:99px;background:transparent;color:var(--sub);cursor:pointer;white-space:nowrap;}
 
 /* ── タブナビ ── */
 .tabnav{background:var(--card);border-bottom:0.5px solid var(--border);display:flex;}
@@ -278,7 +278,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
         <div class="sdot" id="sdot"></div>
         <span class="stext" id="stext"></span>
       </div>
-      <a id="admin-link" href="admin.html" style="display:none;font-size:var(--fs-xs);padding:5px 12px;border:0.5px solid var(--accent);border-radius:99px;background:var(--accent-light);color:var(--accent);text-decoration:none;font-weight:600;"><i class="ti ti-chart-bar"></i> 管理画面</a>
+      <a id="admin-link" href="admin.html" style="display:none;font-size:var(--fs-xs);padding:5px 10px;border:0.5px solid var(--accent);border-radius:99px;background:var(--accent-light);color:var(--accent);text-decoration:none;font-weight:600;white-space:nowrap;"><i class="ti ti-chart-bar"></i> 管理</a>
       <button class="t-switch" onclick="logout()">切替</button>
     </div>
   </div>
@@ -553,7 +553,7 @@ function renderDash(){
 function renderDetail(sname){
   const s=stores.find(x=>x.name===sname);const info=getInfo(sname);if(!s)return;
   document.getElementById('d-name').textContent=s.name;
-  document.getElementById('d-meta').textContent=[s.chain,s.rank?'ランク '+s.rank:'',s.pic?'担当：'+s.pic:''].filter(Boolean).join(' ／ ');
+  document.getElementById('d-meta').innerHTML=[s.chain,s.rank?'ランク '+s.rank:''].filter(Boolean).join(' ／ ')+(s.pic?`<br><span style="white-space:nowrap;">担当：${s.pic}</span>`:'');
   document.getElementById('edit-area').style.display='none';
   const shopAuthCls={強:'on-r',中:'on-a',弱:'on-g'};const bCls={可:'on-g',不可:'on-r'};
   const relCls=r=>!r?'gn':r.startsWith('A')?'g1':r.startsWith('B')?'g0':r.startsWith('C')?'g2':'rS';
