@@ -29,6 +29,15 @@ body{font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif;backgrou
 .back-btn{display:flex;align-items:center;gap:6px;font-size:var(--fs-sm);color:rgba(255,255,255,.7);text-decoration:none;transition:.2s;}
 .back-btn:hover{color:#fff;}
 
+/* ── フィールダー切り替えタブ ── */
+.fielder-tabs{background:var(--card);border-bottom:1px solid var(--border);padding:0 32px;display:flex;align-items:center;gap:4px;overflow-x:auto;scrollbar-width:none;position:sticky;top:56px;z-index:99;}
+.fielder-tabs::-webkit-scrollbar{display:none;}
+.ftab{display:flex;align-items:center;gap:7px;padding:14px 16px;font-size:var(--fs-sm);font-weight:500;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;transition:.15s;}
+.ftab:hover{color:var(--text);}
+.ftab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
+.ftab-avatar{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+.ftab-all{font-size:18px;}
+
 /* ── レイアウト ── */
 .main{padding:28px 32px;max-width:1400px;margin:0 auto;}
 .section-title{font-size:var(--fs-xs);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:6px;}
@@ -93,7 +102,7 @@ body{font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif;backgrou
 .gi2{background:#FEF3C7;}.gi2 .gi-label{color:#92400E;}.gi2 .gi-val{color:#92400E;}
 .gi3{background:#EDE9FE;}.gi3 .gi-label{color:#5B21B6;}.gi3 .gi-val{color:#5B21B6;}
 
-/* ── 訪問結果ドーナツ風 ── */
+/* ── 訪問結果バー ── */
 .result-list{display:flex;flex-direction:column;gap:10px;}
 .res-item{display:flex;align-items:center;gap:12px;}
 .res-label{font-size:var(--fs-sm);color:var(--sub);min-width:80px;}
@@ -124,9 +133,16 @@ body{font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif;backgrou
 .rank-table td:first-child{font-weight:600;text-align:left;}
 .rank-table tr:last-child td{border-bottom:none;}
 .badge{display:inline-block;font-size:var(--fs-xs);padding:2px 8px;border-radius:99px;}
-.rSA{background:#FECACA;color:#991B1B;}.rS{background:#FEF3C7;color:#92400E;}
+.rS{background:#FEF3C7;color:#92400E;}
 .rA{background:#D1FAE5;color:#065F46;}.rB{background:#DBEAFE;color:#1E40AF;}
 .rC,.rD,.rE{background:#F1F5F9;color:var(--sub);}
+
+/* ── フィールダー個別ビュー ── */
+.store-list-panel{display:flex;flex-direction:column;gap:8px;}
+.store-row{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#F8FAFC;border-radius:10px;border:1px solid var(--border);}
+.store-row-name{font-size:var(--fs-sm);font-weight:600;color:var(--text);}
+.store-row-sub{font-size:var(--fs-xs);color:var(--muted);margin-top:2px;}
+.store-row-right{display:flex;align-items:center;gap:8px;flex-shrink:0;}
 
 /* ── ローディング ── */
 .loading{text-align:center;padding:60px 20px;color:var(--muted);font-size:var(--fs-md);}
@@ -161,38 +177,48 @@ body{font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif;backgrou
   </div>
 </div>
 
+<!-- フィールダー切り替えタブ -->
+<div class="fielder-tabs" id="fielder-tabs">
+  <button class="ftab active" onclick="selectFielder(null)" id="ftab-all">
+    <i class="ti ti-layout-grid ftab-all"></i> チーム全体
+  </button>
+</div>
+
 <div class="main">
+  <!-- セクションタイトル -->
+  <div class="section-title" id="section-title"><i class="ti ti-layout-grid"></i> チーム全体</div>
 
   <!-- KPIカード -->
-  <div class="section-title"><i class="ti ti-layout-grid"></i> チーム全体</div>
   <div class="kpi-grid" id="kpi-grid">
     <div class="loading" style="grid-column:span 6;padding:40px;">
       <div class="spinner"></div><br>データを読み込んでいます...
     </div>
   </div>
 
-  <!-- フィールダー別 & 訪問結果 -->
-  <div class="row2">
-    <div class="panel">
-      <div class="panel-head">
-        <div class="panel-title"><i class="ti ti-users"></i> フィールダー別 活動状況</div>
-        <span class="update-time" id="update-time"></span>
+  <!-- フィールダー別（チーム全体時のみ表示） -->
+  <div id="team-only-section">
+    <div class="row2">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title"><i class="ti ti-users"></i> フィールダー別 活動状況</div>
+          <span class="update-time" id="update-time"></span>
+        </div>
+        <div class="panel-body" id="fielder-panel">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
       </div>
-      <div class="panel-body" id="fielder-panel">
-        <div class="loading"><div class="spinner"></div></div>
-      </div>
-    </div>
-    <div class="panel">
-      <div class="panel-head">
-        <div class="panel-title"><i class="ti ti-check"></i> 訪問結果の内訳</div>
-      </div>
-      <div class="panel-body" id="result-panel">
-        <div class="loading"><div class="spinner"></div></div>
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title"><i class="ti ti-check"></i> 訪問結果の内訳</div>
+        </div>
+        <div class="panel-body" id="result-panel">
+          <div class="loading"><div class="spinner"></div></div>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- 目標別 & 停滞店舗 -->
+  <!-- 停滞店舗 & 目標別 -->
   <div class="row3">
     <div class="panel">
       <div class="panel-head">
@@ -214,7 +240,7 @@ body{font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif;backgrou
   </div>
 
   <!-- ランク別フェーズ -->
-  <div class="panel" style="margin-bottom:32px;">
+  <div class="panel" style="margin-bottom:20px;">
     <div class="panel-head">
       <div class="panel-title"><i class="ti ti-table"></i> 売上ランク × フェーズ進捗</div>
     </div>
@@ -223,13 +249,27 @@ body{font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif;backgrou
     </div>
   </div>
 
+  <!-- 個別フィールダー：担当店舗一覧（フィールダー選択時のみ表示） -->
+  <div id="fielder-only-section" style="display:none;">
+    <div class="panel" style="margin-bottom:20px;">
+      <div class="panel-head">
+        <div class="panel-title"><i class="ti ti-building-store"></i> 担当店舗一覧</div>
+        <span id="store-count" style="font-size:var(--fs-xs);color:var(--muted);"></span>
+      </div>
+      <div class="panel-body" id="store-list-panel">
+        <div class="loading"><div class="spinner"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="height:32px;"></div>
 </div>
 
 <script>
 const GAS='https://script.google.com/macros/s/AKfycbxpnXDwE36Wsk5-RNDvwgWJFdmi8MUEgj0Acbx-nZGENv-tSnUKpgEp14CaoFyJKJPq/exec';
 const GOALS=['平台獲得','売場改善','多面展開','取り扱いアイテム増'];
 const GCLS=['gi0','gi1','gi2','gi3'];
-const RANKS=['SA','S','A','B','C','D','E'];
+const RANKS=['S','A','B','C','D','E'];
 const AVATAR_COLORS=[
   {color:'#DBEAFE',tc:'#1E40AF'},{color:'#D1FAE5',tc:'#065F46'},
   {color:'#FEF3C7',tc:'#92400E'},{color:'#EDE9FE',tc:'#5B21B6'},
@@ -238,6 +278,7 @@ const AVATAR_COLORS=[
 ];
 
 let stores=[], records=[], sInfo=[];
+let currentFielder=null; // null=チーム全体、string=フィールダー名
 
 function setSyncDot(state,msg){
   const d=document.getElementById('sdot');
@@ -263,6 +304,10 @@ function daysSince(dateStr){
   return Math.floor((Date.now()-d.getTime())/(1000*60*60*24));
 }
 
+function fmtNum(v){
+  return v?Number(String(v).replace(/,/g,'')).toLocaleString('ja-JP')||v:null;
+}
+
 async function loadAll(){
   setSyncDot('spin','読み込み中...');
   try{
@@ -283,16 +328,57 @@ async function loadAll(){
     document.getElementById('update-time').textContent=
       new Date().toLocaleString('ja-JP',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})+'現在';
 
-    renderKPI();
-    renderFielder();
-    renderResult();
-    renderStagnant();
-    renderGoal();
-    renderRank();
+    buildTabs();
+    renderAll();
   }catch(e){
     setSyncDot('err','読み込みエラー');
     console.error(e);
   }
+}
+
+// フィールダータブを動的生成
+function buildTabs(){
+  const seen=new Set();
+  const fielders=[];
+  stores.forEach(s=>{
+    if(s.pic&&!seen.has(s.pic)){seen.add(s.pic);fielders.push(s.pic);}
+  });
+
+  const tabs=document.getElementById('fielder-tabs');
+  // チーム全体タブは残してフィールダータブを再生成
+  tabs.innerHTML=`<button class="ftab${currentFielder===null?' active':''}" onclick="selectFielder(null)">
+    <i class="ti ti-layout-grid" style="font-size:18px;"></i> チーム全体
+  </button>`;
+
+  fielders.forEach((name,i)=>{
+    const col=AVATAR_COLORS[i%AVATAR_COLORS.length];
+    tabs.innerHTML+=`<button class="ftab${currentFielder===name?' active':''}" onclick="selectFielder('${name.replace(/'/g,"\\'")}')">
+      <div class="ftab-avatar" style="background:${col.color};color:${col.tc};">${initials(name)}</div>
+      ${name}
+    </button>`;
+  });
+}
+
+function selectFielder(name){
+  currentFielder=name;
+  // タブのactive切り替え
+  document.querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));
+  const tabs=document.querySelectorAll('.ftab');
+  tabs.forEach(t=>{
+    if(name===null&&t.textContent.includes('チーム全体'))t.classList.add('active');
+    if(name!==null&&t.textContent.includes(name))t.classList.add('active');
+  });
+  renderAll();
+}
+
+function getFilteredStores(){
+  if(currentFielder===null)return stores;
+  return stores.filter(s=>s.pic===currentFielder);
+}
+
+function getFilteredRecords(){
+  if(currentFielder===null)return records;
+  return records.filter(r=>r.fielder===currentFielder);
 }
 
 function getInfoMap(){
@@ -308,17 +394,43 @@ function getInfoMap(){
   return map;
 }
 
+function renderAll(){
+  const label=currentFielder||'チーム全体';
+  document.getElementById('section-title').innerHTML=
+    currentFielder
+      ? `<i class="ti ti-user"></i> ${currentFielder} のダッシュボード`
+      : `<i class="ti ti-layout-grid"></i> チーム全体`;
+
+  // フィールダー別テーブルはチーム全体時のみ表示
+  document.getElementById('team-only-section').style.display=currentFielder?'none':'block';
+  document.getElementById('fielder-only-section').style.display=currentFielder?'block':'none';
+
+  renderKPI();
+  if(!currentFielder){
+    renderFielder();
+    renderResult();
+  } else {
+    renderStoreList();
+    renderResult(); // 個別でも結果内訳は見せる
+  }
+  renderStagnant();
+  renderGoal();
+  renderRank();
+}
+
 function renderKPI(){
+  const filtStores=getFilteredStores();
+  const filtRecs=getFilteredRecords();
   const infoMap=getInfoMap();
-  const total=stores.length;
-  const withGoal=stores.filter(s=>infoMap[s.name]&&infoMap[s.name].goal>=0).length;
-  const ph3up=stores.filter(s=>infoMap[s.name]&&infoMap[s.name].phase>=3).length;
-  const ph5=stores.filter(s=>infoMap[s.name]&&infoMap[s.name].phase>=5).length;
-  const totalRec=records.length;
-  const agreed=records.filter(r=>r.result==='合意・達成'||r.result==='s').length;
+  const total=filtStores.length;
+  const withGoal=filtStores.filter(s=>infoMap[s.name]&&infoMap[s.name].goal>=0).length;
+  const ph3up=filtStores.filter(s=>infoMap[s.name]&&infoMap[s.name].phase>=3).length;
+  const ph5=filtStores.filter(s=>infoMap[s.name]&&infoMap[s.name].phase>=5).length;
+  const totalRec=filtRecs.length;
+  const agreed=filtRecs.filter(r=>r.result==='合意・達成'||r.result==='s').length;
 
   document.getElementById('kpi-grid').innerHTML=`
-    <div class="kpi-card blue"><div class="kpi-icon"><i class="ti ti-building-store"></i></div><div class="kpi-val">${total}</div><div class="kpi-lbl">総店舗数</div></div>
+    <div class="kpi-card blue"><div class="kpi-icon"><i class="ti ti-building-store"></i></div><div class="kpi-val">${total}</div><div class="kpi-lbl">${currentFielder?'担当店舗数':'総店舗数'}</div></div>
     <div class="kpi-card navy"><div class="kpi-icon"><i class="ti ti-target"></i></div><div class="kpi-val">${withGoal}</div><div class="kpi-lbl">目標設定済</div><div class="kpi-sub">未設定 ${total-withGoal}件</div></div>
     <div class="kpi-card orange"><div class="kpi-icon"><i class="ti ti-stairs-up"></i></div><div class="kpi-val">${ph3up}</div><div class="kpi-lbl">提案中（Ph.03〜）</div><div class="kpi-sub">全体の${Math.round(ph3up/Math.max(total,1)*100)}%</div></div>
     <div class="kpi-card green"><div class="kpi-icon"><i class="ti ti-circle-check"></i></div><div class="kpi-val">${ph5}</div><div class="kpi-lbl">実施完了</div><div class="kpi-sub">${Math.round(ph5/Math.max(total,1)*100)}%</div></div>
@@ -328,7 +440,6 @@ function renderKPI(){
 }
 
 function renderFielder(){
-  // フィールダーごとに集計
   const fielderSet={};
   stores.forEach(s=>{
     const pic=s.pic||'未設定';
@@ -344,9 +455,9 @@ function renderFielder(){
   stores.forEach(s=>{
     const pic=s.pic||'未設定';
     const info=infoMap[s.name];
-    if(info){
-      if(info.phase>=3&&fielderSet[pic])fielderSet[pic].ph3++;
-      if(info.phase>=5&&fielderSet[pic])fielderSet[pic].ph5++;
+    if(info&&fielderSet[pic]){
+      if(info.phase>=3)fielderSet[pic].ph3++;
+      if(info.phase>=5)fielderSet[pic].ph5++;
     }
   });
 
@@ -372,7 +483,7 @@ function renderFielder(){
       <tbody>
         ${list.map(([name,v],i)=>{
           const col=AVATAR_COLORS[i%AVATAR_COLORS.length];
-          return`<tr>
+          return`<tr style="cursor:pointer;" onclick="selectFielder('${name.replace(/'/g,"\\'")}')">
             <td><div class="f-cell">
               <div class="f-avatar" style="background:${col.color};color:${col.tc};">${initials(name)}</div>
               <span class="f-name">${name}</span>
@@ -392,10 +503,11 @@ function renderFielder(){
 }
 
 function renderResult(){
-  const total=records.length;
-  const agreed=records.filter(r=>r.result==='合意・達成'||r.result==='s').length;
-  const pending=records.filter(r=>r.result==='検討中'||r.result==='p').length;
-  const passed=records.filter(r=>r.result==='見送り'||r.result==='f').length;
+  const filtRecs=getFilteredRecords();
+  const total=filtRecs.length;
+  const agreed=filtRecs.filter(r=>r.result==='合意・達成'||r.result==='s').length;
+  const pending=filtRecs.filter(r=>r.result==='検討中'||r.result==='p').length;
+  const passed=filtRecs.filter(r=>r.result==='見送り'||r.result==='f').length;
   const none=total-agreed-pending-passed;
 
   const items=[
@@ -405,7 +517,12 @@ function renderResult(){
     {label:'結果未記録',val:none,cls:'',nbcls:'nb-gray'},
   ];
 
-  document.getElementById('result-panel').innerHTML=`
+  // フィールダー個別時は訪問結果をrow3の右側に差し込む
+  const panelId=currentFielder?'result-panel-fielder':'result-panel';
+  const targetEl=document.getElementById('result-panel');
+  if(!targetEl)return;
+
+  targetEl.innerHTML=`
     <div style="text-align:center;margin-bottom:20px;">
       <div style="font-size:var(--fs-3xl);font-weight:700;color:var(--text);">${total}</div>
       <div style="font-size:var(--fs-xs);color:var(--muted);margin-top:2px;">総訪問記録数</div>
@@ -423,9 +540,9 @@ function renderResult(){
 
 function renderStagnant(){
   const infoMap=getInfoMap();
-  const today=new Date();
+  const filtStores=getFilteredStores();
 
-  const stagnant=stores
+  const stagnant=filtStores
     .map(s=>{
       const info=infoMap[s.name];
       const lastVisit=info?info.lastVisit:'';
@@ -461,7 +578,8 @@ function renderStagnant(){
 
 function renderGoal(){
   const infoMap=getInfoMap();
-  const counts=GOALS.map((_,i)=>stores.filter(s=>infoMap[s.name]&&infoMap[s.name].goal===i).length);
+  const filtStores=getFilteredStores();
+  const counts=GOALS.map((_,i)=>filtStores.filter(s=>infoMap[s.name]&&infoMap[s.name].goal===i).length);
 
   document.getElementById('goal-panel').innerHTML=`
     <div class="goal-grid">
@@ -475,10 +593,10 @@ function renderGoal(){
 
 function renderRank(){
   const infoMap=getInfoMap();
+  const filtStores=getFilteredStores();
 
-  // ランク別にフェーズ分布を集計
   const data=RANKS.map(rank=>{
-    const rankStores=stores.filter(s=>s.rank===rank);
+    const rankStores=filtStores.filter(s=>s.rank===rank);
     const total=rankStores.length;
     if(!total)return{rank,total,ph0:0,ph1_2:0,ph3_4:0,ph5:0};
     const ph0=rankStores.filter(s=>!infoMap[s.name]||infoMap[s.name].phase===0).length;
@@ -487,6 +605,10 @@ function renderRank(){
     const ph5=rankStores.filter(s=>infoMap[s.name]&&infoMap[s.name].phase>=5).length;
     return{rank,total,ph0,ph1_2,ph3_4,ph5};
   }).filter(d=>d.total>0);
+
+  if(!data.length){
+    document.getElementById('rank-panel').innerHTML='<div class="empty">データがありません</div>';return;
+  }
 
   document.getElementById('rank-panel').innerHTML=`
     <table class="rank-table">
@@ -518,7 +640,44 @@ function renderRank(){
     </table>`;
 }
 
-// 起動時に読み込み
+function renderStoreList(){
+  const infoMap=getInfoMap();
+  const filtStores=getFilteredStores();
+  const panel=document.getElementById('store-list-panel');
+  const countEl=document.getElementById('store-count');
+  if(countEl)countEl.textContent=`${filtStores.length}件`;
+
+  if(!filtStores.length){
+    panel.innerHTML='<div class="empty">担当店舗がありません</div>';return;
+  }
+
+  // フェーズ順にソート（高い順）
+  const sorted=[...filtStores].sort((a,b)=>{
+    const pa=infoMap[a.name]?infoMap[a.name].phase:0;
+    const pb=infoMap[b.name]?infoMap[b.name].phase:0;
+    return pb-pa;
+  });
+
+  const priCls=p=>p==='第1優先'?'background:#FEE2E2;color:#991B1B;':p==='第2優先'?'background:#FEF3C7;color:#92400E;':'background:#F1F5F9;color:#64748B;';
+
+  panel.innerHTML=sorted.map(s=>{
+    const info=infoMap[s.name]||{};
+    const goalText=info.goal>=0?GOALS[info.goal]:'未設定';
+    const goalCls=info.goal>=0?['gi0','gi1','gi2','gi3'][info.goal]:'';
+    return`<div class="store-row">
+      <div style="flex:1;min-width:0;">
+        <div class="store-row-name">${s.name}</div>
+        <div class="store-row-sub">${s.chain||''}${s.rank?' ／ ランク'+s.rank:''}</div>
+      </div>
+      <div class="store-row-right">
+        ${s.priority?`<span style="font-size:11px;padding:2px 8px;border-radius:99px;${priCls(s.priority)}">${s.priority}</span>`:''}
+        ${info.phase?`<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:#F1F5F9;color:#475569;">Ph.${info.phase}</span>`:'<span style="font-size:11px;padding:2px 8px;border-radius:99px;background:#F1F5F9;color:#94A3B8;">未着手</span>'}
+        ${info.lastVisit?`<span style="font-size:11px;color:#94A3B8;">${fmtDate(info.lastVisit)}</span>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
 loadAll();
 </script>
 </body>
