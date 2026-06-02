@@ -214,6 +214,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .uchite-btn.active{background:#DBEAFE;border-color:#2563EB;color:#1E40AF;font-weight:600;}
 
 /* 訪問履歴 削除ボタン */
+.map-btn{display:inline-flex;align-items:center;gap:6px;font-size:var(--fs-xs);font-weight:600;padding:8px 16px;border-radius:99px;border:none;background:#1A73E8;color:#fff;cursor:pointer;text-decoration:none;margin-top:10px;}
+.map-btn i{font-size:16px;}
+.nearby-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid #F1F5F9;}
+.nearby-item:last-child{border-bottom:none;}
+.nearby-name{font-size:var(--fs-sm);font-weight:600;color:var(--text);}
+.nearby-sub{font-size:var(--fs-xs);color:var(--muted);margin-top:2px;}
+.nearby-dist{font-size:var(--fs-xs);font-weight:600;color:var(--accent);white-space:nowrap;margin-left:8px;}
 .tl-del-btn{display:inline-flex;align-items:center;gap:4px;font-size:var(--fs-xs);color:#DC2626;background:none;border:0.5px solid #FCA5A5;border-radius:99px;padding:4px 10px;cursor:pointer;margin-top:8px;opacity:.75;}
 .tl-del-btn:active{opacity:1;background:#FEE2E2;}
 
@@ -354,6 +361,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
       <div class="info-card" id="d-info"></div>
       <div class="info-card" id="d-env"></div>
       <div style="font-size:var(--fs-xs);font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:6px;"><i class="ti ti-history"></i> 訪問履歴</div>
+      <div class="info-card" id="d-nearby" style="display:none;"></div>
       <div id="d-timeline"></div>
       <div id="edit-area" style="display:none;">
         <div class="edit-area">
@@ -550,6 +558,57 @@ function renderDash(){
     </div>`;
   }).join('');
 }
+// ── 近隣店舗表示 ──
+function calcDistance(addr1, addr2){
+  // 住所から緯度経度を取得できないため、Geocoding APIなしでの簡易実装
+  // 住所の都道府県・市区町村の一致度で「近さ」を推定
+  if(!addr1||!addr2)return null;
+  // 共通する文字数で類似度を計算（簡易）
+  let common=0;
+  const len=Math.min(addr1.length,addr2.length);
+  for(let i=0;i<len;i++){if(addr1[i]===addr2[i])common++;else break;}
+  return common;
+}
+
+function renderNearby(sname){
+  const panel=document.getElementById('d-nearby');
+  if(!panel)return;
+  const current=stores.find(s=>s.name===sname);
+  if(!current||!current.address){panel.style.display='none';return;}
+
+  // 自分以外の担当店舗（管理者は全店舗、フィールダーは自分の担当）
+  const others=myStores().filter(s=>s.name!==sname&&s.address);
+  if(!others.length){panel.style.display='none';return;}
+
+  // 住所の先頭一致文字数で近い順にソート
+  const sorted=others.map(s=>{
+    const score=calcDistance(current.address,s.address);
+    return{...s,score};
+  }).filter(s=>s.score>=4) // 最低4文字一致（同じ市区町村レベル）
+    .sort((a,b)=>b.score-a.score)
+    .slice(0,5); // 上位5件
+
+  if(!sorted.length){panel.style.display='none';return;}
+
+  panel.style.display='block';
+  const infoMap=stores.reduce((m,s)=>{m[s.name]=getInfo(s.name);return m;},{});
+  panel.innerHTML=`<div class="ic-label"><i class="ti ti-map-pins"></i> 近隣の担当店舗</div>
+    ${sorted.map(s=>{
+      const info=infoMap[s.name]||{};
+      const priCls=s.priority==='第1優先'?'pri1':s.priority==='第2優先'?'pri2':'pri3';
+      return`<div class="nearby-item" onclick="goView('detail','${s.name.replace(/'/g,"\'")}'')" style="cursor:pointer;">
+        <div>
+          <div class="nearby-name">${s.name}</div>
+          <div class="nearby-sub">${s.chain||''}${s.priority?'　<span class="badge '+priCls+'">'+s.priority+'</span>':''}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          ${info.phase?`<span class="badge gn" style="display:block;margin-bottom:2px;">Ph.${info.phase}</span>`:''}
+          ${s.address?`<a href="https://maps.google.com/?q=${encodeURIComponent(s.address)}" target="_blank" style="font-size:11px;color:#1A73E8;" onclick="event.stopPropagation()"><i class="ti ti-map-pin"></i></a>`:''}
+        </div>
+      </div>`;
+    }).join('')}`;
+}
+
 function renderDetail(sname){
   const s=stores.find(x=>x.name===sname);const info=getInfo(sname);if(!s)return;
   document.getElementById('d-name').textContent=s.name;
@@ -578,7 +637,11 @@ function renderDetail(sname){
       ${s.pair==='〇'?`<span class="pair-badge">👥 ペア活動店舗</span>`:''}
     </div>
     ${monthBadge}
-    ${s.note?`<div style="font-size:var(--fs-xs);color:var(--muted);margin-top:10px;">${s.note}</div>`:''}`;
+    ${s.note?`<div style="font-size:var(--fs-xs);color:var(--muted);margin-top:10px;">${s.note}</div>`:''}
+    ${s.address?`<a class="map-btn" href="https://maps.google.com/?q=${encodeURIComponent(s.address)}" target="_blank"><i class="ti ti-map-pin"></i> Googleマップで開く</a>`:''}`;
+
+  // 近隣店舗を表示
+  renderNearby(sname);
 
   const c=info.contact||{};
   document.getElementById('d-info').innerHTML=`<div class="ic-label"><i class="ti ti-users"></i> 店舗担当者・課題</div>
