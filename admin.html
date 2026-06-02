@@ -563,7 +563,7 @@ function renderStagnant(){
   document.getElementById('stagnant-panel').innerHTML=`
     <div class="stagnant-list">
       ${stagnant.map(s=>`
-        <div class="stag-item${s.days===null||s.days>=60?' danger':''}" onclick="openStore('${s.name.replace(/'/g,'\\'')}')" style="cursor:pointer;">
+        <div class="stag-item${s.days===null||s.days>=60?' danger':''}" onclick="openStore(this.dataset.name)" data-name="${s.name}" style="cursor:pointer;">
           <div class="stag-left">
             <div class="stag-name">${s.name}</div>
             <div class="stag-sub">${s.chain?s.chain+' ／ ':''}${s.pic||'担当未設定'}${s.phase?'　Ph.'+s.phase:''}</div>
@@ -664,7 +664,7 @@ function renderStoreList(){
     const info=infoMap[s.name]||{};
     const goalText=info.goal>=0?GOALS[info.goal]:'未設定';
     const goalCls=info.goal>=0?['gi0','gi1','gi2','gi3'][info.goal]:'';
-    return`<div class="store-row" onclick="openStore('${s.name.replace(/'/g,'\\'')}')" style="cursor:pointer;">
+    return`<div class="store-row" onclick="openStore(this.dataset.name)" data-name="${s.name}" style="cursor:pointer;">
       <div style="flex:1;min-width:0;">
         <div class="store-row-name">${s.name}</div>
         <div class="store-row-sub">${s.chain||''}${s.rank?' ／ ランク'+s.rank:''}</div>
