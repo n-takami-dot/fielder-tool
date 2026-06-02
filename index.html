@@ -499,7 +499,7 @@ function login(name){
   if(adminLink)adminLink.style.display=isAdmin()?'inline-flex':'none';
   goView('dash');
   // 起動時に自動でスプレッドシートから全データを読み込む
-  autoLoad();
+  autoLoad().then(()=>checkUrlStore());
 }
 function logout(){try{localStorage.removeItem(CK);}catch(e){}cu=null;renderLogin();}
 function goView(v,sname){
@@ -1109,6 +1109,19 @@ function selUchite(btn,val){
 }
 
 ld();if(cu){login(cu);}else{renderLogin();loadMembers();}
+
+// URLパラメータで店舗が指定されている場合は直接詳細画面を開く
+function checkUrlStore(){
+  const params=new URLSearchParams(window.location.search);
+  const storeName=params.get('store');
+  if(storeName&&cu){
+    // ログイン済みなら直接詳細画面へ
+    setTimeout(()=>goView('detail',storeName),300);
+    // URLをクリア
+    window.history.replaceState({},'',window.location.pathname);
+  }
+}
+checkUrlStore();
 
 // Service Worker 登録
 if('serviceWorker' in navigator){
