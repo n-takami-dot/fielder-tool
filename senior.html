@@ -422,6 +422,11 @@ function renderDashboard(allRecords){
   records.forEach(r=>{seniorCount[r.senior]=(seniorCount[r.senior]||0)+1;});
   const seniorEntries=Object.entries(seniorCount).sort((a,b)=>b[1]-a[1]);
 
+  // バーの幅を制限するためのグリッドレイアウト用スタイル
+  const barStyle=(color,h)=>`width:100%;max-width:80px;border-radius:4px 4px 0 0;background:${color};height:${h}px;`;
+  const colStyle=`display:flex;flex-direction:column;align-items:center;gap:4px;width:80px;flex-shrink:0;`;
+  const chartWrap=`display:flex;align-items:flex-end;gap:12px;height:110px;margin-bottom:8px;overflow-x:auto;padding-bottom:4px;`;
+
   document.getElementById('db-content').innerHTML=`
     <div class="kpi-grid" style="margin-bottom:14px;">
       <div class="kpi-card"><div class="kpi-val">${total}</div><div class="kpi-lbl">同行回数</div></div>
@@ -430,33 +435,33 @@ function renderDashboard(allRecords){
     ${dbSeniorFilter==='全員'&&seniorEntries.length>1?`
     <div class="rec-sec">
       <div class="sec-hd"><i class="ti ti-walk"></i> 同行者別 同行回数</div>
-      <div style="display:flex;align-items:flex-end;gap:10px;height:80px;margin-bottom:8px;">
+      <div style="${chartWrap}">
         ${seniorEntries.map(([name,v])=>`
-          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
+          <div style="${colStyle}">
             <div style="font-size:11px;font-weight:600;color:var(--text);">${v}</div>
-            <div style="width:100%;border-radius:4px 4px 0 0;background:var(--accent);height:${Math.round(v/Math.max(...seniorEntries.map(([,x])=>x),1)*60)}px;"></div>
+            <div style="${barStyle('var(--accent)',Math.round(v/Math.max(...seniorEntries.map(([,x])=>x),1)*80))}"></div>
             <div style="font-size:10px;color:var(--muted);white-space:nowrap;">${initials(name)}</div>
           </div>`).join('')}
       </div>
     </div>`:''}
     <div class="rec-sec">
       <div class="sec-hd"><i class="ti ti-calendar-stats"></i> 月別 同行回数（直近6ヶ月）</div>
-      ${monthEntries.length?`<div style="display:flex;align-items:flex-end;gap:8px;height:100px;margin-bottom:8px;">
+      ${monthEntries.length?`<div style="${chartWrap}">
         ${monthEntries.map(([m,v])=>`
-          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
+          <div style="${colStyle}">
             <div style="font-size:11px;font-weight:600;color:var(--text);">${v}</div>
-            <div style="width:100%;border-radius:4px 4px 0 0;background:var(--accent);height:${Math.round(v/maxM*80)}px;"></div>
+            <div style="${barStyle('var(--accent)',Math.round(v/maxM*80))}"></div>
             <div style="font-size:10px;color:var(--muted);">${m.slice(5)}月</div>
           </div>`).join('')}
       </div>`:'<div style="color:var(--muted);font-size:var(--fs-sm);padding:8px 0;">データがありません</div>'}
     </div>
     <div class="rec-sec">
       <div class="sec-hd"><i class="ti ti-users"></i> フィールダー別 同行回数</div>
-      ${fielderEntries.length?`<div style="display:flex;align-items:flex-end;gap:8px;height:100px;margin-bottom:8px;">
+      ${fielderEntries.length?`<div style="${chartWrap}">
         ${fielderEntries.map(([name,v])=>`
-          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
+          <div style="${colStyle}">
             <div style="font-size:11px;font-weight:600;color:var(--text);">${v}</div>
-            <div style="width:100%;border-radius:4px 4px 0 0;background:#059669;height:${Math.round(v/maxF*80)}px;"></div>
+            <div style="${barStyle('#059669',Math.round(v/maxF*80))}"></div>
             <div style="font-size:10px;color:var(--muted);white-space:nowrap;">${initials(name)}</div>
           </div>`).join('')}
       </div>`:'<div style="color:var(--muted);font-size:var(--fs-sm);padding:8px 0;">データがありません</div>'}
