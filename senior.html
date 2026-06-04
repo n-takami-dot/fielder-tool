@@ -491,7 +491,8 @@ function renderDashboard(allRecords){
   // バーの幅を制限するためのグリッドレイアウト用スタイル
   const barStyle=(color,h)=>`width:100%;max-width:80px;border-radius:4px 4px 0 0;background:${color};height:${h}px;`;
   const colStyle=`display:flex;flex-direction:column;align-items:center;gap:4px;width:80px;flex-shrink:0;`;
-  const chartWrap=`display:flex;align-items:flex-end;gap:12px;height:110px;margin-bottom:8px;overflow-x:auto;padding-bottom:4px;`;
+  // padding-top:24px で数値ラベル分の高さを確保（overflow:visibleで隠れない）
+  const chartWrap=`display:flex;align-items:flex-end;gap:12px;height:110px;margin-bottom:8px;overflow-x:auto;overflow-y:visible;padding-top:24px;padding-bottom:4px;box-sizing:content-box;`;
 
   const totalDays=new Set(records.map(r=>r.date+r.senior)).size;
   document.getElementById('db-content').innerHTML=`
