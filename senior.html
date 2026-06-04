@@ -495,21 +495,68 @@ function onFielderChange(){
     filtered.map(s=>`<option value="${s.name}">${s.chain?'['+s.chain+'] ':''}${s.name}</option>`).join('');
 }
 function showContinuePrompt(fielder){
-  // 保存完了後に続けて入力するか確認するバナーを表示
-  const existing=document.getElementById('continue-banner');
+  // 既存モーダルを削除
+  const existing=document.getElementById('continue-modal');
   if(existing)existing.remove();
-  const banner=document.createElement('div');
-  banner.id='continue-banner';
-  banner.style.cssText='background:#D1FAE5;border:1px solid #059669;border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;';
-  banner.innerHTML=`
-    <div style="font-size:var(--fs-sm);color:#065F46;font-weight:500;">
-      <i class="ti ti-circle-check" style="font-size:16px;vertical-align:-2px;margin-right:4px;"></i>
-      保存しました。続けて${fielder}の別店舗を入力できます。
-    </div>
-    <button onclick="document.getElementById('continue-banner').remove();goView('hist')" style="font-size:var(--fs-xs);padding:6px 12px;border-radius:99px;border:1px solid #059669;background:transparent;color:#065F46;cursor:pointer;white-space:nowrap;">履歴へ</button>`;
-  const page=document.querySelector('#view-input .page');
-  const firstSec=page.querySelector('.rec-sec');
-  if(firstSec)page.insertBefore(banner,firstSec);
+  const modal=document.createElement('div');
+  modal.id='continue-modal';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML=`
+    <div style="background:var(--card);border-radius:16px;padding:24px 20px;width:100%;max-width:360px;">
+      <div style="text-align:center;margin-bottom:6px;">
+        <i class="ti ti-circle-check" style="font-size:36px;color:#059669;"></i>
+      </div>
+      <div style="font-size:var(--fs-lg);font-weight:600;color:var(--text);text-align:center;margin-bottom:6px;">保存しました</div>
+      <div style="font-size:var(--fs-sm);color:var(--sub);text-align:center;margin-bottom:20px;">次の操作を選択してください</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button onclick="continueWithSame()" style="width:100%;padding:14px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:var(--fs-md);font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;">
+          <i class="ti ti-refresh"></i> 同じ担当者で続ける
+        </button>
+        <button onclick="continueWithOther()" style="width:100%;padding:14px;border-radius:12px;border:1.5px solid var(--accent);background:var(--accent-light);color:var(--accent);font-size:var(--fs-md);font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;">
+          <i class="ti ti-users"></i> 別の担当者で入力
+        </button>
+        <button onclick="continueEnd()" style="width:100%;padding:14px;border-radius:12px;border:0.5px solid var(--border);background:var(--card);color:var(--sub);font-size:var(--fs-md);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;">
+          <i class="ti ti-history"></i> 終了（履歴へ）
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+function closeModal(){
+  const m=document.getElementById('continue-modal');
+  if(m)m.remove();
+}
+
+function continueWithSame(){
+  // 日付・担当者を引き継いで店舗のみリセット
+  const savedDate=document.getElementById('s-date').value;
+  const savedFielder=document.getElementById('s-fielder').value;
+  closeModal();
+  document.getElementById('s-store').innerHTML='<option value="">選択してください</option>';
+  onFielderChange();
+  document.getElementById('s-date').value=savedDate;
+  document.getElementById('s-fielder').value=savedFielder;
+  onFielderChange();
+  checks={};renderCheckItems();
+  document.getElementById('s-observation').value='';
+  document.getElementById('s-feedback').value='';
+  document.getElementById('s-next').value='';
+  window.scrollTo(0,0);
+}
+
+function continueWithOther(){
+  // 日付のみ引き継いで担当者・店舗をリセット
+  const savedDate=document.getElementById('s-date').value;
+  closeModal();
+  clearForm();
+  document.getElementById('s-date').value=savedDate;
+  window.scrollTo(0,0);
+}
+
+function continueEnd(){
+  closeModal();
+  goView('hist');
 }
 
 function clearForm(){
@@ -545,14 +592,7 @@ async function saveRecord(){
     setSyncDot('ok','送信完了 '+new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}));
     toast('保存・送信しました','ok');
     // 続けて入力できるよう日付・フィールダーを引き継いでフォームを部分リセット
-    const savedDate=document.getElementById('s-date').value;
     const savedFielder=document.getElementById('s-fielder').value;
-    clearForm();
-    // 日付・フィールダーを復元
-    document.getElementById('s-date').value=savedDate;
-    document.getElementById('s-fielder').value=savedFielder;
-    onFielderChange();
-    // 続けて入力ボタンを表示
     showContinuePrompt(savedFielder);
   }catch(e){setSyncDot('err','送信失敗');toast('送信エラー','err');}
   btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> 保存・送信';
