@@ -179,7 +179,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
     <button class="tnb active" id="nb-input" onclick="goView('input')"><i class="ti ti-clipboard-plus"></i>同行入力</button>
     <button class="tnb" id="nb-hist" onclick="goView('hist')"><i class="ti ti-history"></i>履歴</button>
     <button class="tnb" id="nb-status" onclick="goView('status')"><i class="ti ti-users"></i>状況</button>
-    <button class="tnb" id="nb-summary" onclick="goView('summary')"><i class="ti ti-chart-bar"></i>集計</button>
   </div>
 
   <!-- 同行入力 -->
@@ -232,14 +231,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
     </div>
   </div>
 
-  <!-- 集計 -->
-  <div class="view" id="view-summary">
-    <div class="page">
-      <div class="filter-scroll" id="summary-month-filter"></div>
-      <div id="summary-content"><div class="empty">読み込み中...</div></div>
-      <div style="height:24px;"></div>
-    </div>
-  </div>
 </div>
 
 <script>
@@ -262,7 +253,7 @@ const AVATAR_COLORS=[
 const MONTH_LABELS=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
 
 let cu=null,stores=[],members=[],checks={};
-let seniorRecords=[],histFilter='全員',summaryMonth='全期間';
+let seniorRecords=[],histFilter='全員';
 
 function initials(n){return n.replace(/\s/g,'').slice(0,2);}
 function fmtDate(v){
@@ -349,7 +340,6 @@ function goView(v){
   if(v==='input')initForm();
   if(v==='hist')renderHist();
   if(v==='status')renderStatus();
-  if(v==='summary')renderSummary();
 }
 
 // ── 同行入力 ──
@@ -500,6 +490,7 @@ async function renderStatus(){
               <div class="prog-wrap">
                 <span class="nb nb-blue">${v.rec}件</span>
                 <div class="prog-bar"><div class="prog-fill" style="width:${Math.round(v.rec/maxRec*100)}%;"></div></div>
+                <a href="admin.html?fielder=${encodeURIComponent(name)}" style="display:inline-flex;align-items:center;gap:3px;font-size:var(--fs-xs);padding:4px 8px;border-radius:99px;background:var(--accent);color:#fff;text-decoration:none;white-space:nowrap;flex-shrink:0;" title="${name}の管理画面を開く"><i class="ti ti-external-link" style="font-size:13px;"></i></a>
               </div>
             </div>`;
           }).join('')}
@@ -518,82 +509,6 @@ async function renderStatus(){
   }catch(e){content.innerHTML='<div class="empty">読み込みエラー</div>';}
 }
 
-// ── 集計 ──
-function renderSummary(){
-  // 月一覧を生成
-  const months=[...new Set(seniorRecords.map(r=>getYearMonth(r.date)).filter(Boolean))].sort().reverse();
-  const monthFilter=document.getElementById('summary-month-filter');
-  monthFilter.innerHTML=['全期間',...months].map(m=>
-    `<button class="filter-chip${summaryMonth===m?' active':''}" onclick="setSummaryMonth('${m}')">${m==='全期間'?'全期間':m}</button>`
-  ).join('');
-  const filtered=summaryMonth==='全期間'?[...seniorRecords]:seniorRecords.filter(r=>getYearMonth(r.date)===summaryMonth);
-  // フィールダー別同行回数
-  const fielderCount={};
-  filtered.forEach(r=>{fielderCount[r.fielder]=(fielderCount[r.fielder]||0)+1;});
-  const fielderEntries=Object.entries(fielderCount).sort((a,b)=>b[1]-a[1]);
-  const maxCount=Math.max(...fielderEntries.map(([,v])=>v),1);
-  // チェック項目集計
-  const checkKeys=['check1','check2','check3','check4','check5'];
-  const checkLabels=['事前準備','課題ヒアリング','提案内容','クロージング','売上要因共有'];
-  const checkCounts=checkKeys.map(k=>({
-    ok:filtered.filter(r=>r[k]==='〇').length,
-    warn:filtered.filter(r=>r[k]==='△').length,
-    ng:filtered.filter(r=>r[k]==='✕').length,
-  }));
-  // 月別同行回数
-  const monthCount={};
-  seniorRecords.forEach(r=>{const m=getYearMonth(r.date);if(m)monthCount[m]=(monthCount[m]||0)+1;});
-  const monthEntries=Object.entries(monthCount).sort((a,b)=>a[0].localeCompare(b[0])).slice(-6);
-  const maxMonth=Math.max(...monthEntries.map(([,v])=>v),1);
-  document.getElementById('summary-content').innerHTML=`
-    <div class="summary-sec">
-      <div class="sec-hd"><i class="ti ti-calendar-stats"></i> 月別 同行回数（直近6ヶ月）</div>
-      <div class="bar-chart">
-        ${monthEntries.map(([m,v])=>`
-          <div class="bar-col">
-            <div class="bar-val">${v}</div>
-            <div class="bar-rect" style="height:${Math.round(v/maxMonth*80)}px;"></div>
-            <div class="bar-lbl">${m.slice(5)}月</div>
-          </div>`).join('')}
-      </div>
-    </div>
-    <div class="summary-sec">
-      <div class="sec-hd"><i class="ti ti-users"></i> フィールダー別 同行回数</div>
-      <div class="bar-chart">
-        ${fielderEntries.length?fielderEntries.map(([name,v])=>`
-          <div class="bar-col">
-            <div class="bar-val">${v}</div>
-            <div class="bar-rect" style="height:${Math.round(v/maxCount*80)}px;"></div>
-            <div class="bar-lbl">${initials(name)}</div>
-          </div>`).join(''):'<div style="color:var(--muted);font-size:var(--fs-sm);">データなし</div>'}
-      </div>
-    </div>
-    <div class="summary-sec">
-      <div class="sec-hd"><i class="ti ti-checklist"></i> チェック項目 集計</div>
-      <div class="check-grid">
-        ${checkLabels.map((label,i)=>{
-          const c=checkCounts[i];const total=c.ok+c.warn+c.ng;
-          const op=total?Math.round(c.ok/total*100):0;
-          const wp=total?Math.round(c.warn/total*100):0;
-          const np=total?100-op-wp:0;
-          return`<div class="cs-card">
-            <div class="cs-title">${label}</div>
-            <div class="cs-seg-wrap">
-              ${op?`<div class="cs-seg" style="width:${op}%;background:#D1FAE5;"></div>`:''}
-              ${wp?`<div class="cs-seg" style="width:${wp}%;background:#FEF3C7;"></div>`:''}
-              ${np?`<div class="cs-seg" style="width:${np}%;background:#FEE2E2;"></div>`:''}
-            </div>
-            <div class="cs-legend">
-              <span class="cs-legend-item"><span class="cs-dot" style="background:#059669;"></span>〇 ${c.ok}</span>
-              <span class="cs-legend-item"><span class="cs-dot" style="background:#D97706;"></span>△ ${c.warn}</span>
-              <span class="cs-legend-item"><span class="cs-dot" style="background:#DC2626;"></span>✕ ${c.ng}</span>
-            </div>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>`;
-}
-function setSummaryMonth(m){summaryMonth=m;renderSummary();}
 
 async function postGAS(data){
   const res=await fetch(GAS,{method:'POST',body:JSON.stringify(data)});

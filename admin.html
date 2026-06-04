@@ -174,6 +174,9 @@ body{font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif;backgrou
     <a class="back-btn" href="index.html">
       <i class="ti ti-arrow-left"></i> アプリに戻る
     </a>
+    <a class="back-btn" href="senior.html" id="back-to-senior" style="display:none;">
+      <i class="ti ti-walk"></i> 同行記録に戻る
+    </a>
   </div>
 </div>
 
@@ -682,7 +685,19 @@ function openStore(name){
   window.location.href='index.html?store='+encodeURIComponent(name);
 }
 
-loadAll();
+loadAll().then(()=>{
+  const params=new URLSearchParams(window.location.search);
+  const fielder=params.get('fielder');
+  if(fielder){
+    // senior.htmlからの遷移：同行記録に戻るボタンを表示
+    const backSenior=document.getElementById('back-to-senior');
+    const backIndex=document.querySelector('.back-btn[href="index.html"]');
+    if(backSenior)backSenior.style.display='flex';
+    if(backIndex)backIndex.style.display='none';
+    selectFielder(fielder);
+    window.history.replaceState({},'',window.location.pathname);
+  }
+});
 </script>
 </body>
 </html>
