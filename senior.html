@@ -14,12 +14,14 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
-  --accent:#004f8a;--accent-light:#EFF6FF;--accent-border:#BFDBFE;
+  --accent:#004f8a;--accent-light:#EFF6FF;
   --text:#111;--sub:#6B7280;--muted:#9CA3AF;--border:#E5E7EB;--bg:#F9FAFB;--card:#fff;
-  --fs-xs:13px;--fs-sm:15px;--fs-md:17px;--fs-lg:19px;--fs-xl:22px;--fs-2xl:28px;
+  --fs-xs:13px;--fs-sm:15px;--fs-md:17px;--fs-lg:19px;
   --ok:#059669;--warn:#D97706;--ng:#DC2626;
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;background:var(--bg);min-height:100vh;font-size:var(--fs-md);}
+.screen{display:none;}.screen.active{display:block;}
+.view{display:none;}.view.active{display:block;}
 
 /* ── ログイン ── */
 .login-wrap{padding:2rem 1rem;max-width:420px;margin:0 auto;}
@@ -32,26 +34,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .s-avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
 
 /* ── トップバー ── */
-.topbar{background:var(--accent);padding:11px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
-.t-logo{font-size:var(--fs-md);font-weight:600;color:#fff;display:flex;align-items:center;gap:8px;}
-.t-right{display:flex;align-items:center;gap:8px;}
+.topbar{background:var(--accent);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+.t-logo{font-size:var(--fs-md);font-weight:600;color:#fff;display:flex;align-items:center;gap:8px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.t-right{display:flex;align-items:center;gap:6px;flex-shrink:0;}
 .sdot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.4);}
 .sdot.ok{background:#4ADE80;}.sdot.err{background:#F87171;}.sdot.spin{background:#FCD34D;}
-.stext{font-size:var(--fs-xs);color:rgba(255,255,255,.8);}
-.t-switch{font-size:var(--fs-xs);padding:5px 12px;border:0.5px solid rgba(255,255,255,.4);border-radius:99px;background:transparent;color:#fff;cursor:pointer;}
+.stext{font-size:var(--fs-xs);color:rgba(255,255,255,.7);}
+.t-switch{font-size:var(--fs-xs);padding:5px 10px;border:0.5px solid rgba(255,255,255,.4);border-radius:99px;background:transparent;color:#fff;cursor:pointer;white-space:nowrap;}
 
 /* ── タブナビ ── */
-.tabnav{background:var(--card);border-bottom:0.5px solid var(--border);display:flex;}
-.tnb{flex:1;font-size:var(--fs-xs);padding:11px 4px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;display:flex;flex-direction:column;align-items:center;gap:3px;}
-.tnb i{font-size:22px;}
+.tabnav{background:var(--card);border-bottom:0.5px solid var(--border);display:flex;position:sticky;top:44px;z-index:9;}
+.tnb{flex:1;font-size:var(--fs-xs);padding:10px 4px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;display:flex;flex-direction:column;align-items:center;gap:2px;}
+.tnb i{font-size:20px;}
 .tnb.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
 
 /* ── 共通 ── */
-.screen{display:none;}.screen.active{display:block;}
-.view{display:none;}.view.active{display:block;}
 .page{padding:14px;}
-
-/* ── 入力フォーム ── */
 .rec-sec{background:var(--card);border:0.5px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;}
 .sec-hd{font-size:var(--fs-xs);font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;padding-bottom:8px;border-bottom:0.5px solid #F3F4F6;display:flex;align-items:center;gap:6px;}
 .field{display:flex;flex-direction:column;gap:7px;margin-bottom:14px;}
@@ -68,33 +66,78 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .check-item:last-child{margin-bottom:0;}
 .check-label{font-size:var(--fs-sm);color:var(--text);font-weight:500;margin-bottom:10px;line-height:1.6;}
 .check-btns{display:flex;gap:8px;}
-.chk-btn{flex:1;padding:12px 8px;border-radius:10px;border:1.5px solid var(--border);background:var(--card);font-size:var(--fs-lg);cursor:pointer;text-align:center;transition:.15s;font-family:inherit;}
-.chk-btn:active{opacity:.8;}
-.chk-btn.sel-ok{background:#D1FAE5;border-color:var(--ok);color:var(--ok);}
-.chk-btn.sel-warn{background:#FEF3C7;border-color:var(--warn);color:var(--warn);}
-.chk-btn.sel-ng{background:#FEE2E2;border-color:var(--ng);color:var(--ng);}
+.chk-btn{flex:1;padding:12px 8px;border-radius:10px;border:1.5px solid var(--border);background:var(--card);font-size:var(--fs-lg);cursor:pointer;text-align:center;font-family:inherit;}
+.chk-btn.sel-ok{background:#D1FAE5;border-color:var(--ok);}
+.chk-btn.sel-warn{background:#FEF3C7;border-color:var(--warn);}
+.chk-btn.sel-ng{background:#FEE2E2;border-color:var(--ng);}
 
-/* ── 保存ボタン ── */
+/* ── ボタン ── */
 .save-btn{width:100%;padding:18px;font-size:var(--fs-md);font-weight:600;border:none;border-radius:12px;background:var(--accent);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;}
-.save-btn:active{opacity:.85;}
 .save-btn:disabled{opacity:.5;}
 .clear-btn{width:100%;padding:14px;font-size:var(--fs-sm);border:0.5px solid var(--border);border-radius:12px;background:var(--card);color:var(--sub);cursor:pointer;margin-top:10px;}
 
+/* ── フィルター ── */
+.filter-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.filter-scroll::-webkit-scrollbar{display:none;}
+.filter-chip{flex-shrink:0;font-size:var(--fs-xs);padding:6px 14px;border:0.5px solid var(--border);border-radius:99px;background:var(--card);color:var(--sub);cursor:pointer;white-space:nowrap;}
+.filter-chip.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+
 /* ── 履歴 ── */
-.hist-list{display:flex;flex-direction:column;gap:12px;}
-.hist-card{background:var(--card);border:0.5px solid var(--border);border-radius:12px;padding:16px;}
-.hist-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
-.hist-date{font-size:var(--fs-sm);font-weight:600;color:var(--text);}
-.hist-meta{font-size:var(--fs-xs);color:var(--muted);margin-top:2px;}
-.hist-checks{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;}
-.hchk{display:flex;align-items:center;gap:4px;font-size:var(--fs-xs);padding:4px 10px;border-radius:99px;}
-.hchk.ok{background:#D1FAE5;color:var(--ok);}
-.hchk.warn{background:#FEF3C7;color:var(--warn);}
-.hchk.ng{background:#FEE2E2;color:var(--ng);}
+.hist-card{background:var(--card);border:0.5px solid var(--border);border-radius:12px;padding:14px;margin-bottom:10px;}
+.hist-top{font-size:var(--fs-sm);font-weight:600;color:var(--text);margin-bottom:2px;}
+.hist-meta{font-size:var(--fs-xs);color:var(--muted);margin-bottom:8px;}
+.hist-checks{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;}
+.hchk{font-size:var(--fs-xs);padding:3px 9px;border-radius:99px;display:flex;align-items:center;gap:3px;}
+.hchk-ok{background:#D1FAE5;color:#065F46;}
+.hchk-warn{background:#FEF3C7;color:#92400E;}
+.hchk-ng{background:#FEE2E2;color:#991B1B;}
 .hist-text{font-size:var(--fs-sm);color:var(--text);line-height:1.7;margin-top:6px;}
-.hist-label{font-size:var(--fs-xs);color:var(--muted);margin-bottom:2px;}
-.badge{display:inline-block;font-size:var(--fs-xs);padding:3px 10px;border-radius:99px;}
-.empty{text-align:center;padding:3rem 1rem;font-size:var(--fs-sm);color:var(--muted);}
+.hist-lbl{font-size:var(--fs-xs);color:var(--muted);margin-bottom:2px;margin-top:8px;}
+
+/* ── 状況 ── */
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.kpi-card{background:var(--card);border:0.5px solid var(--border);border-radius:12px;padding:14px;}
+.kpi-val{font-size:28px;font-weight:600;color:var(--text);line-height:1;}
+.kpi-lbl{font-size:var(--fs-xs);color:var(--muted);margin-top:5px;}
+.kpi-sub{font-size:var(--fs-xs);color:var(--sub);}
+.panel{background:var(--card);border:0.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:14px;}
+.panel-head{padding:14px 16px;border-bottom:0.5px solid var(--border);font-size:var(--fs-sm);font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;}
+.panel-body{padding:14px 16px;}
+.fielder-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:0.5px solid #F3F4F6;}
+.fielder-row:last-child{border-bottom:none;}
+.f-left{display:flex;align-items:center;gap:10px;}
+.f-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;}
+.f-name{font-size:var(--fs-sm);font-weight:600;color:var(--text);}
+.f-sub{font-size:var(--fs-xs);color:var(--muted);margin-top:2px;}
+.prog-wrap{display:flex;align-items:center;gap:8px;}
+.prog-bar{height:5px;border-radius:99px;background:#F3F4F6;width:60px;}
+.prog-fill{height:100%;border-radius:99px;background:var(--accent);}
+.nb{display:inline-block;font-size:var(--fs-xs);padding:3px 9px;border-radius:99px;}
+.nb-blue{background:#DBEAFE;color:#1E40AF;}
+.nb-green{background:#D1FAE5;color:#065F46;}
+.nb-orange{background:#FEF3C7;color:#92400E;}
+.stag-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:10px;background:#FFF7ED;border:1px solid #FED7AA;margin-bottom:8px;}
+.stag-item.danger{background:#FFF1F2;border-color:#FECDD3;}
+.stag-name{font-size:var(--fs-sm);font-weight:600;color:var(--text);}
+.stag-sub{font-size:var(--fs-xs);color:var(--sub);margin-top:2px;}
+.stag-days{font-size:var(--fs-lg);font-weight:700;color:var(--warn);}
+.stag-item.danger .stag-days{color:var(--ng);}
+
+/* ── 集計 ── */
+.summary-sec{background:var(--card);border:0.5px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;}
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:100px;margin-bottom:8px;}
+.bar-col{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;}
+.bar-rect{width:100%;border-radius:4px 4px 0 0;background:var(--accent);min-height:4px;}
+.bar-lbl{font-size:10px;color:var(--muted);white-space:nowrap;}
+.bar-val{font-size:10px;color:var(--text);font-weight:600;}
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.cs-card{background:var(--bg);border-radius:10px;padding:12px;}
+.cs-title{font-size:var(--fs-xs);color:var(--sub);margin-bottom:8px;line-height:1.5;}
+.cs-seg-wrap{display:flex;height:8px;border-radius:99px;overflow:hidden;gap:2px;margin-bottom:6px;}
+.cs-seg{border-radius:99px;}
+.cs-legend{display:flex;gap:8px;}
+.cs-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:3px;}
+.cs-legend-item{font-size:11px;color:var(--sub);display:flex;align-items:center;}
 
 /* ── toast ── */
 .toast-area{position:fixed;top:65px;left:0;right:0;display:flex;justify-content:center;pointer-events:none;z-index:100;}
@@ -103,12 +146,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .toast.show{opacity:1;}
 .spinner{display:inline-block;width:18px;height:18px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-3px;}
 @keyframes spin{to{transform:rotate(360deg);}}
+.empty{text-align:center;padding:3rem 1rem;font-size:var(--fs-sm);color:var(--muted);}
 </style>
 </head>
 <body>
 <div id="toast-area" class="toast-area"></div>
 
-<!-- ログイン画面 -->
 <div class="screen active" id="scr-login">
   <div class="login-wrap">
     <div class="login-card">
@@ -121,7 +164,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
   </div>
 </div>
 
-<!-- メイン画面 -->
 <div class="screen" id="scr-main">
   <div class="topbar">
     <div class="t-logo"><i class="ti ti-walk"></i><span id="t-name"></span></div>
@@ -136,6 +178,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
   <div class="tabnav">
     <button class="tnb active" id="nb-input" onclick="goView('input')"><i class="ti ti-clipboard-plus"></i>同行入力</button>
     <button class="tnb" id="nb-hist" onclick="goView('hist')"><i class="ti ti-history"></i>履歴</button>
+    <button class="tnb" id="nb-status" onclick="goView('status')"><i class="ti ti-users"></i>状況</button>
+    <button class="tnb" id="nb-summary" onclick="goView('summary')"><i class="ti ti-chart-bar"></i>集計</button>
   </div>
 
   <!-- 同行入力 -->
@@ -149,28 +193,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
         </div>
         <div class="field" style="margin-bottom:14px;">
           <label>対象フィールダー</label>
-          <select id="s-fielder"><option value="">選択してください</option></select>
+          <select id="s-fielder" onchange="onFielderChange()"><option value="">選択してください</option></select>
         </div>
         <div class="field">
           <label>訪問店舗</label>
           <select id="s-store"><option value="">フィールダーを選択してください</option></select>
         </div>
       </div>
-
       <div class="rec-sec">
         <div class="sec-hd"><i class="ti ti-checklist"></i> チェック項目</div>
-        <div id="check-items">
-          <!-- JS で生成 -->
-        </div>
+        <div id="check-items"></div>
       </div>
-
       <div class="rec-sec">
         <div class="sec-hd"><i class="ti ti-message"></i> コメント</div>
         <div class="field"><label>観察内容</label><textarea id="s-observation" placeholder="同行時に気づいた点、良かった点など"></textarea></div>
         <div class="field"><label>フィードバック</label><textarea id="s-feedback" placeholder="フィールダーへのフィードバック"></textarea></div>
         <div class="field"><label>次回への指示・アクション</label><textarea id="s-next" placeholder="例：次回は提案資料を事前に準備する" style="min-height:70px;"></textarea></div>
       </div>
-
       <button class="save-btn" id="save-btn" onclick="saveRecord()"><i class="ti ti-device-floppy"></i> 保存・送信</button>
       <button class="clear-btn" onclick="clearForm()">クリア</button>
       <div style="height:24px;"></div>
@@ -180,7 +219,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
   <!-- 履歴 -->
   <div class="view" id="view-hist">
     <div class="page">
+      <div class="filter-scroll" id="hist-filter"></div>
       <div id="hist-list"><div class="empty">読み込み中...</div></div>
+      <div style="height:24px;"></div>
+    </div>
+  </div>
+
+  <!-- 状況 -->
+  <div class="view" id="view-status">
+    <div class="page" id="status-content">
+      <div class="empty">読み込み中...</div>
+    </div>
+  </div>
+
+  <!-- 集計 -->
+  <div class="view" id="view-summary">
+    <div class="page">
+      <div class="filter-scroll" id="summary-month-filter"></div>
+      <div id="summary-content"><div class="empty">読み込み中...</div></div>
       <div style="height:24px;"></div>
     </div>
   </div>
@@ -188,7 +244,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 
 <script>
 const GAS='https://script.google.com/macros/s/AKfycbxpnXDwE36Wsk5-RNDvwgWJFdmi8MUEgj0Acbx-nZGENv-tSnUKpgEp14CaoFyJKJPq/exec';
-const SK='sr_s',CK='sr_c';
+const CK='sr_c';
 const CHECK_ITEMS=[
   {id:'check1',label:'事前準備ができていたか'},
   {id:'check2',label:'課題をヒアリングできていたか'},
@@ -201,9 +257,12 @@ const CHECK_CLS=['sel-ok','sel-warn','sel-ng'];
 const AVATAR_COLORS=[
   {color:'#DBEAFE',tc:'#1E40AF'},{color:'#D1FAE5',tc:'#065F46'},
   {color:'#FEF3C7',tc:'#92400E'},{color:'#EDE9FE',tc:'#5B21B6'},
+  {color:'#FCE7F3',tc:'#9D174D'},{color:'#E0F2FE',tc:'#0C4A6E'},
 ];
+const MONTH_LABELS=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
 
-let cu=null, stores=[], members=[], checks={};
+let cu=null,stores=[],members=[],checks={};
+let seniorRecords=[],histFilter='全員',summaryMonth='全期間';
 
 function initials(n){return n.replace(/\s/g,'').slice(0,2);}
 function fmtDate(v){
@@ -212,6 +271,10 @@ function fmtDate(v){
   const d=new Date(v);
   if(isNaN(d.getTime()))return String(v);
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function getYearMonth(dateStr){
+  const d=fmtDate(dateStr);
+  return d?d.slice(0,7):'';
 }
 function setSyncDot(state,msg){
   const d=document.getElementById('sdot');const t=document.getElementById('stext');
@@ -224,21 +287,22 @@ function toast(msg,type){
   setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),300);},3000);
 }
 
-// ── ログイン ──
 async function loadSeniors(){
   try{
     const res=await fetch(GAS+'?action=getSeniors');
     const json=await res.json();
     const seniors=json.seniors||[];
-    document.getElementById('senior-grid').innerHTML=seniors.map((name,i)=>{
-      const col=AVATAR_COLORS[i%AVATAR_COLORS.length];
-      return`<button class="s-btn" onclick="login('${name}')">
-        <div class="s-avatar" style="background:${col.color};color:${col.tc};">${initials(name)}</div>
-        ${name}
-      </button>`;
-    }).join('');
+    document.getElementById('senior-grid').innerHTML=seniors.length
+      ?seniors.map((name,i)=>{
+        const col=AVATAR_COLORS[i%AVATAR_COLORS.length];
+        return`<button class="s-btn" onclick="login('${name}')">
+          <div class="s-avatar" style="background:${col.color};color:${col.tc};">${initials(name)}</div>
+          ${name}
+        </button>`;
+      }).join('')
+      :'<div style="color:var(--ng);font-size:var(--fs-sm);text-align:center;">同行者データが見つかりません</div>';
   }catch(e){
-    document.getElementById('senior-grid').innerHTML='<div style="color:#DC2626;font-size:var(--fs-sm);">読み込みエラー</div>';
+    document.getElementById('senior-grid').innerHTML='<div style="color:var(--ng);font-size:var(--fs-sm);text-align:center;">読み込みエラー</div>';
   }
 }
 
@@ -253,22 +317,22 @@ function login(name){
 }
 function logout(){
   try{localStorage.removeItem(CK);}catch(e){}
-  cu=null;
+  cu=null;seniorRecords=[];
   document.getElementById('scr-main').classList.remove('active');
   document.getElementById('scr-login').classList.add('active');
 }
 
-// ── データ読み込み ──
 async function loadData(){
   setSyncDot('spin','読み込み中...');
   try{
-    const [storesRes, membersRes] = await Promise.all([
+    const [storesRes,membersRes,seniorRes]=await Promise.all([
       fetch(GAS+'?action=getStores').then(r=>r.json()),
       fetch(GAS+'?action=getMembers').then(r=>r.json()),
+      fetch(GAS+'?action=getSeniorRecords&senior=').then(r=>r.json()),
     ]);
     stores=storesRes.stores||[];
     members=membersRes.members||[];
-    // フィールダー選択肢を設定
+    seniorRecords=(seniorRes.records||[]).map(r=>({...r,date:fmtDate(r.date)}));
     const sel=document.getElementById('s-fielder');
     sel.innerHTML='<option value="">選択してください</option>'+
       members.map(m=>`<option value="${m}">${m}</option>`).join('');
@@ -276,7 +340,6 @@ async function loadData(){
   }catch(e){setSyncDot('err','読込エラー');}
 }
 
-// ── 画面遷移 ──
 function goView(v){
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.tnb').forEach(el=>el.classList.remove('active'));
@@ -284,139 +347,253 @@ function goView(v){
   const nb=document.getElementById('nb-'+v);if(nb)nb.classList.add('active');
   window.scrollTo(0,0);
   if(v==='input')initForm();
-  if(v==='hist')loadHist();
+  if(v==='hist')renderHist();
+  if(v==='status')renderStatus();
+  if(v==='summary')renderSummary();
 }
 
-// ── 入力フォーム ──
+// ── 同行入力 ──
 function initForm(){
   document.getElementById('s-date').valueAsDate=new Date();
   document.getElementById('s-senior').value=cu||'';
   checks={};
   renderCheckItems();
 }
-
 function renderCheckItems(){
   document.getElementById('check-items').innerHTML=CHECK_ITEMS.map(item=>`
     <div class="check-item">
       <div class="check-label">${item.label}</div>
       <div class="check-btns">
-        ${CHECK_VALS.map((v,i)=>`
-          <button class="chk-btn${checks[item.id]===v?' '+CHECK_CLS[i]:''}"
-            onclick="selCheck('${item.id}','${v}',${i})">${v}</button>
-        `).join('')}
+        ${CHECK_VALS.map((v,i)=>`<button class="chk-btn${checks[item.id]===v?' '+CHECK_CLS[i]:''}" onclick="selCheck('${item.id}','${v}',${i})">${v}</button>`).join('')}
       </div>
-    </div>
-  `).join('');
+    </div>`).join('');
 }
-
-function selCheck(id,val,idx){
-  checks[id]=val;
-  renderCheckItems();
+function selCheck(id,val,idx){checks[id]=val;renderCheckItems();}
+function onFielderChange(){
+  const fielder=document.getElementById('s-fielder').value;
+  const storeSel=document.getElementById('s-store');
+  const filtered=stores.filter(s=>s.pic===fielder);
+  storeSel.innerHTML='<option value="">選択してください</option>'+
+    filtered.map(s=>`<option value="${s.name}">${s.chain?'['+s.chain+'] ':''}${s.name}</option>`).join('');
 }
-
-// フィールダー変更時に店舗を更新
-document.addEventListener('DOMContentLoaded',()=>{
-  document.getElementById('s-fielder').addEventListener('change',function(){
-    const fielder=this.value;
-    const storeSel=document.getElementById('s-store');
-    const filtered=stores.filter(s=>s.pic===fielder);
-    storeSel.innerHTML='<option value="">選択してください</option>'+
-      filtered.map(s=>`<option value="${s.name}">${s.chain?'['+s.chain+'] ':''}${s.name}</option>`).join('');
-  });
-});
-
 function clearForm(){
   document.getElementById('s-fielder').value='';
   document.getElementById('s-store').innerHTML='<option value="">フィールダーを選択してください</option>';
   document.getElementById('s-observation').value='';
   document.getElementById('s-feedback').value='';
   document.getElementById('s-next').value='';
-  checks={};
-  renderCheckItems();
+  checks={};renderCheckItems();
 }
-
 async function saveRecord(){
   const date=document.getElementById('s-date').value;
   const fielder=document.getElementById('s-fielder').value;
   const storeName=document.getElementById('s-store').value;
   if(!fielder){alert('フィールダーを選択してください');return;}
   if(!storeName){alert('訪問店舗を選択してください');return;}
-
-  // 未入力チェック項目の確認
   const missing=CHECK_ITEMS.filter(item=>!checks[item.id]);
-  if(missing.length>0){
-    if(!confirm('未入力のチェック項目があります。このまま保存しますか？'))return;
-  }
-
+  if(missing.length>0){if(!confirm('未入力のチェック項目があります。このまま保存しますか？'))return;}
   const data={
-    action:'saveSeniorRecord',
-    id:Date.now(),
-    senior:cu,
-    date,
-    fielder,
-    storeName,
-    check1:checks['check1']||'',
-    check2:checks['check2']||'',
-    check3:checks['check3']||'',
-    check4:checks['check4']||'',
-    check5:checks['check5']||'',
+    action:'saveSeniorRecord',id:Date.now(),senior:cu,date,fielder,storeName,
+    check1:checks['check1']||'',check2:checks['check2']||'',check3:checks['check3']||'',
+    check4:checks['check4']||'',check5:checks['check5']||'',
     observation:document.getElementById('s-observation').value.trim(),
     feedback:document.getElementById('s-feedback').value.trim(),
     nextAction:document.getElementById('s-next').value.trim(),
   };
-
   const btn=document.getElementById('save-btn');
   btn.disabled=true;btn.innerHTML='<span class="spinner"></span> 送信中...';
   setSyncDot('spin','送信中...');
-
   try{
     await postGAS(data);
+    seniorRecords.push({...data,date:fmtDate(date)});
     setSyncDot('ok','送信完了 '+new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}));
     toast('保存・送信しました','ok');
-    clearForm();
-    goView('hist');
-  }catch(e){
-    setSyncDot('err','送信失敗');
-    toast('送信エラー','err');
-  }
+    clearForm();goView('hist');
+  }catch(e){setSyncDot('err','送信失敗');toast('送信エラー','err');}
   btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> 保存・送信';
 }
 
 // ── 履歴 ──
-async function loadHist(){
-  document.getElementById('hist-list').innerHTML='<div class="empty">読み込み中...</div>';
-  try{
-    const res=await fetch(GAS+'?action=getSeniorRecords&senior='+encodeURIComponent(cu));
-    const json=await res.json();
-    const records=(json.records||[]).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
-    if(!records.length){
-      document.getElementById('hist-list').innerHTML='<div class="empty">同行記録がありません</div>';
-      return;
-    }
-    const chkCls=v=>v==='〇'?'ok':v==='△'?'warn':'ng';
-    const chkLabels=['事前準備','ヒアリング','提案','クロージング','売上要因'];
-    document.getElementById('hist-list').innerHTML=`<div class="hist-list">`+
-      records.map(r=>{
-        const chkVals=[r.check1,r.check2,r.check3,r.check4,r.check5];
-        return`<div class="hist-card">
-          <div class="hist-top">
-            <div>
-              <div class="hist-date">${fmtDate(r.date)}</div>
-              <div class="hist-meta">${r.fielder} ／ ${r.storeName}</div>
-            </div>
-          </div>
-          <div class="hist-checks">
-            ${chkLabels.map((l,i)=>chkVals[i]?`<span class="hchk ${chkCls(chkVals[i])}"><span>${chkVals[i]}</span> ${l}</span>`:'').join('')}
-          </div>
-          ${r.observation?`<div class="hist-label">観察内容</div><div class="hist-text">${r.observation}</div>`:''}
-          ${r.feedback?`<div class="hist-label" style="margin-top:8px;">フィードバック</div><div class="hist-text">${r.feedback}</div>`:''}
-          ${r.nextAction?`<div class="hist-label" style="margin-top:8px;">次回指示</div><div class="hist-text">${r.nextAction}</div>`:''}
-        </div>`;
-      }).join('')+`</div>`;
-  }catch(e){
-    document.getElementById('hist-list').innerHTML='<div class="empty">読み込みエラー</div>';
+function renderHist(){
+  const allFielders=[...new Set(seniorRecords.map(r=>r.fielder).filter(Boolean))];
+  const filterEl=document.getElementById('hist-filter');
+  filterEl.innerHTML=['全員',...allFielders].map(f=>
+    `<button class="filter-chip${histFilter===f?' active':''}" onclick="setHistFilter('${f}')">${f}</button>`
+  ).join('');
+  const filtered=histFilter==='全員'?[...seniorRecords]:seniorRecords.filter(r=>r.fielder===histFilter);
+  const sorted=filtered.sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  if(!sorted.length){
+    document.getElementById('hist-list').innerHTML='<div class="empty">同行記録がありません</div>';return;
   }
+  const chkCls=v=>v==='〇'?'hchk-ok':v==='△'?'hchk-warn':'hchk-ng';
+  const chkLabels=['事前準備','ヒアリング','提案','クロージング','売上要因'];
+  document.getElementById('hist-list').innerHTML=sorted.map(r=>{
+    const chkVals=[r.check1,r.check2,r.check3,r.check4,r.check5];
+    return`<div class="hist-card">
+      <div class="hist-top">${r.date}　${r.fielder}</div>
+      <div class="hist-meta">${r.storeName}</div>
+      <div class="hist-checks">
+        ${chkLabels.map((l,i)=>chkVals[i]?`<span class="hchk ${chkCls(chkVals[i])}">${chkVals[i]} ${l}</span>`:'').join('')}
+      </div>
+      ${r.observation?`<div class="hist-lbl">観察内容</div><div class="hist-text">${r.observation}</div>`:''}
+      ${r.feedback?`<div class="hist-lbl">フィードバック</div><div class="hist-text">${r.feedback}</div>`:''}
+      ${r.nextAction?`<div class="hist-lbl">次回指示</div><div class="hist-text">${r.nextAction}</div>`:''}
+    </div>`;
+  }).join('');
 }
+function setHistFilter(f){histFilter=f;renderHist();}
+
+// ── 状況（フィールダー状況） ──
+async function renderStatus(){
+  const content=document.getElementById('status-content');
+  content.innerHTML='<div class="empty">読み込み中...</div>';
+  try{
+    const [storeInfoRes,recordsRes]=await Promise.all([
+      fetch(GAS+'?action=getStoreInfo').then(r=>r.json()),
+      fetch(GAS+'?action=getRecords&fielder=').then(r=>r.json()),
+    ]);
+    const infoMap={};
+    (storeInfoRes.info||[]).forEach(item=>{infoMap[item.storeName]={phase:Number(item.phase||0),lastVisit:fmtDate(item.lastVisit||'')};});
+    const records=recordsRes.records||[];
+    const fielderSet={};
+    stores.forEach(s=>{
+      const pic=s.pic||'未設定';
+      if(!fielderSet[pic])fielderSet[pic]={stores:0,rec:0,ph3:0,ph5:0};
+      fielderSet[pic].stores++;
+      const info=infoMap[s.name];
+      if(info){if(info.phase>=3)fielderSet[pic].ph3++;if(info.phase>=5)fielderSet[pic].ph5++;}
+    });
+    records.forEach(r=>{
+      const f=r.fielder||'未設定';
+      if(!fielderSet[f])fielderSet[f]={stores:0,rec:0,ph3:0,ph5:0};
+      fielderSet[f].rec++;
+    });
+    const total=stores.length;
+    const ph3=stores.filter(s=>infoMap[s.name]&&infoMap[s.name].phase>=3).length;
+    const ph5=stores.filter(s=>infoMap[s.name]&&infoMap[s.name].phase>=5).length;
+    // 停滞店舗
+    const stagnant=stores.map(s=>{
+      const info=infoMap[s.name];
+      const last=info?info.lastVisit:'';
+      const days=last?Math.floor((Date.now()-new Date(last).getTime())/(1000*60*60*24)):null;
+      return{...s,days,phase:info?info.phase:0};
+    }).filter(s=>s.days===null||s.days>=30).sort((a,b)=>(b.days||9999)-(a.days||9999)).slice(0,5);
+    const list=Object.entries(fielderSet).filter(([k])=>k!=='未設定').sort((a,b)=>b[1].rec-a[1].rec);
+    const maxRec=Math.max(...list.map(([,v])=>v.rec),1);
+    content.innerHTML=`
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-val">${total}</div><div class="kpi-lbl">総店舗数</div></div>
+        <div class="kpi-card"><div class="kpi-val">${ph3}</div><div class="kpi-lbl">提案中 Ph.03〜</div></div>
+        <div class="kpi-card"><div class="kpi-val">${ph5}</div><div class="kpi-lbl">実施完了</div><div class="kpi-sub">${Math.round(ph5/Math.max(total,1)*100)}%</div></div>
+        <div class="kpi-card"><div class="kpi-val">${records.length}</div><div class="kpi-lbl">総訪問件数</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><i class="ti ti-users"></i> フィールダー別進捗</div>
+        <div class="panel-body">
+          ${list.map(([name,v],i)=>{
+            const col=AVATAR_COLORS[i%AVATAR_COLORS.length];
+            return`<div class="fielder-row">
+              <div class="f-left">
+                <div class="f-av" style="background:${col.color};color:${col.tc};">${initials(name)}</div>
+                <div><div class="f-name">${name}</div><div class="f-sub">担当${v.stores}件</div></div>
+              </div>
+              <div class="prog-wrap">
+                <span class="nb nb-blue">${v.rec}件</span>
+                <div class="prog-bar"><div class="prog-fill" style="width:${Math.round(v.rec/maxRec*100)}%;"></div></div>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><i class="ti ti-alert-triangle" style="color:var(--warn);"></i> 停滞店舗（30日以上）</div>
+        <div class="panel-body">
+          ${stagnant.length?stagnant.map(s=>`
+            <div class="stag-item${s.days===null||s.days>=60?' danger':''}">
+              <div><div class="stag-name">${s.name}</div><div class="stag-sub">${s.pic||'担当未設定'}${s.phase?' Ph.'+s.phase:''}</div></div>
+              <div style="text-align:right;"><div class="stag-days">${s.days===null?'—':s.days}</div><div style="font-size:var(--fs-xs);color:var(--muted);">日未訪問</div></div>
+            </div>`).join(''):'<div class="empty" style="padding:1rem;">停滞店舗はありません</div>'}
+        </div>
+      </div>`;
+  }catch(e){content.innerHTML='<div class="empty">読み込みエラー</div>';}
+}
+
+// ── 集計 ──
+function renderSummary(){
+  // 月一覧を生成
+  const months=[...new Set(seniorRecords.map(r=>getYearMonth(r.date)).filter(Boolean))].sort().reverse();
+  const monthFilter=document.getElementById('summary-month-filter');
+  monthFilter.innerHTML=['全期間',...months].map(m=>
+    `<button class="filter-chip${summaryMonth===m?' active':''}" onclick="setSummaryMonth('${m}')">${m==='全期間'?'全期間':m}</button>`
+  ).join('');
+  const filtered=summaryMonth==='全期間'?[...seniorRecords]:seniorRecords.filter(r=>getYearMonth(r.date)===summaryMonth);
+  // フィールダー別同行回数
+  const fielderCount={};
+  filtered.forEach(r=>{fielderCount[r.fielder]=(fielderCount[r.fielder]||0)+1;});
+  const fielderEntries=Object.entries(fielderCount).sort((a,b)=>b[1]-a[1]);
+  const maxCount=Math.max(...fielderEntries.map(([,v])=>v),1);
+  // チェック項目集計
+  const checkKeys=['check1','check2','check3','check4','check5'];
+  const checkLabels=['事前準備','課題ヒアリング','提案内容','クロージング','売上要因共有'];
+  const checkCounts=checkKeys.map(k=>({
+    ok:filtered.filter(r=>r[k]==='〇').length,
+    warn:filtered.filter(r=>r[k]==='△').length,
+    ng:filtered.filter(r=>r[k]==='✕').length,
+  }));
+  // 月別同行回数
+  const monthCount={};
+  seniorRecords.forEach(r=>{const m=getYearMonth(r.date);if(m)monthCount[m]=(monthCount[m]||0)+1;});
+  const monthEntries=Object.entries(monthCount).sort((a,b)=>a[0].localeCompare(b[0])).slice(-6);
+  const maxMonth=Math.max(...monthEntries.map(([,v])=>v),1);
+  document.getElementById('summary-content').innerHTML=`
+    <div class="summary-sec">
+      <div class="sec-hd"><i class="ti ti-calendar-stats"></i> 月別 同行回数（直近6ヶ月）</div>
+      <div class="bar-chart">
+        ${monthEntries.map(([m,v])=>`
+          <div class="bar-col">
+            <div class="bar-val">${v}</div>
+            <div class="bar-rect" style="height:${Math.round(v/maxMonth*80)}px;"></div>
+            <div class="bar-lbl">${m.slice(5)}月</div>
+          </div>`).join('')}
+      </div>
+    </div>
+    <div class="summary-sec">
+      <div class="sec-hd"><i class="ti ti-users"></i> フィールダー別 同行回数</div>
+      <div class="bar-chart">
+        ${fielderEntries.length?fielderEntries.map(([name,v])=>`
+          <div class="bar-col">
+            <div class="bar-val">${v}</div>
+            <div class="bar-rect" style="height:${Math.round(v/maxCount*80)}px;"></div>
+            <div class="bar-lbl">${initials(name)}</div>
+          </div>`).join(''):'<div style="color:var(--muted);font-size:var(--fs-sm);">データなし</div>'}
+      </div>
+    </div>
+    <div class="summary-sec">
+      <div class="sec-hd"><i class="ti ti-checklist"></i> チェック項目 集計</div>
+      <div class="check-grid">
+        ${checkLabels.map((label,i)=>{
+          const c=checkCounts[i];const total=c.ok+c.warn+c.ng;
+          const op=total?Math.round(c.ok/total*100):0;
+          const wp=total?Math.round(c.warn/total*100):0;
+          const np=total?100-op-wp:0;
+          return`<div class="cs-card">
+            <div class="cs-title">${label}</div>
+            <div class="cs-seg-wrap">
+              ${op?`<div class="cs-seg" style="width:${op}%;background:#D1FAE5;"></div>`:''}
+              ${wp?`<div class="cs-seg" style="width:${wp}%;background:#FEF3C7;"></div>`:''}
+              ${np?`<div class="cs-seg" style="width:${np}%;background:#FEE2E2;"></div>`:''}
+            </div>
+            <div class="cs-legend">
+              <span class="cs-legend-item"><span class="cs-dot" style="background:#059669;"></span>〇 ${c.ok}</span>
+              <span class="cs-legend-item"><span class="cs-dot" style="background:#D97706;"></span>△ ${c.warn}</span>
+              <span class="cs-legend-item"><span class="cs-dot" style="background:#DC2626;"></span>✕ ${c.ng}</span>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+}
+function setSummaryMonth(m){summaryMonth=m;renderSummary();}
 
 async function postGAS(data){
   const res=await fetch(GAS,{method:'POST',body:JSON.stringify(data)});
