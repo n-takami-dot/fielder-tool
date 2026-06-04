@@ -273,7 +273,7 @@ const AVATAR_COLORS=[
 const MONTH_LABELS=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
 
 let cu=null,stores=[],members=[],checks={};
-let seniorRecords=[],histFilter='全員';
+let seniorRecords=[],histFilter='全員',dbAllRecords=[];
 
 function initials(n){return n.replace(/\s/g,'').slice(0,2);}
 function fmtDate(v){
@@ -386,8 +386,9 @@ async function loadDashboard(){
     const allRecords=(seniorRes.records||[]).map(r=>({...r,date:fmtDate(r.date)}));
     const seniors=['全員',...(seniorsRes.seniors||[])];
     // フィルターボタン生成
+    dbAllRecords=allRecords;
     document.getElementById('db-senior-filter').innerHTML=seniors.map(s=>
-      `<button class="filter-chip${dbSeniorFilter===s?' active':''}" onclick="setDbFilter('${s}',${JSON.stringify(allRecords)})">${s}</button>`
+      `<button class="filter-chip${dbSeniorFilter===s?' active':''}" onclick="setDbFilter('${s}')">${s}</button>`
     ).join('');
     renderDashboard(allRecords);
   }catch(e){
@@ -395,13 +396,12 @@ async function loadDashboard(){
   }
 }
 
-function setDbFilter(name, allRecords){
+function setDbFilter(name){
   dbSeniorFilter=name;
-  // フィルターボタンのactive更新
   document.querySelectorAll('#db-senior-filter .filter-chip').forEach(btn=>{
-    btn.classList.toggle('active', btn.textContent===name);
+    btn.classList.toggle('active', btn.textContent.trim()===name);
   });
-  renderDashboard(allRecords);
+  renderDashboard(dbAllRecords);
 }
 
 function renderDashboard(allRecords){
