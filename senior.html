@@ -427,10 +427,12 @@ function renderDashboard(allRecords){
   const colStyle=`display:flex;flex-direction:column;align-items:center;gap:4px;width:80px;flex-shrink:0;`;
   const chartWrap=`display:flex;align-items:flex-end;gap:12px;height:110px;margin-bottom:8px;overflow-x:auto;padding-bottom:4px;`;
 
+  const totalDays=new Set(records.map(r=>r.date+r.senior)).size;
   document.getElementById('db-content').innerHTML=`
-    <div class="kpi-grid" style="margin-bottom:14px;">
-      <div class="kpi-card"><div class="kpi-val">${total}</div><div class="kpi-lbl">同行回数</div></div>
-      <div class="kpi-card"><div class="kpi-val">${fielderEntries.length}</div><div class="kpi-lbl">対象フィールダー数</div></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
+      <div class="kpi-card"><div class="kpi-val">${totalDays}</div><div class="kpi-lbl">同行日数</div></div>
+      <div class="kpi-card"><div class="kpi-val">${total}</div><div class="kpi-lbl">同行店舗数</div></div>
+      <div class="kpi-card"><div class="kpi-val">${fielderEntries.length}</div><div class="kpi-lbl">フィールダー数</div></div>
     </div>
     ${dbSeniorFilter==='全員'&&seniorEntries.length>1?`
     <div class="rec-sec">
@@ -492,6 +494,24 @@ function onFielderChange(){
   storeSel.innerHTML='<option value="">選択してください</option>'+
     filtered.map(s=>`<option value="${s.name}">${s.chain?'['+s.chain+'] ':''}${s.name}</option>`).join('');
 }
+function showContinuePrompt(fielder){
+  // 保存完了後に続けて入力するか確認するバナーを表示
+  const existing=document.getElementById('continue-banner');
+  if(existing)existing.remove();
+  const banner=document.createElement('div');
+  banner.id='continue-banner';
+  banner.style.cssText='background:#D1FAE5;border:1px solid #059669;border-radius:12px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;';
+  banner.innerHTML=`
+    <div style="font-size:var(--fs-sm);color:#065F46;font-weight:500;">
+      <i class="ti ti-circle-check" style="font-size:16px;vertical-align:-2px;margin-right:4px;"></i>
+      保存しました。続けて${fielder}の別店舗を入力できます。
+    </div>
+    <button onclick="document.getElementById('continue-banner').remove();goView('hist')" style="font-size:var(--fs-xs);padding:6px 12px;border-radius:99px;border:1px solid #059669;background:transparent;color:#065F46;cursor:pointer;white-space:nowrap;">履歴へ</button>`;
+  const page=document.querySelector('#view-input .page');
+  const firstSec=page.querySelector('.rec-sec');
+  if(firstSec)page.insertBefore(banner,firstSec);
+}
+
 function clearForm(){
   document.getElementById('s-fielder').value='';
   document.getElementById('s-store').innerHTML='<option value="">フィールダーを選択してください</option>';
@@ -524,7 +544,16 @@ async function saveRecord(){
     seniorRecords.push({...data,date:fmtDate(date)});
     setSyncDot('ok','送信完了 '+new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}));
     toast('保存・送信しました','ok');
-    clearForm();goView('hist');
+    // 続けて入力できるよう日付・フィールダーを引き継いでフォームを部分リセット
+    const savedDate=document.getElementById('s-date').value;
+    const savedFielder=document.getElementById('s-fielder').value;
+    clearForm();
+    // 日付・フィールダーを復元
+    document.getElementById('s-date').value=savedDate;
+    document.getElementById('s-fielder').value=savedFielder;
+    onFielderChange();
+    // 続けて入力ボタンを表示
+    showContinuePrompt(savedFielder);
   }catch(e){setSyncDot('err','送信失敗');toast('送信エラー','err');}
   btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> 保存・送信';
 }
