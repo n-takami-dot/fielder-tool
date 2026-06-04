@@ -160,7 +160,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
       <div class="senior-grid" id="senior-grid">
         <div style="text-align:center;padding:20px;color:var(--muted);">読み込み中...</div>
       </div>
+      <div style="margin-top:14px;padding-top:14px;border-top:0.5px solid var(--border);">
+        <button onclick="openDashboard()" style="width:100%;padding:14px;border:0.5px solid var(--accent);border-radius:12px;background:var(--accent-light);color:var(--accent);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-size:var(--fs-md);font-weight:600;font-family:inherit;">
+          <i class="ti ti-chart-bar"></i> 同行活動ダッシュボード
+        </button>
+      </div>
     </div>
+  </div>
+</div>
+
+
+<div class="screen" id="scr-dashboard">
+  <div class="topbar">
+    <div class="t-logo"><i class="ti ti-chart-bar"></i> 同行活動ダッシュボード</div>
+    <div class="t-right">
+      <button class="t-switch" onclick="closeDashboard()"><i class="ti ti-arrow-left" style="font-size:14px;vertical-align:-2px;"></i> 戻る</button>
+    </div>
+  </div>
+  <div class="page">
+    <div class="filter-scroll" id="db-senior-filter"></div>
+    <div id="db-content"><div class="empty">読み込み中...</div></div>
+    <div style="height:24px;"></div>
   </div>
 </div>
 
@@ -340,6 +360,107 @@ function goView(v){
   if(v==='input')initForm();
   if(v==='hist')renderHist();
   if(v==='status')renderStatus();
+}
+
+
+// ── 同行活動ダッシュボード ──
+let dbSeniorFilter='全員';
+
+function openDashboard(){
+  document.getElementById('scr-login').classList.remove('active');
+  document.getElementById('scr-dashboard').classList.add('active');
+  loadDashboard();
+}
+function closeDashboard(){
+  document.getElementById('scr-dashboard').classList.remove('active');
+  document.getElementById('scr-login').classList.add('active');
+}
+
+async function loadDashboard(){
+  document.getElementById('db-content').innerHTML='<div class="empty">読み込み中...</div>';
+  try{
+    const [seniorRes,seniorsRes]=await Promise.all([
+      fetch(GAS+'?action=getSeniorRecords&senior=').then(r=>r.json()),
+      fetch(GAS+'?action=getSeniors').then(r=>r.json()),
+    ]);
+    const allRecords=(seniorRes.records||[]).map(r=>({...r,date:fmtDate(r.date)}));
+    const seniors=['全員',...(seniorsRes.seniors||[])];
+    // フィルターボタン生成
+    document.getElementById('db-senior-filter').innerHTML=seniors.map(s=>
+      `<button class="filter-chip${dbSeniorFilter===s?' active':''}" onclick="setDbFilter('${s}',${JSON.stringify(allRecords)})">${s}</button>`
+    ).join('');
+    renderDashboard(allRecords);
+  }catch(e){
+    document.getElementById('db-content').innerHTML='<div class="empty">読み込みエラー</div>';
+  }
+}
+
+function setDbFilter(name, allRecords){
+  dbSeniorFilter=name;
+  // フィルターボタンのactive更新
+  document.querySelectorAll('#db-senior-filter .filter-chip').forEach(btn=>{
+    btn.classList.toggle('active', btn.textContent===name);
+  });
+  renderDashboard(allRecords);
+}
+
+function renderDashboard(allRecords){
+  const records=dbSeniorFilter==='全員'?allRecords:allRecords.filter(r=>r.senior===dbSeniorFilter);
+  const total=records.length;
+  // フィールダー別集計
+  const fielderCount={};
+  records.forEach(r=>{fielderCount[r.fielder]=(fielderCount[r.fielder]||0)+1;});
+  const fielderEntries=Object.entries(fielderCount).sort((a,b)=>b[1]-a[1]);
+  const maxF=Math.max(...fielderEntries.map(([,v])=>v),1);
+  // 月別集計
+  const monthCount={};
+  records.forEach(r=>{const m=getYearMonth(r.date);if(m)monthCount[m]=(monthCount[m]||0)+1;});
+  const monthEntries=Object.entries(monthCount).sort((a,b)=>a[0].localeCompare(b[0])).slice(-6);
+  const maxM=Math.max(...monthEntries.map(([,v])=>v),1);
+  // 同行者別集計
+  const seniorCount={};
+  records.forEach(r=>{seniorCount[r.senior]=(seniorCount[r.senior]||0)+1;});
+  const seniorEntries=Object.entries(seniorCount).sort((a,b)=>b[1]-a[1]);
+
+  document.getElementById('db-content').innerHTML=`
+    <div class="kpi-grid" style="margin-bottom:14px;">
+      <div class="kpi-card"><div class="kpi-val">${total}</div><div class="kpi-lbl">同行回数</div></div>
+      <div class="kpi-card"><div class="kpi-val">${fielderEntries.length}</div><div class="kpi-lbl">対象フィールダー数</div></div>
+    </div>
+    ${dbSeniorFilter==='全員'&&seniorEntries.length>1?`
+    <div class="rec-sec">
+      <div class="sec-hd"><i class="ti ti-walk"></i> 同行者別 同行回数</div>
+      <div style="display:flex;align-items:flex-end;gap:10px;height:80px;margin-bottom:8px;">
+        ${seniorEntries.map(([name,v])=>`
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
+            <div style="font-size:11px;font-weight:600;color:var(--text);">${v}</div>
+            <div style="width:100%;border-radius:4px 4px 0 0;background:var(--accent);height:${Math.round(v/Math.max(...seniorEntries.map(([,x])=>x),1)*60)}px;"></div>
+            <div style="font-size:10px;color:var(--muted);white-space:nowrap;">${initials(name)}</div>
+          </div>`).join('')}
+      </div>
+    </div>`:''}
+    <div class="rec-sec">
+      <div class="sec-hd"><i class="ti ti-calendar-stats"></i> 月別 同行回数（直近6ヶ月）</div>
+      ${monthEntries.length?`<div style="display:flex;align-items:flex-end;gap:8px;height:100px;margin-bottom:8px;">
+        ${monthEntries.map(([m,v])=>`
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
+            <div style="font-size:11px;font-weight:600;color:var(--text);">${v}</div>
+            <div style="width:100%;border-radius:4px 4px 0 0;background:var(--accent);height:${Math.round(v/maxM*80)}px;"></div>
+            <div style="font-size:10px;color:var(--muted);">${m.slice(5)}月</div>
+          </div>`).join('')}
+      </div>`:'<div style="color:var(--muted);font-size:var(--fs-sm);padding:8px 0;">データがありません</div>'}
+    </div>
+    <div class="rec-sec">
+      <div class="sec-hd"><i class="ti ti-users"></i> フィールダー別 同行回数</div>
+      ${fielderEntries.length?`<div style="display:flex;align-items:flex-end;gap:8px;height:100px;margin-bottom:8px;">
+        ${fielderEntries.map(([name,v])=>`
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;">
+            <div style="font-size:11px;font-weight:600;color:var(--text);">${v}</div>
+            <div style="width:100%;border-radius:4px 4px 0 0;background:#059669;height:${Math.round(v/maxF*80)}px;"></div>
+            <div style="font-size:10px;color:var(--muted);white-space:nowrap;">${initials(name)}</div>
+          </div>`).join('')}
+      </div>`:'<div style="color:var(--muted);font-size:var(--fs-sm);padding:8px 0;">データがありません</div>'}
+    </div>`;
 }
 
 // ── 同行入力 ──
