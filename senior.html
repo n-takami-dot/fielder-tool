@@ -139,6 +139,53 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .cs-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:3px;}
 .cs-legend-item{font-size:11px;color:var(--sub);display:flex;align-items:center;}
 
+/* ── 店舗詳細 ── */
+.back-btn{display:inline-flex;align-items:center;gap:6px;font-size:var(--fs-sm);color:var(--sub);cursor:pointer;border:none;background:transparent;margin-bottom:14px;padding:0;}
+.dhead{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;gap:10px;}
+.dname{font-size:22px;font-weight:600;color:var(--text);}
+.dmeta{font-size:var(--fs-xs);color:var(--muted);margin-top:4px;}
+.info-card{background:var(--card);border:0.5px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;}
+.ic-label{font-size:var(--fs-xs);font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;padding-bottom:8px;border-bottom:0.5px solid #F3F4F6;display:flex;align-items:center;gap:6px;}
+.ig{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.ii-lbl{font-size:var(--fs-xs);color:var(--muted);margin-bottom:4px;}
+.ii-val{font-size:var(--fs-sm);font-weight:500;color:var(--text);}
+/* タイムライン */
+.tl-section-label{font-size:var(--fs-xs);font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.tl-item{display:flex;gap:12px;margin-bottom:14px;}
+.tl-dc{display:flex;flex-direction:column;align-items:center;}
+.tl-dot{width:11px;height:11px;border-radius:50%;margin-top:3px;flex-shrink:0;}
+.tl-dot-visit{background:#2563EB;}
+.tl-dot-senior{background:#004f8a;}
+.tl-line{width:1px;background:var(--border);flex:1;margin-top:4px;}
+.tl-body{flex:1;}
+.tl-date{font-size:var(--fs-xs);color:var(--muted);margin-bottom:5px;}
+.tl-card{background:var(--bg);border-radius:10px;padding:12px 14px;}
+.tl-card.senior-card{background:#EFF6FF;border:0.5px solid #BFDBFE;}
+.tl-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;}
+.tl-memo{font-size:var(--fs-sm);color:var(--text);margin-top:6px;line-height:1.7;}
+.tl-next{font-size:var(--fs-xs);color:var(--sub);margin-top:5px;}
+.tl-tag{display:inline-block;font-size:var(--fs-xs);padding:3px 10px;border-radius:99px;white-space:nowrap;}
+.tag-visit{background:#DBEAFE;color:#1E40AF;}
+.tag-senior{background:#EDE9FE;color:#5B21B6;}
+.tag-ph{background:#F3F4F6;color:var(--sub);}
+.tag-ok{background:#D1FAE5;color:#065F46;}
+.tag-p{background:#FEF3C7;color:#92400E;}
+.tag-ng{background:#FEE2E2;color:#991B1B;}
+.badge{display:inline-block;font-size:var(--fs-xs);padding:3px 10px;border-radius:99px;white-space:nowrap;}
+.rS{background:#FEF3C7;color:#92400E;}.rA{background:#D1FAE5;color:#065F46;}
+.rB{background:#DBEAFE;color:#1E40AF;}.rC,.rD,.rE{background:#F3F4F6;color:var(--sub);}
+.ph-bar{display:flex;gap:3px;align-items:center;}
+.phb{width:24px;height:20px;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;}
+.phb.done{background:var(--accent);color:#fff;}.phb.cur{background:#F59E0B;color:#fff;}.phb.todo{background:#F3F4F6;color:var(--muted);}
+/* 状況タブ 店舗カード */
+.store-card{background:var(--card);border:0.5px solid var(--border);border-radius:12px;padding:14px 16px;cursor:pointer;margin-bottom:10px;}
+.store-card:active{background:#EFF6FF;}
+.sc-name{font-size:var(--fs-md);font-weight:600;color:var(--text);}
+.sc-chain{font-size:var(--fs-xs);color:var(--muted);margin-top:2px;}
+.sc-bottom{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.fielder-section{margin-bottom:16px;}
+.fielder-section-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:10px 12px;background:var(--card);border-radius:10px;border:0.5px solid var(--border);}
+
 /* ── toast ── */
 .toast-area{position:fixed;top:65px;left:0;right:0;display:flex;justify-content:center;pointer-events:none;z-index:100;}
 .toast{font-size:var(--fs-sm);font-weight:500;padding:11px 22px;border-radius:99px;opacity:0;transition:opacity .3s;box-shadow:0 4px 12px rgba(0,0,0,.1);}
@@ -251,6 +298,23 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
     </div>
   </div>
 
+  <!-- 店舗詳細 -->
+  <div class="view" id="view-store-detail">
+    <div class="page">
+      <button class="back-btn" id="store-back-btn" onclick="goView('status')"><i class="ti ti-arrow-left"></i> 状況に戻る</button>
+      <div class="dhead">
+        <div><div class="dname" id="sd-name"></div><div class="dmeta" id="sd-meta"></div></div>
+      </div>
+      <div class="info-card" id="sd-master"></div>
+      <div style="font-size:var(--fs-xs);font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;display:flex;align-items:center;gap:8px;">
+        <i class="ti ti-history"></i> 活動タイムライン
+        <span id="sd-tl-filter-label" style="font-weight:400;color:var(--sub);letter-spacing:0;text-transform:none;font-size:var(--fs-xs);"></span>
+      </div>
+      <div id="sd-timeline"></div>
+      <div style="height:24px;"></div>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -355,7 +419,9 @@ function goView(v){
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.tnb').forEach(el=>el.classList.remove('active'));
   document.getElementById('view-'+v).classList.add('active');
-  const nb=document.getElementById('nb-'+v);if(nb)nb.classList.add('active');
+  // store-detailはstatusタブのサブ画面なのでタブはstatusをアクティブにする
+  const nbId=v==='store-detail'?'nb-status':('nb-'+v);
+  const nb=document.getElementById(nbId);if(nb)nb.classList.add('active');
   window.scrollTo(0,0);
   if(v==='input')initForm();
   if(v==='hist')renderHist();
@@ -629,42 +695,53 @@ function renderHist(){
 function setHistFilter(f){histFilter=f;renderHist();}
 
 // ── 状況（フィールダー状況） ──
+let statusInvoMap={}, statusVisitRecords=[], statusSeniorRecs=[], statusStores=[];
+let statusFielderFilter='全員';
+
 async function renderStatus(){
   const content=document.getElementById('status-content');
   content.innerHTML='<div class="empty">読み込み中...</div>';
   try{
-    const [storeInfoRes,recordsRes]=await Promise.all([
+    const [storeInfoRes,recordsRes,seniorRes]=await Promise.all([
       fetch(GAS+'?action=getStoreInfo').then(r=>r.json()),
       fetch(GAS+'?action=getRecords&fielder=').then(r=>r.json()),
+      fetch(GAS+'?action=getSeniorRecords&senior=').then(r=>r.json()),
     ]);
     const infoMap={};
-    (storeInfoRes.info||[]).forEach(item=>{infoMap[item.storeName]={phase:Number(item.phase||0),lastVisit:fmtDate(item.lastVisit||'')};});
-    const records=recordsRes.records||[];
-    const fielderSet={};
-    stores.forEach(s=>{
-      const pic=s.pic||'未設定';
-      if(!fielderSet[pic])fielderSet[pic]={stores:0,rec:0,ph3:0,ph5:0};
-      fielderSet[pic].stores++;
-      const info=infoMap[s.name];
-      if(info){if(info.phase>=3)fielderSet[pic].ph3++;if(info.phase>=5)fielderSet[pic].ph5++;}
-    });
-    records.forEach(r=>{
-      const f=r.fielder||'未設定';
-      if(!fielderSet[f])fielderSet[f]={stores:0,rec:0,ph3:0,ph5:0};
-      fielderSet[f].rec++;
-    });
+    (storeInfoRes.info||[]).forEach(item=>{infoMap[item.storeName]={phase:Number(item.phase||0),lastVisit:fmtDate(item.lastVisit||''),goal:item.goal||null};});
+    const records=(recordsRes.records||[]).map(r=>({...r,date:fmtDate(r.date)}));
+    const srecs=(seniorRes.records||[]).map(r=>({...r,date:fmtDate(r.date)}));
+    statusInvoMap=infoMap; statusVisitRecords=records; statusSeniorRecs=srecs; statusStores=stores;
+
     const total=stores.length;
     const ph3=stores.filter(s=>infoMap[s.name]&&infoMap[s.name].phase>=3).length;
     const ph5=stores.filter(s=>infoMap[s.name]&&infoMap[s.name].phase>=5).length;
-    // 停滞店舗
+    const fielderSet={};
+    stores.forEach(s=>{
+      const pic=s.pic||'未設定';
+      if(!fielderSet[pic])fielderSet[pic]={storeList:[],rec:0};
+      fielderSet[pic].storeList.push(s);
+      const info=infoMap[s.name];
+    });
+    records.forEach(r=>{
+      const f=r.fielder||'未設定';
+      if(!fielderSet[f])fielderSet[f]={storeList:[],rec:0};
+      fielderSet[f].rec++;
+    });
     const stagnant=stores.map(s=>{
       const info=infoMap[s.name];
       const last=info?info.lastVisit:'';
       const days=last?Math.floor((Date.now()-new Date(last).getTime())/(1000*60*60*24)):null;
       return{...s,days,phase:info?info.phase:0};
     }).filter(s=>s.days===null||s.days>=30).sort((a,b)=>(b.days||9999)-(a.days||9999)).slice(0,5);
-    const list=Object.entries(fielderSet).filter(([k])=>k!=='未設定').sort((a,b)=>b[1].rec-a[1].rec);
-    const maxRec=Math.max(...list.map(([,v])=>v.rec),1);
+    const fList=Object.entries(fielderSet).filter(([k])=>k!=='未設定').sort((a,b)=>b[1].rec-a[1].rec);
+    const maxRec=Math.max(...fList.map(([,v])=>v.rec),1);
+    const allFielders=['全員',...fList.map(([k])=>k)];
+    const filterChips=allFielders.map(f=>
+      `<button class="filter-chip${statusFielderFilter===f?' active':''}" onclick="setStatusFilter('${f.replace(/'/g,"\\'")}') ">${f}</button>`
+    ).join('');
+    const seniorStoreSet=new Set(srecs.map(r=>r.storeName));
+
     content.innerHTML=`
       <div class="kpi-grid">
         <div class="kpi-card"><div class="kpi-val">${total}</div><div class="kpi-lbl">総店舗数</div></div>
@@ -675,17 +752,17 @@ async function renderStatus(){
       <div class="panel">
         <div class="panel-head"><i class="ti ti-users"></i> フィールダー別進捗</div>
         <div class="panel-body">
-          ${list.map(([name,v],i)=>{
+          ${fList.map(([name,v],i)=>{
             const col=AVATAR_COLORS[i%AVATAR_COLORS.length];
             return`<div class="fielder-row">
               <div class="f-left">
                 <div class="f-av" style="background:${col.color};color:${col.tc};">${initials(name)}</div>
-                <div><div class="f-name">${name}</div><div class="f-sub">担当${v.stores}件</div></div>
+                <div><div class="f-name">${name}</div><div class="f-sub">担当${v.storeList.length}件</div></div>
               </div>
               <div class="prog-wrap">
                 <span class="nb nb-blue">${v.rec}件</span>
                 <div class="prog-bar"><div class="prog-fill" style="width:${Math.round(v.rec/maxRec*100)}%;"></div></div>
-                <a href="admin.html?fielder=${encodeURIComponent(name)}" style="display:inline-flex;align-items:center;gap:3px;font-size:var(--fs-xs);padding:4px 8px;border-radius:99px;background:var(--accent);color:#fff;text-decoration:none;white-space:nowrap;flex-shrink:0;" title="${name}の管理画面を開く"><i class="ti ti-external-link" style="font-size:13px;"></i></a>
+                <a href="admin.html?fielder=${encodeURIComponent(name)}" style="display:inline-flex;align-items:center;gap:3px;font-size:var(--fs-xs);padding:4px 8px;border-radius:99px;background:var(--accent);color:#fff;text-decoration:none;white-space:nowrap;flex-shrink:0;" title="${name}の管理画面"><i class="ti ti-external-link" style="font-size:13px;"></i></a>
               </div>
             </div>`;
           }).join('')}
@@ -695,14 +772,156 @@ async function renderStatus(){
         <div class="panel-head"><i class="ti ti-alert-triangle" style="color:var(--warn);"></i> 停滞店舗（30日以上）</div>
         <div class="panel-body">
           ${stagnant.length?stagnant.map(s=>`
-            <div class="stag-item${s.days===null||s.days>=60?' danger':''}">
+            <div class="stag-item${s.days===null||s.days>=60?' danger':''}" style="cursor:pointer;" onclick="openStoreDetail('${s.name.replace(/'/g,"\\'")}')">
               <div><div class="stag-name">${s.name}</div><div class="stag-sub">${s.pic||'担当未設定'}${s.phase?' Ph.'+s.phase:''}</div></div>
-              <div style="text-align:right;"><div class="stag-days">${s.days===null?'—':s.days}</div><div style="font-size:var(--fs-xs);color:var(--muted);">日未訪問</div></div>
+              <div style="text-align:right;display:flex;align-items:center;gap:8px;">
+                <div><div class="stag-days">${s.days===null?'—':s.days}</div><div style="font-size:var(--fs-xs);color:var(--muted);">日未訪問</div></div>
+                <i class="ti ti-chevron-right" style="color:var(--muted);"></i>
+              </div>
             </div>`).join(''):'<div class="empty" style="padding:1rem;">停滞店舗はありません</div>'}
         </div>
+      </div>
+      <div style="margin-bottom:4px;">
+        <div style="font-size:var(--fs-xs);font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:6px;"><i class="ti ti-building-store"></i> 担当店舗一覧（タップで詳細・同行履歴）</div>
+        <div class="filter-scroll" id="status-fielder-filter">${filterChips}</div>
+        <div id="status-store-list"></div>
       </div>`;
+    renderStatusStoreList(seniorStoreSet);
   }catch(e){content.innerHTML='<div class="empty">読み込みエラー</div>';}
 }
+
+function setStatusFilter(f){
+  statusFielderFilter=f;
+  document.querySelectorAll('#status-fielder-filter .filter-chip').forEach(btn=>{
+    btn.classList.toggle('active', btn.textContent.trim()===f);
+  });
+  const seniorStoreSet=new Set(statusSeniorRecs.map(r=>r.storeName));
+  renderStatusStoreList(seniorStoreSet);
+}
+
+const GOALS_S=['平台獲得','売場改善','多面展開','取り扱いアイテム増'];
+const RANK_CLS={S:'rS',A:'rA',B:'rB',C:'rC',D:'rD',E:'rE'};
+
+function renderStatusStoreList(seniorStoreSet){
+  const container=document.getElementById('status-store-list');
+  if(!container)return;
+  let list=statusFielderFilter==='全員'?statusStores:statusStores.filter(s=>s.pic===statusFielderFilter);
+  list=list.slice().sort((a,b)=>{
+    const da=statusInvoMap[a.name]?.lastVisit||'';
+    const db=statusInvoMap[b.name]?.lastVisit||'';
+    if(!da&&!db)return 0;if(!da)return -1;if(!db)return 1;
+    return da.localeCompare(db);
+  });
+  if(!list.length){container.innerHTML='<div class="empty">店舗がありません</div>';return;}
+  const ss=seniorStoreSet||new Set(statusSeniorRecs.map(r=>r.storeName));
+  container.innerHTML=list.map(s=>{
+    const info=statusInvoMap[s.name]||{};
+    const rk=s.rank?`<span class="badge ${RANK_CLS[s.rank]||'rC'}">${s.rank}</span>`:'';
+    const goalIdx=info.goal!=null?GOALS_S.indexOf(info.goal):-1;
+    const gl=goalIdx>=0?`<span class="tl-tag tag-visit">${GOALS_S[goalIdx]}</span>`:'';
+    const ph=info.phase>0?`<span class="tl-tag tag-ph">Ph.${info.phase}</span>`:'';
+    const hasSenior=ss.has(s.name)?`<span class="tl-tag tag-senior"><i class="ti ti-walk" style="font-size:11px;"></i> 同行あり</span>`:'';
+    const days=info.lastVisit?Math.floor((Date.now()-new Date(info.lastVisit).getTime())/(1000*60*60*24)):null;
+    const daysColor=days===null?'var(--muted)':days>=60?'var(--ng)':days>=30?'var(--warn)':'var(--muted)';
+    return`<div class="store-card" onclick="openStoreDetail('${s.name.replace(/'/g,"\\'")}')">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <div class="sc-name">${s.name}</div>
+          <div class="sc-chain">${s.chain||''}${s.pic&&statusFielderFilter==='全員'?' ／ '+s.pic:''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">${rk}<i class="ti ti-chevron-right" style="color:var(--muted);font-size:18px;"></i></div>
+      </div>
+      <div class="sc-bottom">
+        <div style="display:flex;gap:5px;flex-wrap:wrap;">${gl}${ph}${hasSenior}</div>
+        <div style="font-size:var(--fs-xs);color:${daysColor};">${days!==null?days+'日前':info.lastVisit||'未訪問'}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── 店舗詳細 ──
+function openStoreDetail(sname){
+  const s=statusStores.find(x=>x.name===sname);
+  const info=statusInvoMap[sname]||{};
+  if(!s)return;
+
+  document.getElementById('sd-name').textContent=s.name;
+  document.getElementById('sd-meta').textContent=[
+    s.chain, s.rank?'ランク '+s.rank:'', s.pic?'担当：'+s.pic:''
+  ].filter(Boolean).join(' ／ ');
+
+  const fmtNum=v=>v?Number(String(v).replace(/,/g,'')).toLocaleString('ja-JP')||v:null;
+  const goalIdx=info.goal!=null?GOALS_S.indexOf(info.goal):-1;
+  const phBar=info.phase>0?
+    `<div style="display:flex;gap:3px;margin-top:10px;">${[1,2,3,4,5].map(n=>`<div class="phb ${n<info.phase?'done':n===info.phase?'cur':'todo'}">${n}</div>`).join('')}</div>`:'';
+  document.getElementById('sd-master').innerHTML=`
+    <div class="ic-label"><i class="ti ti-building"></i> 店舗情報</div>
+    <div class="ig">
+      <div><div class="ii-lbl">チェーン名</div><div class="ii-val">${s.chain||'—'}</div></div>
+      <div><div class="ii-lbl">弊社担当者</div><div class="ii-val">${s.pic||'—'}</div></div>
+      <div><div class="ii-lbl">売上ランク</div><div class="ii-val">${s.rank?`<span class="badge ${RANK_CLS[s.rank]||'rC'}">${s.rank}</span>`:'—'}</div></div>
+      <div><div class="ii-lbl">前年金額</div><div class="ii-val">${fmtNum(s.prevResult)||'—'}</div></div>
+      <div><div class="ii-lbl">現在のゴール</div><div class="ii-val">${goalIdx>=0?GOALS_S[goalIdx]:'未設定'}</div></div>
+      <div><div class="ii-lbl">最終訪問日</div><div class="ii-val">${info.lastVisit||'—'}</div></div>
+    </div>${phBar}`;
+
+  // 訪問記録＋同行記録を日付降順でマージ
+  const visitRecs=statusVisitRecords.filter(r=>r.storeName===sname).map(r=>({...r,_type:'visit'}));
+  const seniorRecs=statusSeniorRecs.filter(r=>r.storeName===sname).map(r=>({...r,_type:'senior'}));
+  const merged=[...visitRecs,...seniorRecs].sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+
+  const filterLabel=statusFielderFilter!=='全員'?`（${statusFielderFilter} のみ）`:'';
+  document.getElementById('sd-tl-filter-label').textContent=filterLabel;
+
+  const chkLabels=['事前準備','ヒアリング','提案','クロージング','売上要因'];
+  const chkCls=v=>v==='〇'?'hchk-ok':v==='△'?'hchk-warn':'hchk-ng';
+  const rcls={'合意・達成':'tag-ok','検討中':'tag-p','見送り':'tag-ng','s':'tag-ok','p':'tag-p','f':'tag-ng'};
+  const rlbl={'合意・達成':'合意・達成','検討中':'検討中','見送り':'見送り','s':'合意・達成','p':'検討中','f':'見送り'};
+
+  document.getElementById('sd-timeline').innerHTML=merged.length?merged.map((r,i)=>{
+    const isLast=i===merged.length-1;
+    if(r._type==='visit'){
+      return`<div class="tl-item">
+        <div class="tl-dc"><div class="tl-dot tl-dot-visit"></div>${!isLast?'<div class="tl-line"></div>':''}</div>
+        <div class="tl-body">
+          <div class="tl-date">${r.date}${r.fielder?' ／ '+r.fielder:''}</div>
+          <div class="tl-card">
+            <div class="tl-row">
+              <span class="tl-tag tag-visit"><i class="ti ti-clipboard" style="font-size:11px;"></i> 訪問</span>
+              ${r.phase?`<span class="tl-tag tag-ph">Ph.${r.phase}</span>`:''}
+              ${r.result?`<span class="tl-tag ${rcls[r.result]||'tag-ph'}">${rlbl[r.result]||r.result}</span>`:''}
+            </div>
+            ${r.memo?`<div class="tl-memo">${r.memo}</div>`:''}
+            ${r.next?`<div class="tl-next"><i class="ti ti-arrow-right"></i> ${r.next}</div>`:''}
+            ${r.nextDate?`<div style="font-size:var(--fs-xs);color:var(--muted);margin-top:3px;">次回：${r.nextDate}</div>`:''}
+          </div>
+        </div>
+      </div>`;
+    }else{
+      const chkVals=[r.check1,r.check2,r.check3,r.check4,r.check5];
+      return`<div class="tl-item">
+        <div class="tl-dc"><div class="tl-dot tl-dot-senior"></div>${!isLast?'<div class="tl-line"></div>':''}</div>
+        <div class="tl-body">
+          <div class="tl-date">${r.date}${r.fielder?' ／ '+r.fielder:''}</div>
+          <div class="tl-card senior-card">
+            <div class="tl-row">
+              <span class="tl-tag tag-senior"><i class="ti ti-walk" style="font-size:11px;"></i> 同行：${r.senior||''}</span>
+            </div>
+            <div style="display:flex;gap:4px;flex-wrap:wrap;margin-top:8px;">
+              ${chkLabels.map((l,ci)=>chkVals[ci]?`<span class="hchk ${chkCls(chkVals[ci])}">${chkVals[ci]} ${l}</span>`:'').join('')}
+            </div>
+            ${r.observation?`<div class="hist-lbl">観察内容</div><div class="tl-memo">${r.observation}</div>`:''}
+            ${r.feedback?`<div class="hist-lbl">フィードバック</div><div class="tl-memo">${r.feedback}</div>`:''}
+            ${r.nextAction?`<div class="hist-lbl">次回指示</div><div class="tl-memo">${r.nextAction}</div>`:''}
+          </div>
+        </div>
+      </div>`;
+    }
+  }).join(''):'<div class="empty">活動記録がありません</div>';
+
+  goView('store-detail');
+}
+
 
 
 async function postGAS(data){

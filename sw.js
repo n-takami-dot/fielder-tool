@@ -1,5 +1,5 @@
 // ★ HTMLを更新するたびにこのバージョン番号を上げてください
-const CACHE_VERSION = 'v18';
+const CACHE_VERSION = 'v19';
 const CACHE_NAME = 'fielder-tool-' + CACHE_VERSION;
 
 self.addEventListener('install', event => {
