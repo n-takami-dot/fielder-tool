@@ -447,13 +447,24 @@ function closeDashboard(){
 async function loadDashboard(){
   document.getElementById('db-content').innerHTML='<div class="empty">読み込み中...</div>';
   try{
-    const [seniorRes,seniorsRes]=await Promise.all([
+    // storesが未取得の場合はgetAllで取得してからダッシュボードを描画
+    const needStores=!stores||stores.length===0;
+    const fetches=[
       fetch(GAS+'?action=getSeniorRecords&senior=').then(r=>r.json()),
       fetch(GAS+'?action=getSeniors').then(r=>r.json()),
-    ]);
+    ];
+    if(needStores) fetches.push(fetch(GAS+'?action=getAll').then(r=>r.json()));
+    const results=await Promise.all(fetches);
+    const [seniorRes,seniorsRes,allRes]=results;
+    if(needStores&&allRes){
+      stores=allRes.stores||[];
+      members=allRes.members||[];
+    }
+    // statusStoresを常に最新storesで更新
+    statusStores=stores;
     const allRecords=(seniorRes.records||[]).map(r=>({...r,date:fmtDate(r.date)}));
     const seniors=['全員',...(seniorsRes.seniors||[])];
-    // フィルターボタン生成
+    statusSeniorRecs=allRecords;
     dbAllRecords=allRecords;
     document.getElementById('db-senior-filter').innerHTML=seniors.map(s=>
       `<button class="filter-chip${dbSeniorFilter===s?' active':''}" onclick="setDbFilter('${s}')">${s}</button>`
@@ -498,6 +509,8 @@ function setDbMonthFilter(m){
 }
 
 function _renderDashboardInner(){
+  // statusStoresはrenderStatus()でセットされるが、状況タブ廃止後はstoresで補完
+  if(!statusStores||statusStores.length===0) statusStores=stores;
   // 同行者フィルター
   let records=dbSeniorFilter==='全員'?dbAllRecordsCache:dbAllRecordsCache.filter(r=>r.senior===dbSeniorFilter);
   // 月フィルター
