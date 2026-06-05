@@ -242,12 +242,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
       <button class="t-switch" onclick="logout()">切替</button>
     </div>
   </div>
-  <div class="tabnav">
-    <button class="tnb active" id="nb-input" onclick="goView('input')"><i class="ti ti-clipboard-plus"></i>同行入力</button>
-    <button class="tnb" id="nb-hist" onclick="goView('hist')"><i class="ti ti-history"></i>履歴</button>
-    <button class="tnb" id="nb-status" onclick="goView('status')"><i class="ti ti-users"></i>状況</button>
-  </div>
-
   <!-- 同行入力 -->
   <div class="view active" id="view-input">
     <div class="page">
@@ -279,22 +273,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
       <button class="save-btn" id="save-btn" onclick="saveRecord()"><i class="ti ti-device-floppy"></i> 保存・送信</button>
       <button class="clear-btn" onclick="clearForm()">クリア</button>
       <div style="height:24px;"></div>
-    </div>
-  </div>
-
-  <!-- 履歴 -->
-  <div class="view" id="view-hist">
-    <div class="page">
-      <div class="filter-scroll" id="hist-filter"></div>
-      <div id="hist-list"><div class="empty">読み込み中...</div></div>
-      <div style="height:24px;"></div>
-    </div>
-  </div>
-
-  <!-- 状況 -->
-  <div class="view" id="view-status">
-    <div class="page" id="status-content">
-      <div class="empty">読み込み中...</div>
     </div>
   </div>
 
@@ -424,7 +402,7 @@ function storeDetailBack(){
     document.getElementById('scr-dashboard').classList.add('active');
     window.scrollTo(0,0);
   } else {
-    goView('status');
+    goView('input');
   }
 }
 
@@ -446,15 +424,10 @@ function openStoreDetailFromDashboard(sname){
 
 function goView(v){
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
-  document.querySelectorAll('.tnb').forEach(el=>el.classList.remove('active'));
-  document.getElementById('view-'+v).classList.add('active');
-  // store-detailはstatusタブのサブ画面なのでタブはstatusをアクティブにする
-  const nbId=v==='store-detail'?'nb-status':('nb-'+v);
-  const nb=document.getElementById(nbId);if(nb)nb.classList.add('active');
+  const target=document.getElementById('view-'+v);
+  if(target)target.classList.add('active');
   window.scrollTo(0,0);
   if(v==='input')initForm();
-  if(v==='hist')renderHist();
-  if(v==='status')renderStatus();
 }
 
 
@@ -664,7 +637,10 @@ function _renderDashboardInner(){
             return`<div style="padding:8px 0;border-bottom:0.5px solid #DBEAFE;">
               <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;">
                 <span style="font-size:var(--fs-sm);font-weight:600;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px;" onclick="openStoreDetailFromDashboard('${(r.storeName||'').replace(/'/g,"\\'")}')">${r.storeName||'—'}<i class="ti ti-chevron-right" style="font-size:12px;vertical-align:-1px;margin-left:2px;"></i></span>
-                <span style="font-size:var(--fs-xs);color:var(--muted);white-space:nowrap;margin-left:8px;">${r.date}</span>
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <span style="font-size:var(--fs-xs);color:var(--muted);white-space:nowrap;">${r.date}</span>
+                  <button onclick="openEditModal('${r.id}')" style="display:inline-flex;align-items:center;gap:3px;font-size:var(--fs-xs);padding:3px 8px;border-radius:99px;border:0.5px solid #BFDBFE;background:#EFF6FF;color:#1E40AF;cursor:pointer;white-space:nowrap;"><i class="ti ti-edit" style="font-size:12px;"></i>編集</button>
+                </div>
               </div>
               <div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:4px;">同行：${r.senior||''}</div>
               ${chkHtml?`<div style="display:flex;gap:4px;flex-wrap:wrap;">${chkHtml}</div>`:''}
@@ -702,7 +678,10 @@ function _renderDashboardInner(){
         return`<div style="padding:10px 0;border-bottom:0.5px solid var(--border);">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
             <div style="font-size:var(--fs-sm);font-weight:600;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px;" onclick="openStoreDetailFromDashboard('${(r.storeName||'').replace(/'/g,"\\'")}')">${r.storeName||'—'}</div>
-            <div style="font-size:var(--fs-xs);color:var(--muted);white-space:nowrap;margin-left:8px;">${r.date}</div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div style="font-size:var(--fs-xs);color:var(--muted);white-space:nowrap;">${r.date}</div>
+              <button onclick="openEditModal('${r.id}')" style="display:inline-flex;align-items:center;gap:3px;font-size:var(--fs-xs);padding:3px 8px;border-radius:99px;border:0.5px solid var(--border);background:var(--card);color:var(--sub);cursor:pointer;white-space:nowrap;"><i class="ti ti-edit" style="font-size:12px;"></i>編集</button>
+            </div>
           </div>
           <div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:5px;">${r.fielder||''} ／ 同行：${r.senior||''}</div>
           ${chkHtml?`<div style="display:flex;gap:4px;flex-wrap:wrap;">${chkHtml}</div>`:''}
@@ -712,7 +691,103 @@ function _renderDashboardInner(){
     </div>`;
 }
 
-// ── 同行入力 ──
+// ── 同行記録 編集 ──
+function openEditModal(recId){
+  // seniorRecordsまたはstatusSeniorRecsから対象を検索
+  const allRecs=[...seniorRecords,...(statusSeniorRecs||[])];
+  const rec=allRecs.find(r=>String(r.id)===String(recId));
+  if(!rec){toast('記録が見つかりません','err');return;}
+
+  const existing=document.getElementById('edit-senior-modal');
+  if(existing)existing.remove();
+
+  const chkBtns=(checkId,curVal)=>CHECK_VALS.map((v,i)=>`
+    <button class="chk-btn${curVal===v?' '+CHECK_CLS[i]:''}" onclick="editSelCheck(this,'${checkId}','${v}',${i})">${v}</button>
+  `).join('');
+
+  const modal=document.createElement('div');
+  modal.id='edit-senior-modal';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;';
+  modal.innerHTML=`
+    <div style="background:var(--card);border-radius:16px;padding:20px;width:100%;max-width:480px;margin:auto;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="font-size:var(--fs-lg);font-weight:600;color:var(--text);">同行記録を編集</div>
+        <button onclick="closeEditModal()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:22px;"><i class="ti ti-x"></i></button>
+      </div>
+      <div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:14px;">${rec.date} ／ ${rec.storeName} ／ ${rec.fielder}</div>
+      <input type="hidden" id="edit-rec-id" value="${rec.id}">
+      ${CHECK_ITEMS.map((item,ci)=>`
+        <div style="margin-bottom:12px;">
+          <div style="font-size:var(--fs-sm);color:var(--sub);margin-bottom:6px;">${item.label}</div>
+          <div class="check-btns" id="edit-chk-${item.id}">${chkBtns(item.id,rec['check'+(ci+1)])}</div>
+        </div>`).join('')}
+      <div class="field" style="margin-top:4px;"><label>観察内容</label><textarea id="edit-observation" style="min-height:70px;">${rec.observation||''}</textarea></div>
+      <div class="field"><label>フィードバック</label><textarea id="edit-feedback" style="min-height:70px;">${rec.feedback||''}</textarea></div>
+      <div class="field"><label>次回指示</label><textarea id="edit-next" style="min-height:60px;">${rec.nextAction||''}</textarea></div>
+      <button id="edit-save-btn" onclick="saveEditRecord()" style="width:100%;padding:16px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:var(--fs-md);font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;">
+        <i class="ti ti-device-floppy"></i> 保存
+      </button>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+function editSelCheck(btn,checkId,val,idx){
+  const container=document.getElementById('edit-chk-'+checkId);
+  if(!container)return;
+  container.querySelectorAll('.chk-btn').forEach((b,i)=>{
+    b.className='chk-btn'+(i===idx?' '+CHECK_CLS[i]:'');
+  });
+}
+
+function closeEditModal(){
+  const m=document.getElementById('edit-senior-modal');
+  if(m)m.remove();
+}
+
+async function saveEditRecord(){
+  const id=document.getElementById('edit-rec-id').value;
+  const allRecs=[...seniorRecords,...(statusSeniorRecs||[])];
+  const rec=allRecs.find(r=>String(r.id)===String(id));
+  if(!rec){toast('記録が見つかりません','err');return;}
+
+  // チェック値を取得
+  const getChk=(checkId)=>{
+    const container=document.getElementById('edit-chk-'+checkId);
+    if(!container)return rec['check'+checkId.replace('check','')] ||'';
+    const active=container.querySelector('.chk-btn.chk-ok,.chk-btn.chk-warn,.chk-btn.chk-ng');
+    return active?active.textContent.trim():'';
+  };
+  const updated={
+    ...rec,
+    check1:getChk('check1'),check2:getChk('check2'),check3:getChk('check3'),
+    check4:getChk('check4'),check5:getChk('check5'),
+    observation:document.getElementById('edit-observation').value.trim(),
+    feedback:document.getElementById('edit-feedback').value.trim(),
+    nextAction:document.getElementById('edit-next').value.trim(),
+  };
+
+  const btn=document.getElementById('edit-save-btn');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> 送信中...';
+  try{
+    await postGAS({action:'updateSeniorRecord',...updated});
+    // ローカルも更新
+    const idx=seniorRecords.findIndex(r=>String(r.id)===String(id));
+    if(idx>=0)seniorRecords[idx]={...updated};
+    const idx2=(statusSeniorRecs||[]).findIndex(r=>String(r.id)===String(id));
+    if(idx2>=0)statusSeniorRecs[idx2]={...updated};
+    toast('更新しました','ok');
+    closeEditModal();
+    // ダッシュボード表示中なら再描画
+    if(document.getElementById('scr-dashboard').classList.contains('active')){
+      _renderDashboardInner();
+    }
+  }catch(e){
+    toast('送信エラー','err');
+    btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> 保存';
+  }
+}
+
+
 function initForm(){
   document.getElementById('s-date').valueAsDate=new Date();
   document.getElementById('s-senior').value=cu||'';
@@ -758,7 +833,7 @@ function showContinuePrompt(fielder){
           <i class="ti ti-users"></i> 別の担当者で入力
         </button>
         <button onclick="continueEnd()" style="width:100%;padding:14px;border-radius:12px;border:0.5px solid var(--border);background:var(--card);color:var(--sub);font-size:var(--fs-md);cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;">
-          <i class="ti ti-history"></i> 終了（履歴へ）
+          <i class="ti ti-chart-bar"></i> 終了（ダッシュボードへ）
         </button>
       </div>
     </div>`;
@@ -798,7 +873,10 @@ function continueWithOther(){
 
 function continueEnd(){
   closeModal();
-  goView('hist');
+  // scr-mainを隠してダッシュボードへ
+  document.getElementById('scr-main').classList.remove('active');
+  document.getElementById('scr-dashboard').classList.add('active');
+  loadDashboard();
 }
 
 function clearForm(){
