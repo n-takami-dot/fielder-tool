@@ -400,13 +400,12 @@ function logout(){
 async function loadData(){
   setSyncDot('spin','読み込み中...');
   try{
-    const [storesRes,membersRes,seniorRes]=await Promise.all([
-      fetch(GAS+'?action=getStores').then(r=>r.json()),
-      fetch(GAS+'?action=getMembers').then(r=>r.json()),
+    const [allRes,seniorRes]=await Promise.all([
+      fetch(GAS+'?action=getAll').then(r=>r.json()),
       fetch(GAS+'?action=getSeniorRecords&senior=').then(r=>r.json()),
     ]);
-    stores=storesRes.stores||[];
-    members=membersRes.members||[];
+    stores=allRes.stores||[];
+    members=allRes.members||[];
     seniorRecords=(seniorRes.records||[]).map(r=>({...r,date:fmtDate(r.date)}));
     const sel=document.getElementById('s-fielder');
     sel.innerHTML='<option value="">選択してください</option>'+
