@@ -186,6 +186,42 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .fielder-section{margin-bottom:16px;}
 .fielder-section-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:10px 12px;background:var(--card);border-radius:10px;border:0.5px solid var(--border);}
 
+/* ── カレンダー ── */
+.cal-wrap{margin-bottom:12px;}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.cal-nav-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:4px 12px;cursor:pointer;font-size:16px;color:var(--sub);}
+.cal-month{font-size:var(--fs-md);font-weight:600;color:var(--text);}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
+.cal-head{text-align:center;font-size:var(--fs-xs);font-weight:600;color:var(--muted);padding:4px 0;}
+.cal-head.sun{color:#EF4444;}.cal-head.sat{color:#3B82F6;}
+.cal-cell{border-radius:6px;padding:3px;border:1px solid transparent;cursor:pointer;min-height:58px;}
+.cal-cell:hover{background:var(--accent-light);border-color:var(--accent-border);}
+.cal-cell.today{background:var(--accent-light);border-color:var(--accent-border);}
+.cal-cell.cal-sel{border-color:var(--accent) !important;background:#DBEAFE !important;}
+.cal-cell.other-month .cal-day{color:#D1D5DB;}
+.cal-day{font-size:10px;font-weight:500;color:var(--text);text-align:right;margin-bottom:2px;}
+.cal-cell.sun .cal-day{color:#EF4444;}.cal-cell.sat .cal-day{color:#3B82F6;}
+.cal-cell.today .cal-day{font-weight:700;color:var(--accent);}
+.sb{border-radius:3px;padding:2px 4px;margin-bottom:1px;font-size:9px;font-weight:600;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sb-plan{opacity:.85;}.sb-done{opacity:1;}
+.cal-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
+.cal-leg{display:flex;align-items:center;gap:4px;font-size:var(--fs-xs);color:var(--muted);}
+.cal-leg-box{width:24px;height:12px;border-radius:3px;}
+.cal-detail{background:var(--accent-light);border:0.5px solid var(--accent-border);border-radius:10px;padding:12px 14px;margin-top:10px;}
+.cal-detail-date{font-size:var(--fs-sm);font-weight:600;color:var(--accent);margin-bottom:8px;}
+.cal-di{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--accent-border);}
+.cal-di:last-child{border-bottom:none;}
+.cal-di-badge{font-size:var(--fs-xs);padding:2px 7px;border-radius:99px;font-weight:500;flex-shrink:0;margin-top:1px;}
+.cal-di-plan{background:#DBEAFE;color:#1E40AF;}
+.cal-di-done{background:#D1FAE5;color:#065F46;}
+.cal-di-name{font-size:var(--fs-sm);color:var(--text);}
+.cal-di-sub{font-size:var(--fs-xs);color:var(--muted);margin-top:2px;}
+/* 予定登録リスト */
+.plan-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--accent-light);border-radius:8px;margin-bottom:6px;border:0.5px solid var(--accent-border);}
+.pi-info{font-size:var(--fs-xs);color:var(--accent);font-weight:500;}
+.pi-sub{font-size:var(--fs-xs);color:var(--muted);margin-top:2px;}
+.pi-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:0 4px;line-height:1;}
+.pi-del:hover{color:#EF4444;}
 /* ── toast ── */
 .toast-area{position:fixed;top:65px;left:0;right:0;display:flex;justify-content:center;pointer-events:none;z-index:100;}
 .toast{font-size:var(--fs-sm);font-weight:500;padding:11px 22px;border-radius:99px;opacity:0;transition:opacity .3s;box-shadow:0 4px 12px rgba(0,0,0,.1);}
@@ -226,6 +262,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
   </div>
   <div class="page">
     <div class="filter-scroll" id="db-senior-filter"></div>
+    <div id="db-calendar" style="margin-bottom:12px;"></div>
     <div id="db-content"><div class="empty">読み込み中...</div></div>
     <div style="height:24px;"></div>
   </div>
@@ -245,6 +282,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
   <!-- 同行入力 -->
   <div class="view active" id="view-input">
     <div class="page">
+      <div class="rec-sec">
+        <div class="sec-hd"><i class="ti ti-calendar-plus"></i> 同行予定を登録</div>
+        <div class="r2" style="margin-bottom:14px;">
+          <div class="field"><label>予定日</label><input type="date" id="plan-date"></div>
+          <div class="field"><label>対象フィールダー</label>
+            <select id="plan-fielder"><option value="">選択してください</option></select>
+          </div>
+        </div>
+        <button class="save-btn" style="background:#004f8a;" onclick="savePlan()"><i class="ti ti-calendar-plus"></i> 予定を登録</button>
+      </div>
+      <div class="rec-sec" id="plan-list-sec" style="display:none;">
+        <div class="sec-hd"><i class="ti ti-calendar-event"></i> 登録済み予定</div>
+        <div id="plan-list"></div>
+      </div>
       <div class="rec-sec">
         <div class="sec-hd"><i class="ti ti-info-circle"></i> 基本情報</div>
         <div class="r2" style="margin-bottom:14px;">
@@ -431,6 +482,170 @@ function goView(v){
 }
 
 
+// ── 同行予定 ──
+let seniorPlans=[];
+let calYear=new Date().getFullYear(), calMonth=new Date().getMonth(), calSelDate=null;
+
+const SENIOR_COLORS=[
+  {plan:'#DBEAFE',done:'#93C5FD',text:'#1E40AF'},
+  {plan:'#D1FAE5',done:'#34D399',text:'#065F46'},
+  {plan:'#EDE9FE',done:'#A78BFA',text:'#5B21B6'},
+  {plan:'#FEF3C7',done:'#FCD34D',text:'#92400E'},
+  {plan:'#FCE7F3',done:'#F9A8D4',text:'#9D174D'},
+  {plan:'#E0F2FE',done:'#7DD3FC',text:'#0C4A6E'},
+  {plan:'#FFEDD5',done:'#FDB07A',text:'#9A3412'},
+  {plan:'#DCFCE7',done:'#86EFAC',text:'#166534'},
+];
+let seniorColorMap={};
+function getSeniorColor(name){
+  if(!seniorColorMap[name]){
+    const idx=Object.keys(seniorColorMap).length%SENIOR_COLORS.length;
+    seniorColorMap[name]=SENIOR_COLORS[idx];
+  }
+  return seniorColorMap[name];
+}
+
+function renderCalendar(){
+  const container=document.getElementById('db-calendar');
+  if(!container)return;
+  const pad=n=>String(n).padStart(2,'0');
+  const todayStr=`${new Date().getFullYear()}-${pad(new Date().getMonth()+1)}-${pad(new Date().getDate())}`;
+  const first=new Date(calYear,calMonth,1);
+  const last=new Date(calYear,calMonth+1,0);
+  const filteredDone=dbSeniorFilter==='全員'?dbAllRecordsCache:dbAllRecordsCache.filter(r=>r.senior===dbSeniorFilter);
+  const filteredPlan=dbSeniorFilter==='全員'?seniorPlans:seniorPlans.filter(r=>r.senior===dbSeniorFilter);
+  const dayMap={};
+  const addToMap=(arr,type)=>arr.forEach(r=>{
+    if(!r.date)return;
+    const d=String(r.date).slice(0,10);
+    if(!dayMap[d])dayMap[d]={};
+    if(!dayMap[d][r.senior])dayMap[d][r.senior]={plan:0,done:0};
+    dayMap[d][r.senior][type]++;
+  });
+  addToMap(filteredPlan,'plan');
+  addToMap(filteredDone,'done');
+  let cells='';
+  for(let i=0;i<first.getDay();i++){
+    const d=new Date(calYear,calMonth,-first.getDay()+i+1);
+    cells+=`<div class="cal-cell other-month"><div class="cal-day">${d.getDate()}</div></div>`;
+  }
+  for(let d=1;d<=last.getDate();d++){
+    const dt=`${calYear}-${pad(calMonth+1)}-${pad(d)}`;
+    const dow=new Date(calYear,calMonth,d).getDay();
+    const cls=['cal-cell',dt===todayStr?'today':'',dow===0?'sun':dow===6?'sat':'',dt===calSelDate?'cal-sel':''].filter(Boolean).join(' ');
+    const seniors=dayMap[dt]?Object.entries(dayMap[dt]):[];
+    let blocksHtml='';
+    seniors.slice(0,2).forEach(([name,counts])=>{
+      const col=getSeniorColor(name);
+      const shortName=name.split(' ')[0];
+      if(counts.done>0&&counts.plan>0){
+        blocksHtml+=`<div class="sb sb-done" style="background:${col.done};color:#fff;">${shortName} 予+済</div>`;
+      }else if(counts.done>0){
+        blocksHtml+=`<div class="sb sb-done" style="background:${col.done};color:#fff;">${shortName} 済</div>`;
+      }else{
+        blocksHtml+=`<div class="sb sb-plan" style="background:${col.plan};color:${col.text};">${shortName} 予定</div>`;
+      }
+    });
+    if(seniors.length>2)blocksHtml+=`<div style="font-size:8px;color:var(--muted);text-align:right;">他${seniors.length-2}件</div>`;
+    cells+=`<div class="${cls}" onclick="calSelectDate('${dt}')"><div class="cal-day">${d}</div>${blocksHtml}</div>`;
+  }
+  const rem=7-((first.getDay()+last.getDate())%7||7);
+  for(let i=1;i<rem;i++)cells+=`<div class="cal-cell other-month"><div class="cal-day">${i}</div></div>`;
+  const allSeniors=[...new Set([...filteredDone.map(r=>r.senior),...filteredPlan.map(r=>r.senior)].filter(Boolean))];
+  const legendHtml=allSeniors.slice(0,4).map(name=>{
+    const col=getSeniorColor(name);
+    return`<div class="cal-leg"><div class="cal-leg-box" style="background:${col.plan};border:1px solid ${col.done};"></div>${name.split(' ')[0]} 予定</div>
+           <div class="cal-leg"><div class="cal-leg-box" style="background:${col.done};"></div>${name.split(' ')[0]} 済</div>`;
+  }).join('');
+  container.innerHTML=`
+    <div class="rec-sec">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+        <div style="font-size:var(--fs-xs);font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px;"><i class="ti ti-calendar-event"></i> 同行カレンダー</div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button class="cal-nav-btn" onclick="calChangeMonth(-1)">&#8249;</button>
+          <div class="cal-month">${calYear}年 ${calMonth+1}月</div>
+          <button class="cal-nav-btn" onclick="calChangeMonth(1)">&#8250;</button>
+        </div>
+      </div>
+      <div class="cal-grid">${['日','月','火','水','木','金','土'].map((d,i)=>`<div class="cal-head${i===0?' sun':i===6?' sat':''}">${d}</div>`).join('')}</div>
+      <div class="cal-grid" style="margin-top:2px;">${cells}</div>
+      <div class="cal-legend">${legendHtml}</div>
+      <div id="cal-detail" style="display:none;"></div>
+    </div>`;
+  if(calSelDate)renderCalDetail(calSelDate);
+}
+
+function calSelectDate(dt){
+  calSelDate=calSelDate===dt?null:dt;
+  renderCalendar();
+}
+
+function renderCalDetail(dt){
+  const detail=document.getElementById('cal-detail');
+  if(!detail)return;
+  const filteredDone=dbSeniorFilter==='全員'?dbAllRecordsCache:dbAllRecordsCache.filter(r=>r.senior===dbSeniorFilter);
+  const filteredPlan=dbSeniorFilter==='全員'?seniorPlans:seniorPlans.filter(r=>r.senior===dbSeniorFilter);
+  const dones=filteredDone.filter(r=>String(r.date).slice(0,10)===dt);
+  const plans=filteredPlan.filter(r=>r.date===dt);
+  if(!dones.length&&!plans.length){detail.style.display='none';return;}
+  const dow=['日','月','火','水','木','金','土'][new Date(dt).getDay()];
+  const [,mm,dd]=dt.split('-');
+  let h=`<div class="cal-detail"><div class="cal-detail-date">${parseInt(mm)}月${parseInt(dd)}日（${dow}）</div>`;
+  plans.forEach(r=>h+=`<div class="cal-di"><span class="cal-di-badge cal-di-plan">予定</span><div><div class="cal-di-name">${r.fielder}</div><div class="cal-di-sub">同行者：${r.senior}</div></div></div>`);
+  dones.forEach(r=>h+=`<div class="cal-di"><span class="cal-di-badge cal-di-done">済み</span><div><div class="cal-di-name">${r.fielder}${r.storeName?' ／ '+r.storeName:''}</div><div class="cal-di-sub">同行者：${r.senior}</div></div></div>`);
+  h+='</div>';
+  detail.innerHTML=h;detail.style.display='block';
+}
+
+function calChangeMonth(d){
+  calMonth+=d;
+  if(calMonth>11){calMonth=0;calYear++;}
+  if(calMonth<0){calMonth=11;calYear--;}
+  calSelDate=null;
+  renderCalendar();
+}
+
+async function savePlan(){
+  const date=document.getElementById('plan-date').value;
+  const fielder=document.getElementById('plan-fielder').value;
+  if(!date||!fielder){toast('予定日とフィールダーを選択してください','err');return;}
+  const plan={id:Date.now(),date,fielder,senior:cu};
+  const btn=document.querySelector('[onclick="savePlan()"]');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> 送信中...';
+  try{
+    await postGAS({action:'saveSeniorPlan',...plan});
+    seniorPlans.push(plan);
+    toast('予定を登録しました','ok');
+    renderPlanList();
+    renderCalendar();
+  }catch(e){toast('送信エラー','err');}
+  btn.disabled=false;btn.innerHTML='<i class="ti ti-calendar-plus"></i> 予定を登録';
+}
+
+async function deletePlan(id){
+  if(!confirm('この予定を削除しますか？'))return;
+  try{
+    await postGAS({action:'deleteSeniorPlan',id:String(id)});
+    seniorPlans=seniorPlans.filter(p=>String(p.id)!==String(id));
+    toast('削除しました','ok');
+    renderPlanList();
+    renderCalendar();
+  }catch(e){toast('削除エラー','err');}
+}
+
+function renderPlanList(){
+  const list=document.getElementById('plan-list');
+  const sec=document.getElementById('plan-list-sec');
+  if(!list||!sec)return;
+  const mine=seniorPlans.filter(p=>p.senior===cu).sort((a,b)=>a.date.localeCompare(b.date));
+  sec.style.display=mine.length?'block':'none';
+  list.innerHTML=mine.map(p=>`
+    <div class="plan-item">
+      <div><div class="pi-info">${p.date}　${p.fielder}</div></div>
+      <button class="pi-del" onclick="deletePlan('${p.id}')"><i class="ti ti-x"></i></button>
+    </div>`).join('');
+}
+
 // ── 同行活動ダッシュボード ──
 let dbSeniorFilter='全員';
 
@@ -447,28 +662,33 @@ function closeDashboard(){
 async function loadDashboard(){
   document.getElementById('db-content').innerHTML='<div class="empty">読み込み中...</div>';
   try{
-    // storesが未取得の場合はgetAllで取得してからダッシュボードを描画
     const needStores=!stores||stores.length===0;
     const fetches=[
       fetch(GAS+'?action=getSeniorRecords&senior=').then(r=>r.json()),
       fetch(GAS+'?action=getSeniors').then(r=>r.json()),
+      fetch(GAS+'?action=getSeniorPlans').then(r=>r.json()),
     ];
-    if(needStores) fetches.push(fetch(GAS+'?action=getAll').then(r=>r.json()));
+    if(needStores)fetches.push(fetch(GAS+'?action=getAll').then(r=>r.json()));
     const results=await Promise.all(fetches);
-    const [seniorRes,seniorsRes,allRes]=results;
-    if(needStores&&allRes){
-      stores=allRes.stores||[];
-      members=allRes.members||[];
-    }
-    // statusStoresを常に最新storesで更新
+    const [seniorRes,seniorsRes,plansRes,allRes]=results;
+    if(needStores&&allRes){stores=allRes.stores||[];members=allRes.members||[];}
     statusStores=stores;
     const allRecords=(seniorRes.records||[]).map(r=>({...r,date:fmtDate(r.date)}));
     const seniors=['全員',...(seniorsRes.seniors||[])];
+    seniorPlans=(plansRes&&plansRes.plans||[]).map(r=>({...r,date:fmtDate(r.date)}));
     statusSeniorRecs=allRecords;
     dbAllRecords=allRecords;
+    // 同行者カラーマップをセット
+    seniorColorMap={};
+    (seniorsRes.seniors||[]).forEach((name,i)=>{seniorColorMap[name]=SENIOR_COLORS[i%SENIOR_COLORS.length];});
     document.getElementById('db-senior-filter').innerHTML=seniors.map(s=>
-      `<button class="filter-chip${dbSeniorFilter===s?' active':''}" onclick="setDbFilter('${s}')">${s}</button>`
+      `<button class="filter-chip${dbSeniorFilter===s?' active':''}" onclick="setDbFilter('${s.replace(/'/g,"\\'")}')">${s}</button>`
     ).join('');
+    // 予定登録セレクトを更新
+    const pf=document.getElementById('plan-fielder');
+    if(pf)pf.innerHTML='<option value="">選択してください</option>'+members.map(m=>`<option value="${m}">${m}</option>`).join('');
+    renderPlanList();
+    renderCalendar();
     renderDashboard(allRecords);
   }catch(e){
     document.getElementById('db-content').innerHTML='<div class="empty">読み込みエラー</div>';
@@ -480,6 +700,7 @@ function setDbFilter(name){
   document.querySelectorAll('#db-senior-filter .filter-chip').forEach(btn=>{
     btn.classList.toggle('active', btn.textContent.trim()===name);
   });
+  renderCalendar();
   renderDashboard(dbAllRecords);
 }
 
@@ -804,6 +1025,10 @@ async function saveEditRecord(){
 function initForm(){
   document.getElementById('s-date').valueAsDate=new Date();
   document.getElementById('s-senior').value=cu||'';
+  // 予定日の初期値もセット（翌日）
+  const tomorrow=new Date();tomorrow.setDate(tomorrow.getDate()+1);
+  const pd=document.getElementById('plan-date');
+  if(pd&&!pd.value)pd.valueAsDate=tomorrow;
   checks={};
   renderCheckItems();
 }
