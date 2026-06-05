@@ -469,32 +469,104 @@ function setDbFilter(name){
   renderDashboard(dbAllRecords);
 }
 
-function renderDashboard(allRecords){
-  const records=dbSeniorFilter==='全員'?allRecords:allRecords.filter(r=>r.senior===dbSeniorFilter);
-  const total=records.length;
-  // フィールダー別集計
-  const fielderCount={};
-  records.forEach(r=>{fielderCount[r.fielder]=(fielderCount[r.fielder]||0)+1;});
-  const fielderEntries=Object.entries(fielderCount).sort((a,b)=>b[1]-a[1]);
-  const maxF=Math.max(...fielderEntries.map(([,v])=>v),1);
-  // 月別集計
-  const monthCount={};
-  records.forEach(r=>{const m=getYearMonth(r.date);if(m)monthCount[m]=(monthCount[m]||0)+1;});
-  const monthEntries=Object.entries(monthCount).sort((a,b)=>a[0].localeCompare(b[0])).slice(-6);
-  const maxM=Math.max(...monthEntries.map(([,v])=>v),1);
-  // 同行者別集計
-  const seniorCount={};
-  records.forEach(r=>{seniorCount[r.senior]=(seniorCount[r.senior]||0)+1;});
-  const seniorEntries=Object.entries(seniorCount).sort((a,b)=>b[1]-a[1]);
+let dbMonthFilter='全期間';
+let dbAllRecordsCache=[];
 
-  // バーの幅を制限するためのグリッドレイアウト用スタイル
+function renderDashboard(allRecords){
+  dbAllRecordsCache=allRecords;
+  _renderDashboardInner();
+}
+
+function setDbMonthFilter(m){
+  dbMonthFilter=m;
+  document.querySelectorAll('.db-month-chip').forEach(b=>b.classList.toggle('active',b.dataset.m===m));
+  _renderDashboardInner();
+}
+
+function _renderDashboardInner(){
+  // 同行者フィルター
+  let records=dbSeniorFilter==='全員'?dbAllRecordsCache:dbAllRecordsCache.filter(r=>r.senior===dbSeniorFilter);
+  // 月フィルター
+  if(dbMonthFilter!=='全期間') records=records.filter(r=>getYearMonth(r.date)===dbMonthFilter);
+
+  // ── 集計（全て「日付×同行者」ユニークで日数カウント） ──
+  // 同行日数：日付×同行者のユニーク数
+  const totalDays=new Set(records.map(r=>r.date+'__'+r.senior)).size;
+  // 同行店舗数：件数そのまま
+  const total=records.length;
+
+  // 月別：日付×同行者のユニーク数を月ごとに集計
+  const monthDaySet={};
+  records.forEach(r=>{
+    const m=getYearMonth(r.date);if(!m)return;
+    if(!monthDaySet[m])monthDaySet[m]=new Set();
+    monthDaySet[m].add(r.date+'__'+r.senior);
+  });
+  const monthEntries=Object.entries(monthDaySet)
+    .map(([m,s])=>[m,s.size])
+    .sort((a,b)=>a[0].localeCompare(b[0])).slice(-6);
+  const maxM=Math.max(...monthEntries.map(([,v])=>v),1);
+
+  // 月フィルター用チップ（直近6ヶ月）
+  const allMonths=Object.keys(monthDaySet).sort().slice(-6);
+
+  // フィールダー別：日付×同行者のユニーク日数
+  const fielderDaySet={};
+  records.forEach(r=>{
+    if(!r.fielder)return;
+    if(!fielderDaySet[r.fielder])fielderDaySet[r.fielder]=new Set();
+    fielderDaySet[r.fielder].add(r.date+'__'+r.senior);
+  });
+  const fielderEntries=Object.entries(fielderDaySet)
+    .map(([name,s])=>[name,s.size])
+    .sort((a,b)=>b[1]-a[1]);
+  const maxF=Math.max(...fielderEntries.map(([,v])=>v),1);
+
+  // 同行者別日数
+  const seniorDaySet={};
+  records.forEach(r=>{
+    if(!r.senior)return;
+    if(!seniorDaySet[r.senior])seniorDaySet[r.senior]=new Set();
+    seniorDaySet[r.senior].add(r.date);
+  });
+  const seniorEntries=Object.entries(seniorDaySet)
+    .map(([name,s])=>[name,s.size])
+    .sort((a,b)=>b[1]-a[1]);
+
+  // カバレッジ進捗バー（全フィールダーの担当店舗に対する同行済み率）
+  const seniorStoresByFielder={};
+  records.forEach(r=>{
+    if(!r.fielder||!r.storeName)return;
+    if(!seniorStoresByFielder[r.fielder])seniorStoresByFielder[r.fielder]=new Set();
+    seniorStoresByFielder[r.fielder].add(r.storeName);
+  });
+  // storesからフィールダー別担当店舗数を取得
+  const totalStoresByFielder={};
+  (statusStores||[]).forEach(s=>{
+    if(!s.pic)return;
+    totalStoresByFielder[s.pic]=(totalStoresByFielder[s.pic]||0)+1;
+  });
+  const coverageEntries=fielderEntries.map(([name])=>{
+    const done=(seniorStoresByFielder[name]||new Set()).size;
+    const ttl=totalStoresByFielder[name]||0;
+    const pct=ttl>0?Math.round(done/ttl*100):0;
+    return{name,done,ttl,pct};
+  }).filter(e=>e.ttl>0);
+
+  // 同行明細（日付降順、最新20件）
+  const sortedRecs=[...records].sort((a,b)=>String(b.date).localeCompare(String(a.date))).slice(0,20);
+
   const barStyle=(color,h)=>`width:100%;max-width:80px;border-radius:4px 4px 0 0;background:${color};height:${h}px;`;
   const colStyle=`display:flex;flex-direction:column;align-items:center;gap:4px;width:80px;flex-shrink:0;`;
-  // padding-top:24px で数値ラベル分の高さを確保（overflow:visibleで隠れない）
   const chartWrap=`display:flex;align-items:flex-end;gap:12px;height:110px;margin-bottom:8px;overflow-x:auto;overflow-y:visible;padding-top:24px;padding-bottom:4px;box-sizing:content-box;`;
 
-  const totalDays=new Set(records.map(r=>r.date+r.senior)).size;
+  const coverColor=pct=>pct>=67?'#059669':pct>=34?'#F59E0B':'#EF4444';
+
   document.getElementById('db-content').innerHTML=`
+    <div style="display:flex;gap:8px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px;">
+      <button class="filter-chip db-month-chip${dbMonthFilter==='全期間'?' active':''}" data-m="全期間" onclick="setDbMonthFilter('全期間')">全期間</button>
+      ${allMonths.map(m=>`<button class="filter-chip db-month-chip${dbMonthFilter===m?' active':''}" data-m="${m}" onclick="setDbMonthFilter('${m}')">${m.slice(5)}月</button>`).join('')}
+    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;">
       <div class="kpi-card"><div class="kpi-val">${totalDays}</div><div class="kpi-lbl">同行日数</div></div>
       <div class="kpi-card"><div class="kpi-val">${total}</div><div class="kpi-lbl">同行店舗数</div></div>
@@ -502,7 +574,7 @@ function renderDashboard(allRecords){
     </div>
     ${dbSeniorFilter==='全員'&&seniorEntries.length>1?`
     <div class="rec-sec">
-      <div class="sec-hd"><i class="ti ti-walk"></i> 同行者別 同行回数</div>
+      <div class="sec-hd"><i class="ti ti-walk"></i> 同行者別 同行日数</div>
       <div style="${chartWrap}">
         ${seniorEntries.map(([name,v])=>`
           <div style="${colStyle}">
@@ -513,7 +585,8 @@ function renderDashboard(allRecords){
       </div>
     </div>`:''}
     <div class="rec-sec">
-      <div class="sec-hd"><i class="ti ti-calendar-stats"></i> 月別 同行回数（直近6ヶ月）</div>
+      <div class="sec-hd"><i class="ti ti-calendar-stats"></i> 月別 同行日数（直近6ヶ月）</div>
+      <div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:8px;">同じ日に複数店舗でも1日</div>
       ${monthEntries.length?`<div style="${chartWrap}">
         ${monthEntries.map(([m,v])=>`
           <div style="${colStyle}">
@@ -524,7 +597,7 @@ function renderDashboard(allRecords){
       </div>`:'<div style="color:var(--muted);font-size:var(--fs-sm);padding:8px 0;">データがありません</div>'}
     </div>
     <div class="rec-sec">
-      <div class="sec-hd"><i class="ti ti-users"></i> フィールダー別 同行回数</div>
+      <div class="sec-hd"><i class="ti ti-users"></i> フィールダー別 同行日数</div>
       ${fielderEntries.length?`<div style="${chartWrap}">
         ${fielderEntries.map(([name,v])=>`
           <div style="${colStyle}">
@@ -533,6 +606,41 @@ function renderDashboard(allRecords){
             <div style="font-size:10px;color:var(--muted);white-space:nowrap;">${initials(name)}</div>
           </div>`).join('')}
       </div>`:'<div style="color:var(--muted);font-size:var(--fs-sm);padding:8px 0;">データがありません</div>'}
+    </div>
+    ${coverageEntries.length?`
+    <div class="rec-sec">
+      <div class="sec-hd"><i class="ti ti-map-pin"></i> 担当店舗 同行カバレッジ</div>
+      <div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:10px;">担当店舗のうち同行記録がある店舗の割合</div>
+      ${coverageEntries.map(e=>`
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+          <div style="font-size:var(--fs-xs);color:var(--text);width:56px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${e.name.split(' ')[0]}</div>
+          <div style="flex:1;height:10px;background:var(--border);border-radius:99px;overflow:hidden;">
+            <div style="height:10px;border-radius:99px;background:${coverColor(e.pct)};width:${e.pct}%;"></div>
+          </div>
+          <div style="font-size:var(--fs-xs);color:var(--muted);width:52px;text-align:right;flex-shrink:0;">${e.done}/${e.ttl}店 ${e.pct}%</div>
+        </div>`).join('')}
+      <div style="display:flex;gap:12px;margin-top:4px;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:4px;font-size:var(--fs-xs);color:var(--muted);"><div style="width:10px;height:10px;border-radius:50%;background:#059669;"></div>67%以上</div>
+        <div style="display:flex;align-items:center;gap:4px;font-size:var(--fs-xs);color:var(--muted);"><div style="width:10px;height:10px;border-radius:50%;background:#F59E0B;"></div>34〜66%</div>
+        <div style="display:flex;align-items:center;gap:4px;font-size:var(--fs-xs);color:var(--muted);"><div style="width:10px;height:10px;border-radius:50%;background:#EF4444;"></div>33%以下</div>
+      </div>
+    </div>`:''}
+    <div class="rec-sec">
+      <div class="sec-hd"><i class="ti ti-list"></i> 同行明細${dbMonthFilter!=='全期間'?`（${dbMonthFilter.slice(5)}月）`:''}（直近20件）</div>
+      ${sortedRecs.length?sortedRecs.map(r=>{
+        const chkLabels=['事前','ヒアリング','提案','クロージング','売上要因'];
+        const chkVals=[r.check1,r.check2,r.check3,r.check4,r.check5];
+        const chkHtml=chkLabels.map((l,i)=>chkVals[i]?`<span class="hchk ${chkVals[i]==='〇'?'hchk-ok':chkVals[i]==='△'?'hchk-warn':'hchk-ng'}">${chkVals[i]} ${l}</span>`:'').filter(Boolean).join('');
+        return`<div style="padding:10px 0;border-bottom:0.5px solid var(--border);">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
+            <div style="font-size:var(--fs-sm);font-weight:600;color:var(--text);">${r.storeName||'—'}</div>
+            <div style="font-size:var(--fs-xs);color:var(--muted);white-space:nowrap;margin-left:8px;">${r.date}</div>
+          </div>
+          <div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:5px;">${r.fielder||''} ／ 同行：${r.senior||''}</div>
+          ${chkHtml?`<div style="display:flex;gap:4px;flex-wrap:wrap;">${chkHtml}</div>`:''}
+          ${r.feedback?`<div style="font-size:var(--fs-xs);color:var(--sub);margin-top:5px;"><i class="ti ti-message-circle" style="font-size:12px;"></i> ${r.feedback}</div>`:''}
+        </div>`;
+      }).join(''):'<div style="color:var(--muted);font-size:var(--fs-sm);padding:8px 0;">データがありません</div>'}
     </div>`;
 }
 
@@ -814,15 +922,29 @@ function renderStatusStoreList(seniorStoreSet){
   });
   if(!list.length){container.innerHTML='<div class="empty">店舗がありません</div>';return;}
   const ss=seniorStoreSet||new Set(statusSeniorRecs.map(r=>r.storeName));
+  // 店舗ごとの同行回数・最終同行日を集計
+  const seniorCountByStore={};
+  const seniorLastByStore={};
+  statusSeniorRecs.forEach(r=>{
+    if(!r.storeName)return;
+    seniorCountByStore[r.storeName]=(seniorCountByStore[r.storeName]||0)+1;
+    if(!seniorLastByStore[r.storeName]||r.date>seniorLastByStore[r.storeName])
+      seniorLastByStore[r.storeName]=r.date;
+  });
   container.innerHTML=list.map(s=>{
     const info=statusInvoMap[s.name]||{};
     const rk=s.rank?`<span class="badge ${RANK_CLS[s.rank]||'rC'}">${s.rank}</span>`:'';
     const goalIdx=info.goal!=null?GOALS_S.indexOf(info.goal):-1;
     const gl=goalIdx>=0?`<span class="tl-tag tag-visit">${GOALS_S[goalIdx]}</span>`:'';
     const ph=info.phase>0?`<span class="tl-tag tag-ph">Ph.${info.phase}</span>`:'';
-    const hasSenior=ss.has(s.name)?`<span class="tl-tag tag-senior"><i class="ti ti-walk" style="font-size:11px;"></i> 同行あり</span>`:'';
     const days=info.lastVisit?Math.floor((Date.now()-new Date(info.lastVisit).getTime())/(1000*60*60*24)):null;
     const daysColor=days===null?'var(--muted)':days>=60?'var(--ng)':days>=30?'var(--warn)':'var(--muted)';
+    // 同行バッジ
+    const scnt=seniorCountByStore[s.name]||0;
+    const slast=seniorLastByStore[s.name]||'';
+    const seniorBadge=scnt>0
+      ?`<span class="tl-tag tag-senior"><i class="ti ti-walk" style="font-size:11px;"></i> 同行${scnt}回${slast?' 最終'+slast:''}</span>`
+      :`<span class="tl-tag" style="background:#F3F4F6;color:var(--muted);"><i class="ti ti-walk" style="font-size:11px;"></i> 未同行</span>`;
     return`<div class="store-card" onclick="openStoreDetail('${s.name.replace(/'/g,"\\'")}')">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;">
         <div>
@@ -832,7 +954,7 @@ function renderStatusStoreList(seniorStoreSet){
         <div style="display:flex;align-items:center;gap:6px;">${rk}<i class="ti ti-chevron-right" style="color:var(--muted);font-size:18px;"></i></div>
       </div>
       <div class="sc-bottom">
-        <div style="display:flex;gap:5px;flex-wrap:wrap;">${gl}${ph}${hasSenior}</div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;">${gl}${ph}${seniorBadge}</div>
         <div style="font-size:var(--fs-xs);color:${daysColor};">${days!==null?days+'日前':info.lastVisit||'未訪問'}</div>
       </div>
     </div>`;
