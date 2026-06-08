@@ -33,9 +33,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .loading-box{text-align:center;padding:20px 0;}
 .loading-spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px;}
 .loading-text{font-size:var(--fs-sm);color:var(--muted);margin-bottom:14px;}
-.loading-bar-bg{height:4px;background:var(--border);border-radius:99px;overflow:hidden;margin:0 auto;max-width:200px;}
-.loading-bar-fill{height:4px;background:var(--accent);border-radius:99px;animation:loadbar 2.5s ease-in-out infinite;}
-@keyframes loadbar{0%{width:0%;margin-left:0;}50%{width:70%;margin-left:15%;}100%{width:0%;margin-left:100%;}}
 .s-btn{padding:14px 16px;border:0.5px solid var(--border);border-radius:12px;background:var(--card);cursor:pointer;display:flex;align-items:center;gap:10px;font-size:var(--fs-md);font-weight:500;color:var(--text);}
 .s-btn:active{background:var(--accent-light);}
 .s-avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
@@ -251,7 +248,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
         <div class="loading-box">
           <div class="loading-spinner"></div>
           <div class="loading-text">同行者データを読み込んでいます...</div>
-          <div class="loading-bar-bg"><div class="loading-bar-fill"></div></div>
+          
         </div>
       </div>
       <div style="margin-top:14px;padding-top:14px;border-top:0.5px solid var(--border);">
@@ -432,14 +429,52 @@ function toast(msg,type){
   setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),300);},3000);
 }
 
+function renderSeniorButtons(seniors){
+  const grid=document.getElementById('senior-grid');
+  if(!grid)return;
+  grid.innerHTML=seniors.length
+    ?seniors.map((name,i)=>{
+        const col=AVATAR_COLORS[i%AVATAR_COLORS.length];
+        return`<button class="s-btn" onclick="login('${name.replace(/'/g,"\\'")}')">
+          <div class="s-avatar" style="background:${col.color};color:${col.tc};">${initials(name)}</div>
+          ${name}
+        </button>`;
+      }).join('')
+    :'<div style="color:var(--ng);font-size:var(--fs-sm);text-align:center;padding:12px;">同行者データが見つかりません</div>';
+}
+
 async function loadSeniors(){
   const grid=document.getElementById('senior-grid');
+  const CACHE_KEY='fd_senior_names';
+
+  // ① キャッシュがあれば即座に表示
+  try{
+    const cached=localStorage.getItem(CACHE_KEY);
+    if(cached){
+      const names=JSON.parse(cached);
+      if(names&&names.length>0){
+        renderSeniorButtons(names);
+        // バックグラウンドで最新データを取得・差分があれば更新
+        fetch(GAS+'?action=getSeniors')
+          .then(r=>r.json())
+          .then(json=>{
+            const fresh=json.seniors||[];
+            if(JSON.stringify(fresh)!==JSON.stringify(names)&&fresh.length>0){
+              localStorage.setItem(CACHE_KEY,JSON.stringify(fresh));
+              renderSeniorButtons(fresh);
+            }
+          }).catch(()=>{});
+        return;
+      }
+    }
+  }catch(e){}
+
+  // ② キャッシュなし → スピナー表示してから取得
   grid.innerHTML=`<div class="loading-box">
     <div class="loading-spinner"></div>
     <div class="loading-text">同行者データを読み込んでいます...</div>
-    <div class="loading-bar-bg"><div class="loading-bar-fill"></div></div>
+    
   </div>`;
-  // タイムアウト付きfetch（8秒）
   const ctrl=new AbortController();
   const timer=setTimeout(()=>ctrl.abort(),8000);
   try{
@@ -447,15 +482,8 @@ async function loadSeniors(){
     clearTimeout(timer);
     const json=await res.json();
     const seniors=json.seniors||[];
-    grid.innerHTML=seniors.length
-      ?seniors.map((name,i)=>{
-        const col=AVATAR_COLORS[i%AVATAR_COLORS.length];
-        return`<button class="s-btn" onclick="login('${name.replace(/'/g,"\\'")}')">
-          <div class="s-avatar" style="background:${col.color};color:${col.tc};">${initials(name)}</div>
-          ${name}
-        </button>`;
-      }).join('')
-      :'<div style="color:var(--ng);font-size:var(--fs-sm);text-align:center;padding:12px;">同行者データが見つかりません</div>';
+    try{localStorage.setItem(CACHE_KEY,JSON.stringify(seniors));}catch(e){}
+    renderSeniorButtons(seniors);
   }catch(e){
     clearTimeout(timer);
     const msg=e.name==='AbortError'?'接続がタイムアウトしました':'読み込みエラーが発生しました';
