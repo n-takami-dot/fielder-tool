@@ -279,23 +279,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
       <button class="t-switch" onclick="logout()">切替</button>
     </div>
   </div>
+  <div class="tabnav">
+    <button class="tnb active" id="nb-input" onclick="goView('input')"><i class="ti ti-clipboard-plus"></i>同行入力</button>
+    <button class="tnb" id="nb-plan" onclick="goView('plan')"><i class="ti ti-calendar-plus"></i>予定登録</button>
+  </div>
+
   <!-- 同行入力 -->
   <div class="view active" id="view-input">
     <div class="page">
-      <div class="rec-sec">
-        <div class="sec-hd"><i class="ti ti-calendar-plus"></i> 同行予定を登録</div>
-        <div class="r2" style="margin-bottom:14px;">
-          <div class="field"><label>予定日</label><input type="date" id="plan-date"></div>
-          <div class="field"><label>対象フィールダー</label>
-            <select id="plan-fielder"><option value="">選択してください</option></select>
-          </div>
-        </div>
-        <button class="save-btn" style="background:#004f8a;" onclick="savePlan()"><i class="ti ti-calendar-plus"></i> 予定を登録</button>
-      </div>
-      <div class="rec-sec" id="plan-list-sec" style="display:none;">
-        <div class="sec-hd"><i class="ti ti-calendar-event"></i> 登録済み予定</div>
-        <div id="plan-list"></div>
-      </div>
       <div class="rec-sec">
         <div class="sec-hd"><i class="ti ti-info-circle"></i> 基本情報</div>
         <div class="r2" style="margin-bottom:14px;">
@@ -323,6 +314,27 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
       </div>
       <button class="save-btn" id="save-btn" onclick="saveRecord()"><i class="ti ti-device-floppy"></i> 保存・送信</button>
       <button class="clear-btn" onclick="clearForm()">クリア</button>
+      <div style="height:24px;"></div>
+    </div>
+  </div>
+
+  <!-- 予定登録 -->
+  <div class="view" id="view-plan">
+    <div class="page">
+      <div class="rec-sec">
+        <div class="sec-hd"><i class="ti ti-calendar-plus"></i> 同行予定を登録</div>
+        <div class="r2" style="margin-bottom:14px;">
+          <div class="field"><label>予定日</label><input type="date" id="plan-date"></div>
+          <div class="field"><label>対象フィールダー</label>
+            <select id="plan-fielder"><option value="">選択してください</option></select>
+          </div>
+        </div>
+        <button class="save-btn" style="background:#004f8a;" onclick="savePlan()"><i class="ti ti-calendar-plus"></i> 予定を登録</button>
+      </div>
+      <div class="rec-sec" id="plan-list-sec" style="display:none;">
+        <div class="sec-hd"><i class="ti ti-calendar-event"></i> 登録済み予定</div>
+        <div id="plan-list"></div>
+      </div>
       <div style="height:24px;"></div>
     </div>
   </div>
@@ -475,10 +487,15 @@ function openStoreDetailFromDashboard(sname){
 
 function goView(v){
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.tnb').forEach(el=>el.classList.remove('active'));
   const target=document.getElementById('view-'+v);
   if(target)target.classList.add('active');
+  // store-detailはinputタブのサブ画面
+  const nbId=v==='store-detail'?'nb-input':('nb-'+v);
+  const nb=document.getElementById(nbId);if(nb)nb.classList.add('active');
   window.scrollTo(0,0);
   if(v==='input')initForm();
+  if(v==='plan'){renderPlanList();initPlanForm();}
 }
 
 
@@ -1022,13 +1039,21 @@ async function saveEditRecord(){
 }
 
 
+function initPlanForm(){
+  const pd=document.getElementById('plan-date');
+  if(pd&&!pd.value){
+    const tomorrow=new Date();tomorrow.setDate(tomorrow.getDate()+1);
+    pd.valueAsDate=tomorrow;
+  }
+  const pf=document.getElementById('plan-fielder');
+  if(pf&&pf.options.length<=1){
+    pf.innerHTML='<option value="">選択してください</option>'+members.map(m=>`<option value="${m}">${m}</option>`).join('');
+  }
+}
+
 function initForm(){
   document.getElementById('s-date').valueAsDate=new Date();
   document.getElementById('s-senior').value=cu||'';
-  // 予定日の初期値もセット（翌日）
-  const tomorrow=new Date();tomorrow.setDate(tomorrow.getDate()+1);
-  const pd=document.getElementById('plan-date');
-  if(pd&&!pd.value)pd.valueAsDate=tomorrow;
   checks={};
   renderCheckItems();
 }
