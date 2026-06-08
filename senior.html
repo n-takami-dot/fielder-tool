@@ -569,7 +569,7 @@ function goView(v){
   const nb=document.getElementById(nbId);if(nb)nb.classList.add('active');
   window.scrollTo(0,0);
   if(v==='input')initForm();
-  if(v==='plan'){renderPlanList();renderPlanCal();}
+  if(v==='plan'){loadPlanData();}
 }
 
 
@@ -696,7 +696,40 @@ function calChangeMonth(d){
   renderCalendar();
 }
 
-// ── 予定登録タブ専用カレンダー ──
+// ── 予定登録タブ用データ取得 ──
+async function loadPlanData(){
+  // すでにデータ取得済みならそのまま描画
+  if(seniorPlans.length>0||statusSeniorRecs.length>0){
+    renderPlanList();
+    renderPlanCal();
+    // バックグラウンドで最新を取得
+    _fetchPlanData();
+    return;
+  }
+  // 未取得なら取得してから描画
+  renderPlanCal(); // まず空で描画
+  await _fetchPlanData();
+}
+
+async function _fetchPlanData(){
+  try{
+    const [plansRes,recsRes]=await Promise.all([
+      fetch(GAS+'?action=getSeniorPlans').then(r=>r.json()),
+      fetch(GAS+'?action=getSeniorRecords&senior=').then(r=>r.json()),
+    ]);
+    seniorPlans=(plansRes.plans||[]).map(r=>({...r,date:fmtDate(r.date)}));
+    statusSeniorRecs=(recsRes.records||[]).map(r=>({...r,date:fmtDate(r.date)}));
+    // 同行者カラーマップを更新
+    const allSeniors=[...new Set(statusSeniorRecs.map(r=>r.senior).filter(Boolean))];
+    allSeniors.forEach((name,i)=>{
+      if(!seniorColorMap[name])seniorColorMap[name]=SENIOR_COLORS[i%SENIOR_COLORS.length];
+    });
+    renderPlanList();
+    renderPlanCal();
+  }catch(e){}
+}
+
+
 let planCalYear=new Date().getFullYear(), planCalMonth=new Date().getMonth(), planCalSelDate=null;
 
 function renderPlanCal(){
