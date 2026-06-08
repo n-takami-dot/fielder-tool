@@ -321,18 +321,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
   <!-- 予定登録 -->
   <div class="view" id="view-plan">
     <div class="page">
+      <!-- 月ナビ -->
       <div class="rec-sec">
-        <div class="sec-hd"><i class="ti ti-calendar-plus"></i> 同行予定を登録</div>
-        <div class="r2" style="margin-bottom:14px;">
-          <div class="field"><label>予定日</label><input type="date" id="plan-date"></div>
-          <div class="field"><label>対象フィールダー</label>
-            <select id="plan-fielder"><option value="">選択してください</option></select>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+          <div style="font-size:var(--fs-xs);font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px;"><i class="ti ti-calendar-event"></i> 同行予定カレンダー</div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <button class="cal-nav-btn" onclick="planCalChangeMonth(-1)">&#8249;</button>
+            <div class="cal-month" id="plan-cal-month"></div>
+            <button class="cal-nav-btn" onclick="planCalChangeMonth(1)">&#8250;</button>
           </div>
         </div>
-        <button class="save-btn" style="background:#004f8a;" onclick="savePlan()"><i class="ti ti-calendar-plus"></i> 予定を登録</button>
+        <div class="cal-grid">${['日','月','火','水','木','金','土'].map((d,i)=>`<div class="cal-head${i===0?' sun':i===6?' sat':''}">${d}</div>`).join('')}</div>
+        <div class="cal-grid" style="margin-top:2px;" id="plan-cal-cells"></div>
+        <div class="cal-legend" id="plan-cal-legend"></div>
+        <!-- 日付選択後のフォーム -->
+        <div id="plan-date-form" style="display:none;margin-top:12px;padding-top:12px;border-top:0.5px solid var(--border);">
+          <div style="font-size:var(--fs-sm);font-weight:600;color:var(--accent);margin-bottom:10px;" id="plan-sel-date-label"></div>
+          <div class="field" style="margin-bottom:12px;">
+            <label>対象フィールダー</label>
+            <select id="plan-fielder"><option value="">選択してください</option></select>
+          </div>
+          <button class="save-btn" style="background:#004f8a;padding:14px;" onclick="savePlan()"><i class="ti ti-calendar-plus"></i> 予定を登録</button>
+        </div>
       </div>
+      <!-- 登録済み予定 -->
       <div class="rec-sec" id="plan-list-sec" style="display:none;">
-        <div class="sec-hd"><i class="ti ti-calendar-event"></i> 登録済み予定</div>
+        <div class="sec-hd"><i class="ti ti-list"></i> 登録済み予定</div>
         <div id="plan-list"></div>
       </div>
       <div style="height:24px;"></div>
@@ -495,7 +509,7 @@ function goView(v){
   const nb=document.getElementById(nbId);if(nb)nb.classList.add('active');
   window.scrollTo(0,0);
   if(v==='input')initForm();
-  if(v==='plan'){renderPlanList();initPlanForm();}
+  if(v==='plan'){renderPlanList();renderPlanCal();}
 }
 
 
@@ -622,22 +636,125 @@ function calChangeMonth(d){
   renderCalendar();
 }
 
+// ── 予定登録タブ専用カレンダー ──
+let planCalYear=new Date().getFullYear(), planCalMonth=new Date().getMonth(), planCalSelDate=null;
+
+function renderPlanCal(){
+  const pad=n=>String(n).padStart(2,'0');
+  const todayStr=`${new Date().getFullYear()}-${pad(new Date().getMonth()+1)}-${pad(new Date().getDate())}`;
+  const first=new Date(planCalYear,planCalMonth,1);
+  const last=new Date(planCalYear,planCalMonth+1,0);
+  const monthEl=document.getElementById('plan-cal-month');
+  if(monthEl)monthEl.textContent=`${planCalYear}年 ${planCalMonth+1}月`;
+
+  // 予定・済みのマップ
+  const planMap={}, doneMap={};
+  seniorPlans.forEach(r=>{if(!planMap[r.date])planMap[r.date]=[];planMap[r.date].push(r);});
+  (statusSeniorRecs||[]).forEach(r=>{const d=String(r.date).slice(0,10);if(!doneMap[d])doneMap[d]=[];doneMap[d].push(r);});
+
+  let cells='';
+  for(let i=0;i<first.getDay();i++){
+    const d=new Date(planCalYear,planCalMonth,-first.getDay()+i+1);
+    cells+=`<div class="cal-cell other-month"><div class="cal-day">${d.getDate()}</div></div>`;
+  }
+  for(let d=1;d<=last.getDate();d++){
+    const dt=`${planCalYear}-${pad(planCalMonth+1)}-${pad(d)}`;
+    const dow=new Date(planCalYear,planCalMonth,d).getDay();
+    const isPast=dt<todayStr;
+    const cls=['cal-cell',dt===todayStr?'today':'',dow===0?'sun':dow===6?'sat':'',dt===planCalSelDate?'cal-sel':'',isPast?'other-month':''].filter(Boolean).join(' ');
+    const plans=planMap[dt]||[], dones=doneMap[dt]||[];
+    let blocksHtml='';
+    // 同行者別にブロック表示
+    const seniorDone=[...new Set(dones.map(r=>r.senior))];
+    const seniorPlan=[...new Set(plans.map(r=>r.senior))];
+    const allSeniors=[...new Set([...seniorDone,...seniorPlan])];
+    allSeniors.slice(0,2).forEach(name=>{
+      const col=getSeniorColor(name);
+      const hasDone=seniorDone.includes(name), hasPlan=seniorPlan.includes(name);
+      const shortName=name.split(' ')[0];
+      if(hasDone&&hasPlan) blocksHtml+=`<div class="sb sb-done" style="background:${col.done};color:#fff;">${shortName} 予+済</div>`;
+      else if(hasDone)     blocksHtml+=`<div class="sb sb-done" style="background:${col.done};color:#fff;">${shortName} 済</div>`;
+      else                 blocksHtml+=`<div class="sb sb-plan" style="background:${col.plan};color:${col.text};">${shortName} 予定</div>`;
+    });
+    if(allSeniors.length>2) blocksHtml+=`<div style="font-size:8px;color:var(--muted);text-align:right;">他${allSeniors.length-2}件</div>`;
+    const onclick=isPast?'':`onclick="planCalSelect('${dt}')"`;
+    cells+=`<div class="${cls}" ${onclick} style="${isPast?'cursor:default;':''}"><div class="cal-day">${d}</div>${blocksHtml}</div>`;
+  }
+  const rem=7-((first.getDay()+last.getDate())%7||7);
+  for(let i=1;i<rem;i++) cells+=`<div class="cal-cell other-month"><div class="cal-day">${i}</div></div>`;
+
+  const cellsEl=document.getElementById('plan-cal-cells');
+  if(cellsEl)cellsEl.innerHTML=cells;
+
+  // 凡例
+  const allSeniorsAll=[...new Set([...seniorPlans.map(r=>r.senior),...(statusSeniorRecs||[]).map(r=>r.senior)].filter(Boolean))];
+  const legendEl=document.getElementById('plan-cal-legend');
+  if(legendEl)legendEl.innerHTML=allSeniorsAll.slice(0,4).map(name=>{
+    const col=getSeniorColor(name);
+    return`<div class="cal-leg"><div class="cal-leg-box" style="background:${col.plan};border:1px solid ${col.done};"></div>${name.split(' ')[0]} 予定</div>
+           <div class="cal-leg"><div class="cal-leg-box" style="background:${col.done};"></div>${name.split(' ')[0]} 済</div>`;
+  }).join('');
+
+  if(planCalSelDate)showPlanDateForm(planCalSelDate);
+}
+
+function planCalSelect(dt){
+  planCalSelDate=planCalSelDate===dt?null:dt;
+  if(!planCalSelDate){
+    const form=document.getElementById('plan-date-form');
+    if(form)form.style.display='none';
+  }
+  renderPlanCal();
+}
+
+function showPlanDateForm(dt){
+  const form=document.getElementById('plan-date-form');
+  const label=document.getElementById('plan-sel-date-label');
+  if(!form||!label)return;
+  const dow=['日','月','火','水','木','金','土'][new Date(dt).getDay()];
+  const [,mm,dd]=dt.split('-');
+  label.textContent=`${parseInt(mm)}月${parseInt(dd)}日（${dow}）に予定を登録`;
+  // フィールダーリスト更新
+  const pf=document.getElementById('plan-fielder');
+  if(pf){
+    const cur=pf.value;
+    pf.innerHTML='<option value="">選択してください</option>'+members.map(m=>`<option value="${m}">${m}</option>`).join('');
+    if(cur)pf.value=cur;
+  }
+  form.style.display='block';
+}
+
+function planCalChangeMonth(d){
+  planCalMonth+=d;
+  if(planCalMonth>11){planCalMonth=0;planCalYear++;}
+  if(planCalMonth<0){planCalMonth=11;planCalYear--;}
+  planCalSelDate=null;
+  const form=document.getElementById('plan-date-form');
+  if(form)form.style.display='none';
+  renderPlanCal();
+}
+
 async function savePlan(){
-  const date=document.getElementById('plan-date').value;
+  const date=planCalSelDate;
   const fielder=document.getElementById('plan-fielder').value;
-  if(!date||!fielder){toast('予定日とフィールダーを選択してください','err');return;}
+  if(!date){toast('カレンダーで予定日を選択してください','err');return;}
+  if(!fielder){toast('フィールダーを選択してください','err');return;}
   const plan={id:Date.now(),date,fielder,senior:cu};
   const btn=document.querySelector('[onclick="savePlan()"]');
-  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> 送信中...';
+  if(btn){btn.disabled=true;btn.innerHTML='<span class="spinner"></span> 送信中...';}
   try{
     await postGAS({action:'saveSeniorPlan',...plan});
     seniorPlans.push(plan);
     toast('予定を登録しました','ok');
+    document.getElementById('plan-fielder').value='';
     renderPlanList();
-    renderCalendar();
+    renderPlanCal();
+    renderCalendar(); // ダッシュボードカレンダーも更新
   }catch(e){toast('送信エラー','err');}
-  btn.disabled=false;btn.innerHTML='<i class="ti ti-calendar-plus"></i> 予定を登録';
+  if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-calendar-plus"></i> 予定を登録';}
 }
+
+
 
 async function deletePlan(id){
   if(!confirm('この予定を削除しますか？'))return;
@@ -706,6 +823,7 @@ async function loadDashboard(){
     if(pf)pf.innerHTML='<option value="">選択してください</option>'+members.map(m=>`<option value="${m}">${m}</option>`).join('');
     renderPlanList();
     renderCalendar();
+    renderPlanCal();
     renderDashboard(allRecords);
   }catch(e){
     document.getElementById('db-content').innerHTML='<div class="empty">読み込みエラー</div>';
@@ -1038,18 +1156,6 @@ async function saveEditRecord(){
   }
 }
 
-
-function initPlanForm(){
-  const pd=document.getElementById('plan-date');
-  if(pd&&!pd.value){
-    const tomorrow=new Date();tomorrow.setDate(tomorrow.getDate()+1);
-    pd.valueAsDate=tomorrow;
-  }
-  const pf=document.getElementById('plan-fielder');
-  if(pf&&pf.options.length<=1){
-    pf.innerHTML='<option value="">選択してください</option>'+members.map(m=>`<option value="${m}">${m}</option>`).join('');
-  }
-}
 
 function initForm(){
   document.getElementById('s-date').valueAsDate=new Date();
