@@ -297,9 +297,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
     <div class="page">
       <div class="rec-sec">
         <div class="sec-hd"><i class="ti ti-info-circle"></i> 基本情報</div>
-        <div class="r2" style="margin-bottom:14px;">
-          <div class="field"><label>同行日</label><input type="date" id="s-date"></div>
-          <div class="field"><label>同行者</label><input type="text" id="s-senior" readonly></div>
+        <!-- 予定日選択エリア（予定がある時のみ表示） -->
+        <div id="plan-select-area" style="display:none;margin-bottom:14px;">
+          <div style="font-size:var(--fs-sm);color:var(--sub);margin-bottom:8px;font-weight:500;">同行予定日を選択</div>
+          <div id="plan-date-btns" style="display:flex;flex-direction:column;gap:8px;"></div>
+          <button onclick="switchToManualDate()" style="margin-top:10px;font-size:var(--fs-xs);color:var(--muted);background:none;border:none;cursor:pointer;padding:4px 0;text-decoration:underline;">予定にない日に記録する</button>
+        </div>
+        <!-- 日付直接入力エリア -->
+        <div id="manual-date-area">
+          <div class="r2" style="margin-bottom:14px;">
+            <div class="field"><label>同行日</label><input type="date" id="s-date"></div>
+            <div class="field"><label>同行者</label><input type="text" id="s-senior" readonly></div>
+          </div>
+          <div id="back-to-plan-wrap" style="display:none;margin-bottom:10px;">
+            <button onclick="switchToPlanSelect()" style="font-size:var(--fs-xs);color:var(--accent);background:none;border:none;cursor:pointer;padding:4px 0;"><i class="ti ti-arrow-left" style="font-size:12px;"></i> 予定日から選ぶ</button>
+          </div>
         </div>
         <div class="field" style="margin-bottom:14px;">
           <label>対象フィールダー</label>
@@ -1251,10 +1263,59 @@ async function saveEditRecord(){
 
 
 function initForm(){
-  document.getElementById('s-date').valueAsDate=new Date();
   document.getElementById('s-senior').value=cu||'';
   checks={};
   renderCheckItems();
+  // フィールダーセレクトを初期化
+  const sf=document.getElementById('s-fielder');
+  sf.innerHTML='<option value="">選択してください</option>'+members.map(m=>`<option value="${m}">${m}</option>`).join('');
+  document.getElementById('s-store').innerHTML='<option value="">フィールダーを選択してください</option>';
+  // 自分の予定（未来日のみ）を取得
+  const today=new Date();today.setHours(0,0,0,0);
+  const myPlans=seniorPlans.filter(p=>p.senior===cu&&new Date(p.date)>=today)
+    .sort((a,b)=>a.date.localeCompare(b.date));
+  if(myPlans.length>0){
+    // 予定選択モード
+    document.getElementById('plan-select-area').style.display='block';
+    document.getElementById('manual-date-area').style.display='none';
+    document.getElementById('plan-date-btns').innerHTML=myPlans.map(p=>{
+      const d=new Date(p.date);
+      const dow=['日','月','火','水','木','金','土'][d.getDay()];
+      const label=`${p.date.slice(5).replace('-','/')}（${dow}）　${p.fielder}`;
+      return`<button onclick="selectPlanDate('${p.date}','${p.fielder.replace(/'/g,"\\'")}')"
+        style="width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid var(--accent-border);background:var(--accent-light);color:var(--accent);font-size:var(--fs-sm);font-weight:600;cursor:pointer;text-align:left;font-family:inherit;display:flex;align-items:center;gap:10px;">
+        <i class="ti ti-calendar-event" style="font-size:18px;flex-shrink:0;"></i>${label}
+      </button>`;
+    }).join('');
+  } else {
+    // 予定なし → 直接入力モード
+    switchToManualDate();
+  }
+}
+
+function selectPlanDate(date, fielder){
+  // 選んだ予定日・フィールダーをセット
+  document.getElementById('s-date').value=date;
+  document.getElementById('plan-select-area').style.display='none';
+  document.getElementById('manual-date-area').style.display='block';
+  document.getElementById('back-to-plan-wrap').style.display='block';
+  // フィールダーも自動セット
+  const sf=document.getElementById('s-fielder');
+  if(sf){sf.value=fielder;onFielderChange();}
+}
+
+function switchToManualDate(){
+  document.getElementById('plan-select-area').style.display='none';
+  document.getElementById('manual-date-area').style.display='block';
+  document.getElementById('back-to-plan-wrap').style.display='none';
+  if(!document.getElementById('s-date').value){
+    document.getElementById('s-date').valueAsDate=new Date();
+  }
+}
+
+function switchToPlanSelect(){
+  document.getElementById('plan-select-area').style.display='block';
+  document.getElementById('manual-date-area').style.display='none';
 }
 function renderCheckItems(){
   document.getElementById('check-items').innerHTML=CHECK_ITEMS.map(item=>`
