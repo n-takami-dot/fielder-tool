@@ -518,10 +518,14 @@ function login(name){
   loadData();
 }
 function logout(){
-  try{localStorage.removeItem(CK);}catch(e){}
+  try{
+    localStorage.removeItem(CK);
+    localStorage.removeItem('fd_senior_names'); // 同行者キャッシュをクリア
+  }catch(e){}
   cu=null;seniorRecords=[];
   document.getElementById('scr-main').classList.remove('active');
   document.getElementById('scr-login').classList.add('active');
+  loadSeniors(); // 最新データを再取得
 }
 
 async function loadData(){
