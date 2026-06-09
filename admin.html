@@ -154,6 +154,60 @@ body{font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif;backgrou
 
 /* ── 更新日時 ── */
 .update-time{font-size:var(--fs-xs);color:var(--muted);}
+
+/* ══════════════════════════════════
+   スマホ用ビュー（768px以下）
+══════════════════════════════════ */
+/* スマホ専用要素はデフォルト非表示 */
+.sp-only{display:none;}
+.pc-only{display:block;}
+
+@media(max-width:768px){
+  /* PC専用要素を非表示 */
+  .pc-only{display:none !important;}
+  /* スマホ専用要素を表示 */
+  .sp-only{display:block;}
+
+  /* ヘッダー */
+  .header{padding:0 14px;height:50px;}
+  .h-logo{font-size:13px;}
+  .h-logo i{font-size:18px;}
+  .h-right{gap:8px;}
+  .reload-btn span{display:none;}
+  .reload-btn{padding:6px 10px;}
+  .back-btn span{display:none;}
+
+  /* フィールダータブ */
+  .fielder-tabs{padding:0 8px;}
+  .ftab{padding:11px 10px;font-size:11px;gap:5px;}
+
+  /* メインレイアウト */
+  .main{padding:12px;}
+  .row2,.row3{grid-template-columns:1fr;gap:12px;}
+  .kpi-grid{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+  .kpi-card{padding:12px 14px;}
+  .kpi-val{font-size:24px;}
+
+  /* パネル */
+  .panel-body{padding:12px 14px;}
+  .panel-head{padding:12px 14px;}
+
+  /* テーブル→カード形式 */
+  .fielder-table thead{display:none;}
+  .fielder-table tr{display:block;background:#F8FAFC;border-radius:10px;border:1px solid var(--border);margin-bottom:8px;padding:12px 14px;}
+  .fielder-table td{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:0.5px solid #F1F5F9;font-size:12px;}
+  .fielder-table td:last-child{border-bottom:none;}
+  .fielder-table td::before{content:attr(data-label);font-size:11px;color:var(--muted);font-weight:500;flex-shrink:0;margin-right:8px;}
+  .f-cell{justify-content:flex-end;}
+
+  /* ランクテーブル */
+  .rank-table{font-size:11px;}
+  .rank-table th,.rank-table td{padding:7px 6px;}
+
+  /* 停滞店舗 */
+  .stag-name{font-size:12px;}
+  .stag-sub{font-size:11px;}
+}
 </style>
 </head>
 <body>
@@ -169,13 +223,13 @@ body{font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif;backgrou
       <span id="stext">読み込み中...</span>
     </div>
     <button class="reload-btn" onclick="loadAll()">
-      <i class="ti ti-refresh"></i> 再読み込み
+      <i class="ti ti-refresh"></i> <span>再読み込み</span>
     </button>
     <a class="back-btn" href="index.html">
-      <i class="ti ti-arrow-left"></i> アプリに戻る
+      <i class="ti ti-arrow-left"></i> <span>アプリに戻る</span>
     </a>
     <a class="back-btn" href="senior.html" id="back-to-senior" style="display:none;">
-      <i class="ti ti-walk"></i> 同行記録に戻る
+      <i class="ti ti-users"></i> <span>同行記録に戻る</span>
     </a>
   </div>
 </div>
@@ -193,7 +247,7 @@ body{font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif;backgrou
 
   <!-- KPIカード -->
   <div class="kpi-grid" id="kpi-grid">
-    <div class="loading" style="grid-column:span 6;padding:40px;">
+    <div class="loading" style="grid-column:span 6;">
       <div class="spinner"></div><br>データを読み込んでいます...
     </div>
   </div>
@@ -487,18 +541,18 @@ function renderFielder(){
         ${list.map(([name,v],i)=>{
           const col=AVATAR_COLORS[i%AVATAR_COLORS.length];
           return`<tr style="cursor:pointer;" onclick="selectFielder('${name.replace(/'/g,"\\'")}')">
-            <td><div class="f-cell">
+            <td data-label=""><div class="f-cell">
               <div class="f-avatar" style="background:${col.color};color:${col.tc};">${initials(name)}</div>
               <span class="f-name">${name}</span>
             </div></td>
-            <td><span class="num-badge nb-gray">${v.stores}</span></td>
-            <td><span class="num-badge nb-blue">${v.rec}</span></td>
-            <td><div style="display:flex;align-items:center;gap:8px;">
+            <td data-label="担当店舗"><span class="num-badge nb-gray">${v.stores}</span></td>
+            <td data-label="訪問件数"><span class="num-badge nb-blue">${v.rec}</span></td>
+            <td data-label="進捗"><div style="display:flex;align-items:center;gap:8px;">
               <div class="prog-bar"><div class="prog-fill" style="width:${Math.round(v.rec/maxRec*100)}%;"></div></div>
               <span style="font-size:var(--fs-xs);color:var(--muted);min-width:28px;">${v.rec}件</span>
             </div></td>
-            <td><span class="num-badge nb-orange">${v.ph3}</span></td>
-            <td><span class="num-badge nb-green">${v.ph5}</span></td>
+            <td data-label="Ph.03〜"><span class="num-badge nb-orange">${v.ph3}</span></td>
+            <td data-label="完了"><span class="num-badge nb-green">${v.ph5}</span></td>
           </tr>`;
         }).join('')}
       </tbody>
