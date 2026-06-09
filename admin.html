@@ -148,65 +148,69 @@ body{font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif;backgrou
 .loading{text-align:center;padding:60px 20px;color:var(--muted);font-size:var(--fs-md);}
 .spinner{display:inline-block;width:32px;height:32px;border:3px solid #E2E8F0;border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin-bottom:12px;}
 @keyframes spin{to{transform:rotate(360deg);}}
-
-/* ── 空状態 ── */
 .empty{text-align:center;padding:32px;color:var(--muted);font-size:var(--fs-sm);}
-
-/* ── 更新日時 ── */
 .update-time{font-size:var(--fs-xs);color:var(--muted);}
 
-/* ══════════════════════════════════
-   スマホ用ビュー（768px以下）
-══════════════════════════════════ */
-/* スマホ専用要素はデフォルト非表示 */
+/* ══════════════════════════
+   スマホ用（768px以下）
+══════════════════════════ */
 .sp-only{display:none;}
-.pc-only{display:block;}
-
 @media(max-width:768px){
-  /* PC専用要素を非表示 */
-  .pc-only{display:none !important;}
-  /* スマホ専用要素を表示 */
   .sp-only{display:block;}
-
-  /* ヘッダー */
-  .header{padding:0 14px;height:50px;}
+  .pc-only{display:none !important;}
+  .header{padding:0 12px;height:48px;}
   .h-logo{font-size:13px;}
-  .h-logo i{font-size:18px;}
-  .h-right{gap:8px;}
-  .reload-btn span{display:none;}
-  .reload-btn{padding:6px 10px;}
-  .back-btn span{display:none;}
-
-  /* フィールダータブ */
-  .fielder-tabs{padding:0 8px;}
-  .ftab{padding:11px 10px;font-size:11px;gap:5px;}
-
-  /* メインレイアウト */
-  .main{padding:12px;}
-  .row2,.row3{grid-template-columns:1fr;gap:12px;}
-  .kpi-grid{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
-  .kpi-card{padding:12px 14px;}
-  .kpi-val{font-size:24px;}
-
-  /* パネル */
-  .panel-body{padding:12px 14px;}
-  .panel-head{padding:12px 14px;}
-
-  /* テーブル→カード形式 */
-  .fielder-table thead{display:none;}
-  .fielder-table tr{display:block;background:#F8FAFC;border-radius:10px;border:1px solid var(--border);margin-bottom:8px;padding:12px 14px;}
-  .fielder-table td{display:flex;align-items:center;justify-content:space-between;padding:5px 0;border-bottom:0.5px solid #F1F5F9;font-size:12px;}
-  .fielder-table td:last-child{border-bottom:none;}
-  .fielder-table td::before{content:attr(data-label);font-size:11px;color:var(--muted);font-weight:500;flex-shrink:0;margin-right:8px;}
-  .f-cell{justify-content:flex-end;}
-
-  /* ランクテーブル */
-  .rank-table{font-size:11px;}
-  .rank-table th,.rank-table td{padding:7px 6px;}
-
-  /* 停滞店舗 */
-  .stag-name{font-size:12px;}
-  .stag-sub{font-size:11px;}
+  .h-logo i{font-size:17px;}
+  .reload-btn span,.back-btn span{display:none;}
+  .reload-btn{padding:5px 9px;}
+  .fielder-tabs{padding:0 6px;}
+  .ftab{padding:10px 10px;font-size:11px;gap:4px;}
+  .main{padding:10px;}
+  .kpi-grid{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;}
+  .kpi-card{padding:11px 12px;}
+  .kpi-val{font-size:26px;}
+  .kpi-icon{font-size:17px;margin-bottom:5px;}
+  .row2,.row3{grid-template-columns:1fr !important;gap:10px;}
+  .sp-panel{background:var(--card);border-radius:12px;border:1px solid var(--border);margin-bottom:10px;overflow:hidden;}
+  .sp-panel-head{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;cursor:pointer;user-select:none;}
+  .sp-panel-title{font-size:var(--fs-sm);font-weight:600;color:var(--text);display:flex;align-items:center;gap:7px;}
+  .sp-panel-right{display:flex;align-items:center;gap:7px;}
+  .sp-panel-badge{font-size:var(--fs-xs);padding:2px 8px;border-radius:99px;background:#F1F5F9;color:var(--sub);}
+  .sp-panel-badge.warn{background:#FEF3C7;color:#92400E;}
+  .sp-panel-chevron{font-size:15px;color:var(--muted);transition:transform .2s;}
+  .sp-panel-chevron.open{transform:rotate(180deg);}
+  .sp-panel-body{padding:0 14px 12px;}
+  .sp-fielder-card{background:#F8FAFC;border-radius:10px;padding:11px 12px;margin-bottom:7px;cursor:pointer;}
+  .sp-fc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;}
+  .sp-fc-name{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--text);}
+  .sp-fc-badges{display:flex;gap:5px;}
+  .sp-fc-badge{font-size:10px;padding:2px 7px;border-radius:99px;font-weight:600;}
+  .sp-prog-wrap{display:flex;align-items:center;gap:8px;}
+  .sp-prog-bg{flex:1;height:4px;background:#E2E8F0;border-radius:99px;overflow:hidden;}
+  .sp-prog-fill{height:4px;border-radius:99px;background:var(--accent);}
+  .sp-prog-label{font-size:10px;color:var(--muted);white-space:nowrap;}
+  .sp-store-row{padding:9px 0;border-bottom:0.5px solid #F1F5F9;display:flex;align-items:center;justify-content:space-between;}
+  .sp-store-row:last-child{border-bottom:none;}
+  .sp-store-name{font-size:12px;font-weight:600;color:var(--text);}
+  .sp-store-sub{font-size:10px;color:var(--muted);margin-top:2px;}
+  .sp-stag-days{font-size:11px;font-weight:600;text-align:right;white-space:nowrap;}
+  .sp-stag-days.warn{color:var(--warning);}
+  .sp-stag-days.danger{color:var(--danger);}
+  .sp-show-more{text-align:center;padding:8px 0 2px;font-size:11px;color:var(--accent);cursor:pointer;border:none;background:none;width:100%;font-family:inherit;}
+  .sp-filter-row{display:flex;gap:6px;overflow-x:auto;padding:8px 0 4px;scrollbar-width:none;}
+  .sp-filter-row::-webkit-scrollbar{display:none;}
+  .sp-fchip{flex-shrink:0;font-size:11px;padding:5px 12px;border-radius:99px;border:0.5px solid var(--border);background:var(--card);color:var(--sub);cursor:pointer;font-family:inherit;}
+  .sp-fchip.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .sp-fielder-hero{background:var(--card);border-radius:12px;border:1px solid var(--border);padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;}
+  .sp-hero-av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
+  .sp-hero-name{font-size:15px;font-weight:600;color:var(--text);}
+  .sp-hero-sub{font-size:11px;color:var(--muted);margin-top:3px;}
+  .sp-res-item{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+  .sp-res-label{font-size:11px;color:var(--sub);width:58px;flex-shrink:0;}
+  .sp-res-bg{flex:1;height:6px;border-radius:99px;background:#E2E8F0;overflow:hidden;}
+  .sp-res-fill{height:6px;border-radius:99px;}
+  .sp-res-num{font-size:11px;font-weight:600;color:var(--text);min-width:18px;text-align:right;}
+  .sp-res-pct{font-size:10px;color:var(--muted);min-width:26px;text-align:right;}
 }
 </style>
 </head>
@@ -223,13 +227,13 @@ body{font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif;backgrou
       <span id="stext">読み込み中...</span>
     </div>
     <button class="reload-btn" onclick="loadAll()">
-      <i class="ti ti-refresh"></i> <span>再読み込み</span>
+      <i class="ti ti-refresh"></i> 再読み込み
     </button>
     <a class="back-btn" href="index.html">
-      <i class="ti ti-arrow-left"></i> <span>アプリに戻る</span>
+      <i class="ti ti-arrow-left"></i> アプリに戻る
     </a>
     <a class="back-btn" href="senior.html" id="back-to-senior" style="display:none;">
-      <i class="ti ti-users"></i> <span>同行記録に戻る</span>
+      <i class="ti ti-walk"></i> 同行記録に戻る
     </a>
   </div>
 </div>
@@ -241,13 +245,13 @@ body{font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif;backgrou
   </button>
 </div>
 
-<div class="main">
+<div class="main pc-only">
   <!-- セクションタイトル -->
   <div class="section-title" id="section-title"><i class="ti ti-layout-grid"></i> チーム全体</div>
 
   <!-- KPIカード -->
   <div class="kpi-grid" id="kpi-grid">
-    <div class="loading" style="grid-column:span 6;">
+    <div class="loading" style="grid-column:span 6;padding:40px;">
       <div class="spinner"></div><br>データを読み込んでいます...
     </div>
   </div>
@@ -321,6 +325,9 @@ body{font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif;backgrou
 
   <div style="height:32px;"></div>
 </div>
+
+<!-- スマホ用コンテンツ（768px以下で表示） -->
+<div class="sp-only" id="sp-main" style="padding:10px;"></div>
 
 <script>
 const GAS='https://script.google.com/macros/s/AKfycbxpnXDwE36Wsk5-RNDvwgWJFdmi8MUEgj0Acbx-nZGENv-tSnUKpgEp14CaoFyJKJPq/exec';
@@ -457,22 +464,14 @@ function renderAll(){
     currentFielder
       ? `<i class="ti ti-user"></i> ${currentFielder} のダッシュボード`
       : `<i class="ti ti-layout-grid"></i> チーム全体`;
-
-  // フィールダー別テーブルはチーム全体時のみ表示
   document.getElementById('team-only-section').style.display=currentFielder?'none':'block';
   document.getElementById('fielder-only-section').style.display=currentFielder?'block':'none';
-
   renderKPI();
-  if(!currentFielder){
-    renderFielder();
-    renderResult();
-  } else {
-    renderStoreList();
-    renderResult(); // 個別でも結果内訳は見せる
-  }
-  renderStagnant();
-  renderGoal();
-  renderRank();
+  if(!currentFielder){renderFielder();renderResult();}
+  else{renderStoreList();renderResult();}
+  renderStagnant();renderGoal();renderRank();
+  // スマホ用描画
+  renderSpMain();
 }
 
 function renderKPI(){
@@ -541,18 +540,18 @@ function renderFielder(){
         ${list.map(([name,v],i)=>{
           const col=AVATAR_COLORS[i%AVATAR_COLORS.length];
           return`<tr style="cursor:pointer;" onclick="selectFielder('${name.replace(/'/g,"\\'")}')">
-            <td data-label=""><div class="f-cell">
+            <td><div class="f-cell">
               <div class="f-avatar" style="background:${col.color};color:${col.tc};">${initials(name)}</div>
               <span class="f-name">${name}</span>
             </div></td>
-            <td data-label="担当店舗"><span class="num-badge nb-gray">${v.stores}</span></td>
-            <td data-label="訪問件数"><span class="num-badge nb-blue">${v.rec}</span></td>
-            <td data-label="進捗"><div style="display:flex;align-items:center;gap:8px;">
+            <td><span class="num-badge nb-gray">${v.stores}</span></td>
+            <td><span class="num-badge nb-blue">${v.rec}</span></td>
+            <td><div style="display:flex;align-items:center;gap:8px;">
               <div class="prog-bar"><div class="prog-fill" style="width:${Math.round(v.rec/maxRec*100)}%;"></div></div>
               <span style="font-size:var(--fs-xs);color:var(--muted);min-width:28px;">${v.rec}件</span>
             </div></td>
-            <td data-label="Ph.03〜"><span class="num-badge nb-orange">${v.ph3}</span></td>
-            <td data-label="完了"><span class="num-badge nb-green">${v.ph5}</span></td>
+            <td><span class="num-badge nb-orange">${v.ph3}</span></td>
+            <td><span class="num-badge nb-green">${v.ph5}</span></td>
           </tr>`;
         }).join('')}
       </tbody>
@@ -738,6 +737,272 @@ function renderStoreList(){
 function openStore(name){
   window.location.href='index.html?store='+encodeURIComponent(name);
 }
+
+// ── スマホ用描画 ──
+function isMobile(){return window.innerWidth<=768;}
+
+function spToggle(id){
+  const body=document.getElementById('sp-body-'+id);
+  const ch=document.getElementById('sp-ch-'+id);
+  if(!body)return;
+  const open=body.style.display!=='none';
+  body.style.display=open?'none':'block';
+  if(ch)ch.classList.toggle('open',!open);
+}
+
+let spStoreFilter='all';
+function spSetFilter(f){
+  spStoreFilter=f;
+  document.querySelectorAll('.sp-fchip').forEach(b=>b.classList.toggle('active',b.dataset.f===f));
+  renderSpStores();
+}
+
+function renderSpStores(){
+  const infoMap=getInfoMap();
+  const filtStores=getFilteredStores();
+  const filtered=filtStores.filter(s=>{
+    const info=infoMap[s.name]||{};
+    if(spStoreFilter==='all')return true;
+    if(spStoreFilter==='goal')return info.goal>=0;
+    if(spStoreFilter==='ph1')return info.phase===1||info.phase===2;
+    if(spStoreFilter==='ph3')return info.phase>=3;
+    if(spStoreFilter==='stag'){
+      const d=daysSince(info.lastVisit||'');
+      return d===null||d>=30;
+    }
+    return true;
+  });
+  const sorted=[...filtered].sort((a,b)=>{
+    const pa=infoMap[a.name]?infoMap[a.name].phase:0;
+    const pb=infoMap[b.name]?infoMap[b.name].phase:0;
+    return pb-pa;
+  });
+  const LIMIT=5;
+  const container=document.getElementById('sp-store-list');
+  const moreBtn=document.getElementById('sp-store-more');
+  if(!container)return;
+  const rankCls={S:'background:#FEF3C7;color:#92400E;',A:'background:#D1FAE5;color:#065F46;',B:'background:#DBEAFE;color:#1E40AF;',C:'background:#F1F5F9;color:#64748B;',D:'background:#F1F5F9;color:#64748B;',E:'background:#F1F5F9;color:#64748B;'};
+  const rows=sorted.slice(0,spStoreFilter==='all'?LIMIT:sorted.length);
+  container.innerHTML=rows.map(s=>{
+    const info=infoMap[s.name]||{};
+    const phLabel=info.phase?`Ph.${info.phase}`:'未';
+    const phStyle=info.phase?'background:#DBEAFE;color:#1E40AF;':'background:#F1F5F9;color:#94A3B8;';
+    const rk=s.rank?`<span style="font-size:10px;padding:2px 6px;border-radius:99px;${rankCls[s.rank]||''}">${s.rank}</span>`:'';
+    const lastV=info.lastVisit?info.lastVisit:'未訪問';
+    return`<div class="sp-store-row" onclick="openStore('${s.name.replace(/'/g,"\\'")}')" style="cursor:pointer;">
+      <div style="min-width:0;flex:1;">
+        <div class="sp-store-name">${s.name}</div>
+        <div class="sp-store-sub">${s.chain||''}　最終：${lastV}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:5px;flex-shrink:0;margin-left:8px;">
+        ${rk}
+        <span style="font-size:10px;padding:2px 6px;border-radius:99px;${phStyle}">${phLabel}</span>
+      </div>
+    </div>`;
+  }).join('');
+  if(moreBtn){
+    const remaining=sorted.length-rows.length;
+    if(spStoreFilter!=='all'||remaining<=0){
+      moreBtn.style.display='none';
+    }else{
+      moreBtn.style.display='block';
+      moreBtn.textContent=`残り${remaining}件を表示 ▾`;
+      moreBtn.onclick=()=>{spStoreFilter='all_expanded';spSetFilter('all_expanded');};
+    }
+  }
+}
+spStoreFilter='all';
+
+function renderSpMain(){
+  if(!isMobile())return;
+  const infoMap=getInfoMap();
+  const filtStores=getFilteredStores();
+  const filtRecs=getFilteredRecords();
+  const total=filtStores.length;
+  const withGoal=filtStores.filter(s=>infoMap[s.name]&&infoMap[s.name].goal>=0).length;
+  const ph3up=filtStores.filter(s=>infoMap[s.name]&&infoMap[s.name].phase>=3).length;
+  const ph5=filtStores.filter(s=>infoMap[s.name]&&infoMap[s.name].phase>=5).length;
+  const totalRec=filtRecs.length;
+  const agreed=filtRecs.filter(r=>r.result==='合意・達成'||r.result==='s').length;
+
+  // KPI
+  const kpiHtml=`<div class="kpi-grid">
+    <div class="kpi-card blue pc-only" style="display:block;"><div class="kpi-icon"><i class="ti ti-building-store"></i></div><div class="kpi-val">${total}</div><div class="kpi-lbl">${currentFielder?'担当店舗数':'総店舗数'}</div></div>
+    <div class="kpi-card green" style=""><div class="kpi-icon"><i class="ti ti-target"></i></div><div class="kpi-val">${withGoal}</div><div class="kpi-lbl">目標設定済</div><div class="kpi-sub">未設定 ${total-withGoal}件</div></div>
+    <div class="kpi-card blue"><div class="kpi-icon"><i class="ti ti-building-store"></i></div><div class="kpi-val">${total}</div><div class="kpi-lbl">${currentFielder?'担当店舗数':'総店舗数'}</div></div>
+    <div class="kpi-card green"><div class="kpi-icon"><i class="ti ti-target"></i></div><div class="kpi-val">${withGoal}</div><div class="kpi-lbl">目標設定済</div><div class="kpi-sub">未設定 ${total-withGoal}件</div></div>
+    <div class="kpi-card orange"><div class="kpi-icon"><i class="ti ti-stairs-up"></i></div><div class="kpi-val">${ph3up}</div><div class="kpi-lbl">提案中 Ph.03〜</div><div class="kpi-sub">全体の${Math.round(ph3up/Math.max(total,1)*100)}%</div></div>
+    <div class="kpi-card red"><div class="kpi-icon"><i class="ti ti-circle-check"></i></div><div class="kpi-val">${ph5}</div><div class="kpi-lbl">実施完了</div><div class="kpi-sub">${Math.round(ph5/Math.max(total,1)*100)}%</div></div>
+    <div class="kpi-card blue"><div class="kpi-icon"><i class="ti ti-clipboard-list"></i></div><div class="kpi-val">${totalRec}</div><div class="kpi-lbl">総訪問件数</div></div>
+    <div class="kpi-card red"><div class="kpi-icon"><i class="ti ti-thumb-up"></i></div><div class="kpi-val">${agreed}</div><div class="kpi-lbl">合意・達成</div><div class="kpi-sub">訪問の${Math.round(agreed/Math.max(totalRec,1)*100)}%</div></div>
+  </div>`;
+
+  // フィールダーヒーロー（個別時のみ）
+  let heroHtml='';
+  if(currentFielder){
+    const fidx=Object.keys(Object.fromEntries(stores.map(s=>s.pic).filter(Boolean).reduce((m,n)=>(m.set(n,1),m),new Map()))).indexOf(currentFielder);
+    const col=AVATAR_COLORS[Math.max(fidx,0)%AVATAR_COLORS.length];
+    heroHtml=`<div class="sp-fielder-hero">
+      <div class="sp-hero-av" style="background:${col.color};color:${col.tc};">${initials(currentFielder)}</div>
+      <div><div class="sp-hero-name">${currentFielder}</div><div class="sp-hero-sub">担当${total}店舗　／　訪問${totalRec}件</div></div>
+    </div>`;
+  }
+
+  // フィールダー別（チーム全体のみ）
+  let fielderPanelHtml='';
+  if(!currentFielder){
+    const fielderSet={};
+    stores.forEach(s=>{
+      const pic=s.pic||'未設定';
+      if(!fielderSet[pic])fielderSet[pic]={stores:0,rec:0,ph3:0,ph5:0};
+      fielderSet[pic].stores++;
+      const info=infoMap[s.name];
+      if(info){if(info.phase>=3)fielderSet[pic].ph3++;if(info.phase>=5)fielderSet[pic].ph5++;}
+    });
+    records.forEach(r=>{const f=r.fielder||'未設定';if(!fielderSet[f])fielderSet[f]={stores:0,rec:0,ph3:0,ph5:0};fielderSet[f].rec++;});
+    const list=Object.entries(fielderSet).filter(([k])=>k!=='未設定').sort((a,b)=>b[1].rec-a[1].rec);
+    const maxRec=Math.max(...list.map(([,v])=>v.rec),1);
+    const cardsHtml=list.map(([name,v],i)=>{
+      const col=AVATAR_COLORS[i%AVATAR_COLORS.length];
+      return`<div class="sp-fielder-card" onclick="selectFielder('${name.replace(/'/g,"\\'")}')">
+        <div class="sp-fc-top">
+          <div class="sp-fc-name">
+            <div style="width:24px;height:24px;border-radius:50%;background:${col.color};color:${col.tc};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;">${initials(name)}</div>
+            ${name}
+          </div>
+          <div class="sp-fc-badges">
+            <span class="sp-fc-badge" style="background:#DBEAFE;color:#1E40AF;">${v.rec}件</span>
+            <span class="sp-fc-badge" style="background:#FEF3C7;color:#92400E;">Ph.3〜:${v.ph3}</span>
+            <span class="sp-fc-badge" style="background:#D1FAE5;color:#065F46;">完:${v.ph5}</span>
+          </div>
+        </div>
+        <div class="sp-prog-wrap">
+          <div class="sp-prog-bg"><div class="sp-prog-fill" style="width:${Math.round(v.rec/maxRec*100)}%;"></div></div>
+          <div class="sp-prog-label">担当${v.stores}店 / ${v.rec}件訪問</div>
+        </div>
+      </div>`;
+    }).join('');
+    fielderPanelHtml=`<div class="sp-panel">
+      <div class="sp-panel-head" onclick="spToggle('fielder')">
+        <div class="sp-panel-title"><i class="ti ti-users"></i>フィールダー別 活動状況</div>
+        <div class="sp-panel-right">
+          <span class="sp-panel-badge">${list.length}名</span>
+          <i class="ti ti-chevron-up sp-panel-chevron open" id="sp-ch-fielder"></i>
+        </div>
+      </div>
+      <div id="sp-body-fielder" class="sp-panel-body">${cardsHtml}</div>
+    </div>`;
+  }
+
+  // 停滞店舗
+  const stagnant=filtStores.map(s=>{
+    const info=infoMap[s.name]||{};
+    const d=daysSince(info.lastVisit||'');
+    return{...s,days:d,phase:info.phase||0,lastVisit:info.lastVisit||''};
+  }).filter(s=>s.days===null||s.days>=30).sort((a,b)=>(b.days||9999)-(a.days||9999));
+  const STAG_LIMIT=4;
+  const stagRows=stagnant.slice(0,STAG_LIMIT).map(s=>{
+    const dc=s.days===null||s.days>=60?'danger':'warn';
+    const label=s.days===null?'未訪問':`${s.days}日`;
+    return`<div class="sp-store-row" onclick="openStore('${s.name.replace(/'/g,"\\'")}')">
+      <div><div class="sp-store-name">${s.name}</div><div class="sp-store-sub">${s.chain||''}${s.pic?' ／ '+s.pic:''}</div></div>
+      <div class="sp-stag-days ${dc}">${label}</div>
+    </div>`;
+  }).join('');
+  const stagMore=stagnant.length>STAG_LIMIT
+    ?`<button class="sp-show-more" onclick="spExpandStag()">残り${stagnant.length-STAG_LIMIT}件を表示 ▾</button><div id="sp-stag-more" style="display:none;">${stagnant.slice(STAG_LIMIT).map(s=>{const dc=s.days===null||s.days>=60?'danger':'warn';const label=s.days===null?'未訪問':`${s.days}日`;return`<div class="sp-store-row" onclick="openStore('${s.name.replace(/'/g,"\\'")}')"><div><div class="sp-store-name">${s.name}</div><div class="sp-store-sub">${s.chain||''}${s.pic?' ／ '+s.pic:''}</div></div><div class="sp-stag-days ${dc}">${label}</div></div>`;}).join('')}</div>`:'';
+  const stagPanelHtml=`<div class="sp-panel">
+    <div class="sp-panel-head" onclick="spToggle('stag')">
+      <div class="sp-panel-title"><i class="ti ti-alert-triangle" style="color:var(--warning);"></i>停滞店舗（30日以上）</div>
+      <div class="sp-panel-right">
+        <span class="sp-panel-badge warn">${stagnant.length}件</span>
+        <i class="ti ti-chevron-down sp-panel-chevron" id="sp-ch-stag"></i>
+      </div>
+    </div>
+    <div id="sp-body-stag" style="display:none;" class="sp-panel-body">${stagRows}${stagMore}</div>
+  </div>`;
+
+  // 訪問結果
+  const pending=filtRecs.filter(r=>r.result==='検討中'||r.result==='p').length;
+  const passed=filtRecs.filter(r=>r.result==='見送り'||r.result==='f').length;
+  const none=totalRec-agreed-pending-passed;
+  const resItems=[
+    {label:'合意・達成',val:agreed,color:'#059669'},
+    {label:'検討中',val:pending,color:'#D97706'},
+    {label:'見送り',val:passed,color:'#DC2626'},
+    {label:'未記録',val:none,color:'#94A3B8'},
+  ];
+  const resPanelHtml=`<div class="sp-panel">
+    <div class="sp-panel-head" onclick="spToggle('result')">
+      <div class="sp-panel-title"><i class="ti ti-check"></i>訪問結果の内訳</div>
+      <i class="ti ti-chevron-down sp-panel-chevron" id="sp-ch-result"></i>
+    </div>
+    <div id="sp-body-result" style="display:none;" class="sp-panel-body">
+      ${resItems.map(it=>`<div class="sp-res-item">
+        <div class="sp-res-label">${it.label}</div>
+        <div class="sp-res-bg"><div class="sp-res-fill" style="width:${Math.round(it.val/Math.max(totalRec,1)*100)}%;background:${it.color};"></div></div>
+        <div class="sp-res-num">${it.val}</div>
+        <div class="sp-res-pct">${Math.round(it.val/Math.max(totalRec,1)*100)}%</div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+
+  // 目標別
+  const goalCounts=GOALS.map((_,i)=>filtStores.filter(s=>infoMap[s.name]&&infoMap[s.name].goal===i).length);
+  const goalColors=['#DBEAFE;color:#1E40AF','#D1FAE5;color:#065F46','#FEF3C7;color:#92400E','#EDE9FE;color:#5B21B6'];
+  const goalPanelHtml=`<div class="sp-panel">
+    <div class="sp-panel-head" onclick="spToggle('goal')">
+      <div class="sp-panel-title"><i class="ti ti-target"></i>目標別 件数</div>
+      <i class="ti ti-chevron-down sp-panel-chevron" id="sp-ch-goal"></i>
+    </div>
+    <div id="sp-body-goal" style="display:none;padding:0 14px 12px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        ${GOALS.map((g,i)=>`<div style="background:${goalColors[i].split(';')[0]};border-radius:10px;padding:12px;"><div style="font-size:10px;font-weight:600;color:${goalColors[i].split('color:')[1]};margin-bottom:4px;">${g}</div><div style="font-size:22px;font-weight:600;color:${goalColors[i].split('color:')[1]};">${goalCounts[i]}</div></div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+
+  // 担当店舗（フィールダー個別時のみ）
+  let storePanelHtml='';
+  if(currentFielder){
+    storePanelHtml=`<div class="sp-panel">
+      <div class="sp-panel-head" onclick="spToggle('stores')">
+        <div class="sp-panel-title"><i class="ti ti-building-store"></i>担当店舗一覧</div>
+        <div class="sp-panel-right">
+          <span class="sp-panel-badge">${total}件</span>
+          <i class="ti ti-chevron-down sp-panel-chevron" id="sp-ch-stores"></i>
+        </div>
+      </div>
+      <div id="sp-body-stores" style="display:none;">
+        <div class="sp-filter-row" style="padding:8px 14px 0;">
+          <button class="sp-fchip active" data-f="all" onclick="spSetFilter('all')">すべて</button>
+          <button class="sp-fchip" data-f="goal" onclick="spSetFilter('goal')">目標設定済</button>
+          <button class="sp-fchip" data-f="ph1" onclick="spSetFilter('ph1')">Ph.01〜02</button>
+          <button class="sp-fchip" data-f="ph3" onclick="spSetFilter('ph3')">Ph.03〜</button>
+          <button class="sp-fchip" data-f="stag" onclick="spSetFilter('stag')">停滞中</button>
+        </div>
+        <div class="sp-panel-body" style="padding-top:4px;">
+          <div id="sp-store-list"></div>
+          <button id="sp-store-more" class="sp-show-more"></button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  const container=document.getElementById('sp-main');
+  if(!container)return;
+  container.innerHTML=heroHtml+kpiHtml+fielderPanelHtml+stagPanelHtml+resPanelHtml+goalPanelHtml+storePanelHtml;
+  if(currentFielder){spStoreFilter='all';renderSpStores();}
+}
+
+function spExpandStag(){
+  const more=document.getElementById('sp-stag-more');
+  const btn=event.target;
+  if(more){more.style.display='block';}
+  if(btn){btn.style.display='none';}
+}
+
+
 
 loadAll().then(()=>{
   const params=new URLSearchParams(window.location.search);
