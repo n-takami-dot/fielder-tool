@@ -899,7 +899,8 @@ function openDashboard(){
 }
 function closeDashboard(){
   document.getElementById('scr-dashboard').classList.remove('active');
-  document.getElementById('scr-login').classList.add('active');
+  document.getElementById('scr-main').classList.add('active');
+  goView('input');
 }
 
 async function loadDashboard(){
