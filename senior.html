@@ -624,7 +624,7 @@ function renderCalendar(){
   const filteredDone=dbSeniorFilter==='全員'?dbAllRecordsCache:dbAllRecordsCache.filter(r=>r.senior===dbSeniorFilter);
   const filteredPlan=dbSeniorFilter==='全員'?seniorPlans:seniorPlans.filter(r=>r.senior===dbSeniorFilter);
   const dayMap={};
-  const addToMap=(arr,type)=>arr.forEach(r=>{
+  const addToMap=(arr,type)=>arr.filter(r=>r.senior&&r.senior.trim()).forEach(r=>{
     if(!r.date)return;
     const d=String(r.date).slice(0,10);
     if(!dayMap[d])dayMap[d]={};
@@ -694,8 +694,8 @@ function renderCalDetail(dt){
   if(!detail)return;
   const filteredDone=dbSeniorFilter==='全員'?dbAllRecordsCache:dbAllRecordsCache.filter(r=>r.senior===dbSeniorFilter);
   const filteredPlan=dbSeniorFilter==='全員'?seniorPlans:seniorPlans.filter(r=>r.senior===dbSeniorFilter);
-  const dones=filteredDone.filter(r=>String(r.date).slice(0,10)===dt);
-  const plans=filteredPlan.filter(r=>r.date===dt);
+  const dones=filteredDone.filter(r=>String(r.date).slice(0,10)===dt&&r.senior&&r.senior.trim());
+  const plans=filteredPlan.filter(r=>r.date===dt&&r.senior&&r.senior.trim());
   if(!dones.length&&!plans.length){detail.style.display='none';return;}
   const dow=['日','月','火','水','木','金','土'][new Date(dt).getDay()];
   const [,mm,dd]=dt.split('-');
@@ -758,10 +758,10 @@ function renderPlanCal(){
   const monthEl=document.getElementById('plan-cal-month');
   if(monthEl)monthEl.textContent=`${planCalYear}年 ${planCalMonth+1}月`;
 
-  // 予定・済みのマップ
+  // 予定・済みのマップ（seniorが空のデータは除外）
   const planMap={}, doneMap={};
-  seniorPlans.forEach(r=>{if(!planMap[r.date])planMap[r.date]=[];planMap[r.date].push(r);});
-  (statusSeniorRecs||[]).forEach(r=>{const d=String(r.date).slice(0,10);if(!doneMap[d])doneMap[d]=[];doneMap[d].push(r);});
+  seniorPlans.filter(r=>r.senior&&r.senior.trim()).forEach(r=>{if(!planMap[r.date])planMap[r.date]=[];planMap[r.date].push(r);});
+  (statusSeniorRecs||[]).filter(r=>r.senior&&r.senior.trim()).forEach(r=>{const d=String(r.date).slice(0,10);if(!doneMap[d])doneMap[d]=[];doneMap[d].push(r);});
 
   let cells='';
   for(let i=0;i<first.getDay();i++){
