@@ -196,17 +196,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .cal-nav-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:4px 12px;cursor:pointer;font-size:16px;color:var(--sub);}
 .cal-month{font-size:var(--fs-md);font-weight:600;color:var(--text);}
 .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
-.cal-head{text-align:center;font-size:var(--fs-xs);font-weight:600;color:var(--muted);padding:4px 0;}
+.cal-head{text-align:center;font-size:13px;font-weight:600;color:var(--muted);padding:5px 0;}
 .cal-head.sun{color:#EF4444;}.cal-head.sat{color:#3B82F6;}
-.cal-cell{border-radius:6px;padding:3px;border:1px solid transparent;cursor:pointer;min-height:58px;}
+.cal-cell{border-radius:6px;padding:4px;border:1px solid transparent;cursor:pointer;min-height:68px;}
 .cal-cell:hover{background:var(--accent-light);border-color:var(--accent-border);}
 .cal-cell.today{background:var(--accent-light);border-color:var(--accent-border);}
 .cal-cell.cal-sel{border-color:var(--accent) !important;background:#DBEAFE !important;}
 .cal-cell.other-month .cal-day{color:#D1D5DB;}
-.cal-day{font-size:10px;font-weight:500;color:var(--text);text-align:right;margin-bottom:2px;}
+.cal-day{font-size:13px;font-weight:500;color:var(--text);text-align:right;margin-bottom:3px;}
 .cal-cell.sun .cal-day{color:#EF4444;}.cal-cell.sat .cal-day{color:#3B82F6;}
 .cal-cell.today .cal-day{font-weight:700;color:var(--accent);}
-.sb{border-radius:3px;padding:2px 4px;margin-bottom:1px;font-size:9px;font-weight:600;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sb{border-radius:3px;padding:3px 4px;margin-bottom:2px;font-size:11px;font-weight:600;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .sb-plan{opacity:.85;}.sb-done{opacity:1;}
 .cal-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
 .cal-leg{display:flex;align-items:center;gap:4px;font-size:var(--fs-xs);color:var(--muted);}
@@ -221,11 +221,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .cal-di-name{font-size:var(--fs-sm);color:var(--text);}
 .cal-di-sub{font-size:var(--fs-xs);color:var(--muted);margin-top:2px;}
 /* 予定登録リスト */
-.plan-item{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--accent-light);border-radius:8px;margin-bottom:6px;border:0.5px solid var(--accent-border);}
-.pi-info{font-size:var(--fs-xs);color:var(--accent);font-weight:500;}
+.plan-item{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--accent-light);border-radius:8px;margin-bottom:8px;border:0.5px solid var(--accent-border);}
+.pi-info{font-size:var(--fs-sm);color:var(--accent);font-weight:500;}
 .pi-sub{font-size:var(--fs-xs);color:var(--muted);margin-top:2px;}
-.pi-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px;padding:0 4px;line-height:1;}
-.pi-del:hover{color:#EF4444;}
+.pi-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.pi-edit{background:none;border:0.5px solid var(--accent-border);color:var(--accent);cursor:pointer;font-size:14px;padding:5px 8px;border-radius:6px;line-height:1;}
+.pi-del{background:none;border:0.5px solid #FCA5A5;color:#DC2626;cursor:pointer;font-size:14px;padding:5px 8px;border-radius:6px;line-height:1;}
+.pi-del:hover{background:#FEE2E2;}
 /* ── toast ── */
 .toast-area{position:fixed;top:65px;left:0;right:0;display:flex;justify-content:center;pointer-events:none;z-index:100;}
 .toast{font-size:var(--fs-sm);font-weight:500;padding:11px 22px;border-radius:99px;opacity:0;transition:opacity .3s;box-shadow:0 4px 12px rgba(0,0,0,.1);}
@@ -786,8 +788,8 @@ function renderPlanCal(){
       else                 blocksHtml+=`<div class="sb sb-plan" style="background:${col.plan};color:${col.text};">${shortName} 予定</div>`;
     });
     if(allSeniors.length>2) blocksHtml+=`<div style="font-size:8px;color:var(--muted);text-align:right;">他${allSeniors.length-2}件</div>`;
-    const onclick=isPast?'':`onclick="planCalSelect('${dt}')"`;
-    cells+=`<div class="${cls}" ${onclick} style="${isPast?'cursor:default;':''}"><div class="cal-day">${d}</div>${blocksHtml}</div>`;
+    const onclick=`onclick="planCalSelect('${dt}')"`;
+    cells+=`<div class="${cls}" ${onclick}><div class="cal-day">${d}</div>${blocksHtml}</div>`;
   }
   const rem=7-((first.getDay()+last.getDate())%7||7);
   for(let i=1;i<rem;i++) cells+=`<div class="cal-cell other-month"><div class="cal-day">${i}</div></div>`;
@@ -865,6 +867,64 @@ async function savePlan(){
 
 
 
+function openPlanEditModal(id){
+  const plan=seniorPlans.find(p=>String(p.id)===String(id));
+  if(!plan){toast('予定が見つかりません','err');return;}
+  const existing=document.getElementById('plan-edit-modal');
+  if(existing)existing.remove();
+  const modal=document.createElement('div');
+  modal.id='plan-edit-modal';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;';
+  modal.innerHTML=`
+    <div style="background:var(--card);border-radius:16px;padding:20px;width:100%;max-width:400px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <div style="font-size:var(--fs-lg);font-weight:600;color:var(--text);">予定を編集</div>
+        <button onclick="document.getElementById('plan-edit-modal').remove()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:22px;"><i class="ti ti-x"></i></button>
+      </div>
+      <input type="hidden" id="plan-edit-id" value="${plan.id}">
+      <div class="field" style="margin-bottom:14px;">
+        <label>予定日</label>
+        <input type="date" id="plan-edit-date" value="${plan.date}">
+      </div>
+      <div class="field" style="margin-bottom:20px;">
+        <label>対象フィールダー</label>
+        <select id="plan-edit-fielder">
+          ${members.map(m=>`<option value="${m}"${m===plan.fielder?' selected':''}>${m}</option>`).join('')}
+        </select>
+      </div>
+      <button id="plan-edit-save-btn" onclick="savePlanEdit()" style="width:100%;padding:16px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:var(--fs-md);font-weight:600;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <i class="ti ti-device-floppy"></i> 保存
+      </button>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+async function savePlanEdit(){
+  const id=document.getElementById('plan-edit-id').value;
+  const date=document.getElementById('plan-edit-date').value;
+  const fielder=document.getElementById('plan-edit-fielder').value;
+  if(!date||!fielder){toast('予定日とフィールダーを入力してください','err');return;}
+  const btn=document.getElementById('plan-edit-save-btn');
+  btn.disabled=true;btn.innerHTML='<span class="spinner"></span> 送信中...';
+  try{
+    // 既存を削除して新規保存（スプレッドシートの更新を簡潔に）
+    await postGAS({action:'deleteSeniorPlan',id:String(id)});
+    const newPlan={id:Date.now(),date,fielder,senior:cu};
+    await postGAS({action:'saveSeniorPlan',...newPlan});
+    // ローカル更新
+    const idx=seniorPlans.findIndex(p=>String(p.id)===String(id));
+    if(idx>=0)seniorPlans.splice(idx,1,newPlan);
+    toast('予定を更新しました','ok');
+    document.getElementById('plan-edit-modal').remove();
+    renderPlanList();
+    renderPlanCal();
+    renderCalendar();
+  }catch(e){
+    toast('送信エラー','err');
+    btn.disabled=false;btn.innerHTML='<i class="ti ti-device-floppy"></i> 保存';
+  }
+}
+
 async function deletePlan(id){
   if(!confirm('この予定を削除しますか？'))return;
   try{
@@ -880,13 +940,23 @@ function renderPlanList(){
   const list=document.getElementById('plan-list');
   const sec=document.getElementById('plan-list-sec');
   if(!list||!sec)return;
+  // 自分の予定を全件（過去含む）日付順で表示
   const mine=seniorPlans.filter(p=>p.senior===cu).sort((a,b)=>a.date.localeCompare(b.date));
   sec.style.display=mine.length?'block':'none';
-  list.innerHTML=mine.map(p=>`
-    <div class="plan-item">
-      <div><div class="pi-info">${p.date}　${p.fielder}</div></div>
-      <button class="pi-del" onclick="deletePlan('${p.id}')"><i class="ti ti-x"></i></button>
-    </div>`).join('');
+  const today=new Date();today.setHours(0,0,0,0);
+  list.innerHTML=mine.map(p=>{
+    const isPast=new Date(p.date)<today;
+    const pastStyle=isPast?'opacity:.65;':'' ;
+    return`<div class="plan-item" style="${pastStyle}">
+      <div>
+        <div class="pi-info">${p.date}　${p.fielder}${isPast?' <span style="font-size:11px;color:var(--muted);">（過去）</span>':''}</div>
+      </div>
+      <div class="pi-actions">
+        <button class="pi-edit" onclick="openPlanEditModal('${p.id}')" title="編集"><i class="ti ti-edit"></i></button>
+        <button class="pi-del" onclick="deletePlan('${p.id}')" title="削除"><i class="ti ti-trash"></i></button>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // ── 同行活動ダッシュボード ──
