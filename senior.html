@@ -16,7 +16,7 @@
 :root{
   --accent:#004f8a;--accent-light:#EFF6FF;
   --text:#111;--sub:#6B7280;--muted:#9CA3AF;--border:#E5E7EB;--bg:#F9FAFB;--card:#fff;
-  --fs-xs:13px;--fs-sm:15px;--fs-md:17px;--fs-lg:19px;
+  --fs-xs:14px;--fs-sm:16px;--fs-md:18px;--fs-lg:20px;
   --ok:#059669;--warn:#D97706;--ng:#DC2626;
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;background:var(--bg);min-height:100vh;font-size:var(--fs-md);}
@@ -48,8 +48,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 
 /* ── タブナビ ── */
 .tabnav{background:var(--card);border-bottom:0.5px solid var(--border);display:flex;position:sticky;top:44px;z-index:9;}
-.tnb{flex:1;font-size:var(--fs-xs);padding:10px 4px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;display:flex;flex-direction:column;align-items:center;gap:2px;}
-.tnb i{font-size:20px;}
+.tnb{flex:1;font-size:var(--fs-xs);padding:13px 4px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.tnb i{font-size:24px;}
 .tnb.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
 
 /* ── 共通 ── */
@@ -58,8 +58,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .sec-hd{font-size:var(--fs-xs);font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:12px;padding-bottom:8px;border-bottom:0.5px solid #F3F4F6;display:flex;align-items:center;gap:6px;}
 .field{display:flex;flex-direction:column;gap:7px;margin-bottom:14px;}
 .field:last-child{margin-bottom:0;}
-.field label{font-size:var(--fs-sm);color:var(--sub);font-weight:500;}
-.field input,.field select,.field textarea{font-size:17px;padding:12px 14px;border:0.5px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);width:100%;-webkit-appearance:none;}
+.field label{font-size:var(--fs-md);color:var(--text);font-weight:500;}
+.field input,.field select,.field textarea{font-size:18px;padding:15px 16px;border:0.5px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);width:100%;-webkit-appearance:none;}
 .field input[readonly]{background:var(--bg);color:var(--sub);}
 .field textarea{resize:vertical;min-height:86px;line-height:1.7;}
 .field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--accent);}
@@ -68,15 +68,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 /* ── チェック項目 ── */
 .check-item{margin-bottom:16px;}
 .check-item:last-child{margin-bottom:0;}
-.check-label{font-size:var(--fs-sm);color:var(--text);font-weight:500;margin-bottom:10px;line-height:1.6;}
+.check-label{font-size:var(--fs-md);color:var(--text);font-weight:500;margin-bottom:10px;line-height:1.6;}
 .check-btns{display:flex;gap:8px;}
-.chk-btn{flex:1;padding:12px 8px;border-radius:10px;border:1.5px solid var(--border);background:var(--card);font-size:var(--fs-lg);cursor:pointer;text-align:center;font-family:inherit;}
+.chk-btn{flex:1;padding:16px 8px;border-radius:10px;border:1.5px solid var(--border);background:var(--card);font-size:22px;cursor:pointer;text-align:center;font-family:inherit;}
 .chk-btn.sel-ok{background:#D1FAE5;border-color:var(--ok);}
 .chk-btn.sel-warn{background:#FEF3C7;border-color:var(--warn);}
 .chk-btn.sel-ng{background:#FEE2E2;border-color:var(--ng);}
 
 /* ── ボタン ── */
-.save-btn{width:100%;padding:18px;font-size:var(--fs-md);font-weight:600;border:none;border-radius:12px;background:var(--accent);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;}
+.save-btn{width:100%;padding:19px;font-size:var(--fs-md);font-weight:600;border:none;border-radius:12px;background:var(--accent);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;}
 .save-btn:disabled{opacity:.5;}
 .clear-btn{width:100%;padding:14px;font-size:var(--fs-sm);border:0.5px solid var(--border);border-radius:12px;background:var(--card);color:var(--sub);cursor:pointer;margin-top:10px;}
 
@@ -1288,8 +1288,8 @@ function initForm(){
       const dow=['日','月','火','水','木','金','土'][d.getDay()];
       const label=`${p.date.slice(5).replace('-','/')}（${dow}）　${p.fielder}`;
       return`<button onclick="selectPlanDate('${p.date}','${p.fielder.replace(/'/g,"\\'")}')"
-        style="width:100%;padding:12px 14px;border-radius:10px;border:1.5px solid var(--accent-border);background:var(--accent-light);color:var(--accent);font-size:var(--fs-sm);font-weight:600;cursor:pointer;text-align:left;font-family:inherit;display:flex;align-items:center;gap:10px;">
-        <i class="ti ti-calendar-event" style="font-size:18px;flex-shrink:0;"></i>${label}
+        style="width:100%;padding:14px 14px;border-radius:11px;border:1.5px solid var(--accent-border);background:var(--accent-light);color:var(--accent);font-size:14px;font-weight:600;cursor:pointer;text-align:left;font-family:inherit;display:flex;align-items:center;gap:8px;white-space:nowrap;overflow:hidden;">
+        <i class="ti ti-calendar-event" style="font-size:18px;flex-shrink:0;"></i><span style="overflow:hidden;text-overflow:ellipsis;">${label}</span>
       </button>`;
     }).join('');
   } else {
