@@ -422,11 +422,24 @@ let seniorRecords=[],histFilter='全員',dbAllRecords=[];
 
 function initials(n){return n.replace(/\s/g,'').slice(0,2);}
 function fmtDate(v){
-  if(!v)return '';
-  if(/^\d{4}-\d{2}-\d{2}$/.test(String(v)))return String(v);
+  if(!v&&v!==0)return '';
+  const s=String(v).trim();
+  // YYYY-MM-DD形式はそのまま
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s))return s;
+  // Excelシリアル値（数値5桁）→日付変換
+  if(/^\d{5}$/.test(s)){
+    const serial=parseInt(s);
+    const msPerDay=86400000;
+    // Excelの基準日：1899-12-30
+    const d=new Date((serial-25569)*msPerDay);
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
+  // ISO文字列・Date型 → JST基準で変換（タイムゾーンズレ防止）
   const d=new Date(v);
-  if(isNaN(d.getTime()))return String(v);
-  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  if(isNaN(d.getTime()))return s;
+  // UTCではなくJSTで日付取得
+  const jst=new Date(d.getTime()+9*60*60*1000);
+  return jst.getUTCFullYear()+'-'+String(jst.getUTCMonth()+1).padStart(2,'0')+'-'+String(jst.getUTCDate()).padStart(2,'0');
 }
 function getYearMonth(dateStr){
   const d=fmtDate(dateStr);
@@ -1242,7 +1255,6 @@ function _renderDashboardInner(){
 
 // ── 同行記録 編集 ──
 function openEditModal(recId){
-  // seniorRecordsまたはstatusSeniorRecsから対象を検索
   const allRecs=[...seniorRecords,...(statusSeniorRecs||[])];
   const rec=allRecs.find(r=>String(r.id)===String(recId));
   if(!rec){toast('記録が見つかりません','err');return;}
@@ -1254,6 +1266,14 @@ function openEditModal(recId){
     <button class="chk-btn${curVal===v?' '+CHECK_CLS[i]:''}" onclick="editSelCheck(this,'${checkId}','${v}',${i})">${v}</button>
   `).join('');
 
+  // 担当フィールダーの選択肢
+  const fielderOpts=members.map(m=>`<option value="${m}"${m===rec.fielder?' selected':''}>${m}</option>`).join('');
+
+  // 担当店舗の選択肢（stores から対象フィールダーの店舗）
+  const storeOpts=stores
+    .filter(s=>!rec.fielder||s.pic===rec.fielder)
+    .map(s=>`<option value="${s.name}"${s.name===rec.storeName?' selected':''}>${s.name}</option>`).join('');
+
   const modal=document.createElement('div');
   modal.id='edit-senior-modal';
   modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;';
@@ -1263,13 +1283,24 @@ function openEditModal(recId){
         <div style="font-size:var(--fs-lg);font-weight:600;color:var(--text);">同行記録を編集</div>
         <button onclick="closeEditModal()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:22px;"><i class="ti ti-x"></i></button>
       </div>
-      <div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:14px;">${rec.date} ／ ${rec.storeName} ／ ${rec.fielder}</div>
       <input type="hidden" id="edit-rec-id" value="${rec.id}">
-      ${CHECK_ITEMS.map((item,ci)=>`
-        <div style="margin-bottom:12px;">
-          <div style="font-size:var(--fs-sm);color:var(--sub);margin-bottom:6px;">${item.label}</div>
-          <div class="check-btns" id="edit-chk-${item.id}">${chkBtns(item.id,rec['check'+(ci+1)])}</div>
-        </div>`).join('')}
+      <div class="r2" style="margin-bottom:14px;">
+        <div class="field"><label>同行日</label><input type="date" id="edit-date" value="${rec.date}"></div>
+        <div class="field"><label>フィールダー</label>
+          <select id="edit-fielder" onchange="editFielderChange()">${fielderOpts}</select>
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:16px;">
+        <label>訪問店舗</label>
+        <select id="edit-store">${storeOpts||`<option value="${rec.storeName}">${rec.storeName}</option>`}</select>
+      </div>
+      <div style="border-top:0.5px solid var(--border);padding-top:14px;margin-bottom:12px;">
+        ${CHECK_ITEMS.map((item,ci)=>`
+          <div style="margin-bottom:14px;">
+            <div class="check-label">${item.label}</div>
+            <div class="check-btns" id="edit-chk-${item.id}">${chkBtns(item.id,rec['check'+(ci+1)])}</div>
+          </div>`).join('')}
+      </div>
       <div class="field" style="margin-top:4px;"><label>観察内容</label><textarea id="edit-observation" style="min-height:70px;">${rec.observation||''}</textarea></div>
       <div class="field"><label>フィードバック</label><textarea id="edit-feedback" style="min-height:70px;">${rec.feedback||''}</textarea></div>
       <div class="field"><label>次回指示</label><textarea id="edit-next" style="min-height:60px;">${rec.nextAction||''}</textarea></div>
@@ -1278,6 +1309,16 @@ function openEditModal(recId){
       </button>
     </div>`;
   document.body.appendChild(modal);
+}
+
+function editFielderChange(){
+  const fielder=document.getElementById('edit-fielder').value;
+  const sel=document.getElementById('edit-store');
+  if(!sel)return;
+  const curStore=sel.value;
+  const opts=stores.filter(s=>!fielder||s.pic===fielder)
+    .map(s=>`<option value="${s.name}"${s.name===curStore?' selected':''}>${s.name}</option>`).join('');
+  sel.innerHTML=opts||`<option value="${curStore}">${curStore}</option>`;
 }
 
 function editSelCheck(btn,checkId,val,idx){
@@ -1299,15 +1340,22 @@ async function saveEditRecord(){
   const rec=allRecs.find(r=>String(r.id)===String(id));
   if(!rec){toast('記録が見つかりません','err');return;}
 
-  // チェック値を取得
+  const newDate=document.getElementById('edit-date').value;
+  const newFielder=document.getElementById('edit-fielder').value;
+  const newStore=document.getElementById('edit-store').value;
+  if(!newDate){toast('同行日を入力してください','err');return;}
+
   const getChk=(checkId)=>{
     const container=document.getElementById('edit-chk-'+checkId);
-    if(!container)return rec['check'+checkId.replace('check','')] ||'';
+    if(!container)return rec['check'+checkId.replace('check','')]||'';
     const active=container.querySelector('.chk-btn.chk-ok,.chk-btn.chk-warn,.chk-btn.chk-ng');
     return active?active.textContent.trim():'';
   };
   const updated={
     ...rec,
+    date:newDate,
+    fielder:newFielder,
+    storeName:newStore,
     check1:getChk('check1'),check2:getChk('check2'),check3:getChk('check3'),
     check4:getChk('check4'),check5:getChk('check5'),
     observation:document.getElementById('edit-observation').value.trim(),
@@ -1319,14 +1367,12 @@ async function saveEditRecord(){
   btn.disabled=true;btn.innerHTML='<span class="spinner"></span> 送信中...';
   try{
     await postGAS({action:'updateSeniorRecord',...updated});
-    // ローカルも更新
     const idx=seniorRecords.findIndex(r=>String(r.id)===String(id));
     if(idx>=0)seniorRecords[idx]={...updated};
     const idx2=(statusSeniorRecs||[]).findIndex(r=>String(r.id)===String(id));
     if(idx2>=0)statusSeniorRecs[idx2]={...updated};
     toast('更新しました','ok');
     closeEditModal();
-    // ダッシュボード表示中なら再描画
     if(document.getElementById('scr-dashboard').classList.contains('active')){
       _renderDashboardInner();
     }
