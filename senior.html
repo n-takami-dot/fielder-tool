@@ -1068,12 +1068,18 @@ function setDbMonthFilter(m){
 }
 
 function _renderDashboardInner(){
-  // statusStoresはrenderStatus()でセットされるが、状況タブ廃止後はstoresで補完
   if(!statusStores||statusStores.length===0) statusStores=stores;
-  // 同行者フィルター
   let records=dbSeniorFilter==='全員'?dbAllRecordsCache:dbAllRecordsCache.filter(r=>r.senior===dbSeniorFilter);
-  // 月フィルター
   if(dbMonthFilter!=='全期間') records=records.filter(r=>getYearMonth(r.date)===dbMonthFilter);
+
+  // ── デバッグログ ──
+  console.log('=== ダッシュボード集計デバッグ ===');
+  console.log('フィルター:', dbSeniorFilter, '/ 月:', dbMonthFilter);
+  console.log('records件数:', records.length);
+  records.forEach((r,i)=>console.log(`[${i}] date:${r.date} senior:${r.senior} store:${r.storeName} id:${r.id}`));
+  const dates=records.map(r=>r.date);
+  console.log('日付一覧:', dates);
+  console.log('ユニーク日付:', [...new Set(dates)]);
 
   // ── 集計 ──
   // 同行日数：「全員」時は日付のユニーク数、個人フィルター時は日付×同行者のユニーク数
