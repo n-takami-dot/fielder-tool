@@ -12,13 +12,24 @@
 <title>同行記録</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
 :root{
   --accent:#004f8a;--accent-light:#EFF6FF;
   --text:#111;--sub:#6B7280;--muted:#9CA3AF;--border:#E5E7EB;--bg:#F9FAFB;--card:#fff;
   --fs-xs:14px;--fs-sm:16px;--fs-md:18px;--fs-lg:20px;
   --ok:#059669;--warn:#D97706;--ng:#DC2626;
 }
+/* フォントサイズ3段階 */
+body.fs-small {--fs-xs:12px;--fs-sm:14px;--fs-md:16px;--fs-lg:18px;}
+body.fs-medium{--fs-xs:14px;--fs-sm:16px;--fs-md:18px;--fs-lg:20px;}
+body.fs-large {--fs-xs:16px;--fs-sm:18px;--fs-md:20px;--fs-lg:22px;}
+/* 文字サイズバー */
+.fs-bar{background:var(--card);border-bottom:0.5px solid var(--border);padding:7px 14px;display:flex;align-items:center;gap:10px;}
+.fs-bar-label{font-size:12px;color:var(--muted);white-space:nowrap;flex-shrink:0;display:flex;align-items:center;gap:4px;}
+.fs-btns{display:flex;gap:6px;}
+.fs-btn{padding:4px 14px;border-radius:99px;border:0.5px solid var(--border);background:var(--card);color:var(--sub);cursor:pointer;font-family:inherit;white-space:nowrap;}
+.fs-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.fs-btn.fs-s{font-size:12px;}.fs-btn.fs-m{font-size:14px;}.fs-btn.fs-l{font-size:16px;}
 body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;background:var(--bg);min-height:100vh;font-size:var(--fs-md);}
 .screen{display:none;}.screen.active{display:block;}
 .view{display:none;}.view.active{display:block;}
@@ -33,7 +44,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .loading-box{text-align:center;padding:20px 0;}
 .loading-spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px;}
 .loading-text{font-size:var(--fs-sm);color:var(--muted);margin-bottom:14px;}
-.s-btn{padding:14px 16px;border:0.5px solid var(--border);border-radius:12px;background:var(--card);cursor:pointer;display:flex;align-items:center;gap:10px;font-size:var(--fs-md);font-weight:500;color:var(--text);}
+.s-btn{padding:14px 16px;border:0.5px solid var(--border);border-radius:12px;background:var(--card);cursor:pointer;display:flex;align-items:center;gap:10px;font-size:16px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;-webkit-text-size-adjust:none;}
 .s-btn:active{background:var(--accent-light);}
 .s-avatar{width:36px;height:36px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;}
 
@@ -254,7 +265,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
         </div>
       </div>
       <div style="margin-top:14px;padding-top:14px;border-top:0.5px solid var(--border);">
-        <button onclick="openDashboard()" style="width:100%;padding:14px;border:0.5px solid var(--accent);border-radius:12px;background:var(--accent-light);color:var(--accent);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-size:var(--fs-md);font-weight:600;font-family:inherit;">
+        <button onclick="openDashboard()" style="width:100%;padding:14px;border:0.5px solid var(--accent);border-radius:12px;background:var(--accent-light);color:var(--accent);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-size:16px;font-weight:600;font-family:inherit;white-space:nowrap;">
           <i class="ti ti-chart-bar"></i> 同行活動ダッシュボード
         </button>
       </div>
@@ -270,11 +281,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
       <button class="t-switch" onclick="closeDashboard()"><i class="ti ti-arrow-left" style="font-size:14px;vertical-align:-2px;"></i> 戻る</button>
     </div>
   </div>
+  <div class="fs-bar">
+    <div class="fs-bar-label"><i class="ti ti-text-size" style="font-size:14px;"></i>文字</div>
+    <div class="fs-btns" id="fs-btns-dash">
+      <button class="fs-btn fs-s" onclick="setFontSize('small')">小</button>
+      <button class="fs-btn fs-m" onclick="setFontSize('medium')">中</button>
+      <button class="fs-btn fs-l" onclick="setFontSize('large')">大</button>
+    </div>
+  </div>
   <div class="page">
     <div class="filter-scroll" id="db-senior-filter"></div>
-    <div style="margin-bottom:8px;">
-      <button onclick="(function(){const r=dbAllRecordsCache;alert('全件数:'+r.length+'\nユニーク日付:'+[...new Set(r.map(x=>x.date))].join(',')+'\n\n明細:\n'+r.map(x=>x.date+'|'+x.senior).join('\n'));})()" style="font-size:12px;padding:6px 12px;border-radius:8px;border:1px solid #ccc;background:#fff;color:#666;cursor:pointer;">🔍 データ確認</button>
-    </div>
     <div id="db-calendar" style="margin-bottom:12px;"></div>
     <div id="db-content"><div class="empty">読み込み中...</div></div>
     <div style="height:24px;"></div>
@@ -290,6 +306,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
         <span class="stext" id="stext"></span>
       </div>
       <button class="t-switch" onclick="logout()">切替</button>
+    </div>
+  </div>
+  <div class="fs-bar">
+    <div class="fs-bar-label"><i class="ti ti-text-size" style="font-size:14px;"></i>文字</div>
+    <div class="fs-btns">
+      <button class="fs-btn fs-s" onclick="setFontSize('small')">小</button>
+      <button class="fs-btn fs-m" onclick="setFontSize('medium')">中</button>
+      <button class="fs-btn fs-l" onclick="setFontSize('large')">大</button>
     </div>
   </div>
   <div class="tabnav">
@@ -402,6 +426,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 </div>
 
 <script>
+// ── 文字サイズ設定 ──
+const FS_KEY='fd_font_size';
+function setFontSize(size){
+  document.body.className=document.body.className
+    .replace(/\bfs-small\b|\bfs-medium\b|\bfs-large\b/g,'').trim()+' fs-'+size;
+  try{localStorage.setItem(FS_KEY,size);}catch(e){}
+  document.querySelectorAll('.fs-btn').forEach(b=>{
+    const isActive=(size==='small'&&b.classList.contains('fs-s'))
+      ||(size==='medium'&&b.classList.contains('fs-m'))
+      ||(size==='large'&&b.classList.contains('fs-l'));
+    b.classList.toggle('active',isActive);
+  });
+}
+function initFontSize(){
+  let size='medium';
+  try{size=localStorage.getItem(FS_KEY)||'medium';}catch(e){}
+  setFontSize(size);
+}
+
 const GAS='https://script.google.com/macros/s/AKfycbxpnXDwE36Wsk5-RNDvwgWJFdmi8MUEgj0Acbx-nZGENv-tSnUKpgEp14CaoFyJKJPq/exec';
 const CK='sr_c';
 const CHECK_ITEMS=[
@@ -1719,6 +1762,7 @@ async function postGAS(data){
 }
 
 // ── 起動 ──
+initFontSize();
 try{cu=localStorage.getItem(CK)||null;}catch(e){}
 if(cu){
   document.getElementById('scr-login').classList.remove('active');
