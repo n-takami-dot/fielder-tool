@@ -1000,7 +1000,17 @@ async function loadDashboard(){
     const [seniorRes,seniorsRes,plansRes,allRes]=results;
     if(needStores&&allRes){stores=allRes.stores||[];members=allRes.members||[];}
     statusStores=stores;
-    const allRecords=(seniorRes.records||[]).map(r=>({...r,date:fmtDate(r.date)}));
+    // IDで重複除去（スプレッドシートに重複行がある場合の対策）
+    const seen=new Set();
+    const allRecords=(seniorRes.records||[])
+      .map(r=>({...r,date:fmtDate(r.date)}))
+      .filter(r=>{
+        const key=String(r.id);
+        if(seen.has(key))return false;
+        seen.add(key);
+        return true;
+      })
+      .filter(r=>r.senior&&r.senior.trim()); // seniorが空のデータも除外
     const seniors=['全員',...(seniorsRes.seniors||[])];
     seniorPlans=(plansRes&&plansRes.plans||[]).map(r=>({...r,date:fmtDate(r.date)}));
     statusSeniorRecs=allRecords;
@@ -1065,9 +1075,11 @@ function _renderDashboardInner(){
   // 月フィルター
   if(dbMonthFilter!=='全期間') records=records.filter(r=>getYearMonth(r.date)===dbMonthFilter);
 
-  // ── 集計（全て「日付×同行者」ユニークで日数カウント） ──
-  // 同行日数：日付×同行者のユニーク数
-  const totalDays=new Set(records.map(r=>r.date+'__'+r.senior)).size;
+  // ── 集計 ──
+  // 同行日数：「全員」時は日付のユニーク数、個人フィルター時は日付×同行者のユニーク数
+  const totalDays=dbSeniorFilter==='全員'
+    ? new Set(records.map(r=>r.date)).size
+    : new Set(records.map(r=>r.date+'__'+r.senior)).size;
   // 同行店舗数：件数そのまま
   const total=records.length;
 
