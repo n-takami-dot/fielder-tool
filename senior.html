@@ -272,6 +272,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
   </div>
   <div class="page">
     <div class="filter-scroll" id="db-senior-filter"></div>
+    <div style="margin-bottom:8px;">
+      <button onclick="(function(){const r=dbAllRecordsCache;alert('全件数:'+r.length+'\nユニーク日付:'+[...new Set(r.map(x=>x.date))].join(',')+'\n\n明細:\n'+r.map(x=>x.date+'|'+x.senior).join('\n'));})()" style="font-size:12px;padding:6px 12px;border-radius:8px;border:1px solid #ccc;background:#fff;color:#666;cursor:pointer;">🔍 データ確認</button>
+    </div>
     <div id="db-calendar" style="margin-bottom:12px;"></div>
     <div id="db-content"><div class="empty">読み込み中...</div></div>
     <div style="height:24px;"></div>
