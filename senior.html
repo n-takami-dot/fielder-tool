@@ -1266,6 +1266,7 @@ function _renderDashboardInner(){
                 <div style="display:flex;align-items:center;gap:6px;">
                   <span style="font-size:var(--fs-xs);color:var(--muted);white-space:nowrap;">${r.date}</span>
                   <button onclick="openEditModal('${r.id}')" style="display:inline-flex;align-items:center;gap:3px;font-size:var(--fs-xs);padding:3px 8px;border-radius:99px;border:0.5px solid #BFDBFE;background:#EFF6FF;color:#1E40AF;cursor:pointer;white-space:nowrap;"><i class="ti ti-edit" style="font-size:12px;"></i>編集</button>
+                  <button onclick="deleteSeniorRecord('${r.id}','${(r.storeName||'').replace(/'/g,"\\'")}','${r.date}')" style="display:inline-flex;align-items:center;gap:3px;font-size:var(--fs-xs);padding:3px 8px;border-radius:99px;border:0.5px solid #FCA5A5;background:#FFF;color:#DC2626;cursor:pointer;white-space:nowrap;"><i class="ti ti-trash" style="font-size:12px;"></i>削除</button>
                 </div>
               </div>
               <div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:4px;">同行：${r.senior||''}</div>
@@ -1304,9 +1305,10 @@ function _renderDashboardInner(){
         return`<div style="padding:10px 0;border-bottom:0.5px solid var(--border);">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">
             <div style="font-size:var(--fs-sm);font-weight:600;color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:2px;" onclick="openStoreDetailFromDashboard('${(r.storeName||'').replace(/'/g,"\\'")}')">${r.storeName||'—'}</div>
-            <div style="display:flex;align-items:center;gap:8px;">
+            <div style="display:flex;align-items:center;gap:6px;">
               <div style="font-size:var(--fs-xs);color:var(--muted);white-space:nowrap;">${r.date}</div>
               <button onclick="openEditModal('${r.id}')" style="display:inline-flex;align-items:center;gap:3px;font-size:var(--fs-xs);padding:3px 8px;border-radius:99px;border:0.5px solid var(--border);background:var(--card);color:var(--sub);cursor:pointer;white-space:nowrap;"><i class="ti ti-edit" style="font-size:12px;"></i>編集</button>
+              <button onclick="deleteSeniorRecord('${r.id}','${(r.storeName||'').replace(/'/g,"\\'")}','${r.date}')" style="display:inline-flex;align-items:center;gap:3px;font-size:var(--fs-xs);padding:3px 8px;border-radius:99px;border:0.5px solid #FCA5A5;background:#FFF;color:#DC2626;cursor:pointer;white-space:nowrap;"><i class="ti ti-trash" style="font-size:12px;"></i>削除</button>
             </div>
           </div>
           <div style="font-size:var(--fs-xs);color:var(--muted);margin-bottom:5px;">${r.fielder||''} ／ 同行：${r.senior||''}</div>
@@ -1315,6 +1317,29 @@ function _renderDashboardInner(){
         </div>`;
       }).join(''):'<div style="color:var(--muted);font-size:var(--fs-sm);padding:8px 0;">データがありません</div>'}
     </div>`;
+}
+
+// ── 同行記録 削除 ──
+async function deleteSeniorRecord(id, storeName, date){
+  // 確認ダイアログ
+  const ok=confirm(`この同行記録を削除しますか？\n\n店舗：${storeName}\n日付：${date}\n\n削除後は元に戻せません。`);
+  if(!ok)return;
+  try{
+    await postGAS({action:'deleteSeniorRecord',id:String(id)});
+    // ローカルからも削除
+    const removeFromArr=(arr)=>{
+      const idx=arr.findIndex(r=>String(r.id)===String(id));
+      if(idx>=0)arr.splice(idx,1);
+    };
+    removeFromArr(seniorRecords);
+    removeFromArr(statusSeniorRecs);
+    removeFromArr(dbAllRecordsCache);
+    removeFromArr(dbAllRecords);
+    toast('削除しました','ok');
+    _renderDashboardInner();
+  }catch(e){
+    toast('削除エラー','err');
+  }
 }
 
 // ── 同行記録 編集 ──
