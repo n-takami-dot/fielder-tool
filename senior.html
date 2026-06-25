@@ -1485,10 +1485,10 @@ function initForm(){
   const myPlans=seniorPlans.filter(p=>p.senior===cu&&new Date(p.date)>=today)
     .sort((a,b)=>a.date.localeCompare(b.date));
   if(myPlans.length>0){
-    // 予定選択モード
     document.getElementById('plan-select-area').style.display='block';
     document.getElementById('manual-date-area').style.display='none';
-    document.getElementById('plan-date-btns').innerHTML=myPlans.map(p=>{
+    const LIMIT=3;
+    const makeBtnHtml=(p)=>{
       const d=new Date(p.date);
       const dow=['日','月','火','水','木','金','土'][d.getDay()];
       const label=`${p.date.slice(5).replace('-','/')}（${dow}）　${p.fielder}`;
@@ -1496,9 +1496,20 @@ function initForm(){
         style="width:100%;padding:14px 14px;border-radius:11px;border:1.5px solid var(--accent-border);background:var(--accent-light);color:var(--accent);font-size:14px;font-weight:600;cursor:pointer;text-align:left;font-family:inherit;display:flex;align-items:center;gap:8px;white-space:nowrap;overflow:hidden;">
         <i class="ti ti-calendar-event" style="font-size:18px;flex-shrink:0;"></i><span style="overflow:hidden;text-overflow:ellipsis;">${label}</span>
       </button>`;
-    }).join('');
+    };
+    const visiblePlans=myPlans.slice(0,LIMIT);
+    const hiddenPlans=myPlans.slice(LIMIT);
+    let html=visiblePlans.map(makeBtnHtml).join('');
+    if(hiddenPlans.length>0){
+      const hiddenHtml=hiddenPlans.map(makeBtnHtml).join('');
+      html+=`<div id="plan-hidden-btns" style="display:none;margin-top:0;">${hiddenHtml}</div>
+        <button onclick="document.getElementById('plan-hidden-btns').style.display='block';this.style.display='none';"
+          style="margin-top:6px;font-size:var(--fs-xs);color:var(--accent);background:none;border:0.5px solid var(--accent-border);border-radius:99px;padding:5px 14px;cursor:pointer;font-family:inherit;">
+          <i class="ti ti-chevron-down" style="font-size:12px;vertical-align:-1px;"></i> 他${hiddenPlans.length}件を表示
+        </button>`;
+    }
+    document.getElementById('plan-date-btns').innerHTML=html;
   } else {
-    // 予定なし → 直接入力モード
     switchToManualDate();
   }
 }
