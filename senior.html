@@ -206,18 +206,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
 .cal-nav-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:4px 10px;cursor:pointer;font-size:16px;color:var(--sub);flex-shrink:0;}
 .cal-month{font-size:16px;font-weight:600;color:var(--text);white-space:nowrap;}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;}
-.cal-head{text-align:center;font-size:13px;font-weight:600;color:var(--muted);padding:5px 0;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;}
+.cal-head{text-align:center;font-size:12px;font-weight:600;color:var(--muted);padding:4px 0;}
 .cal-head.sun{color:#EF4444;}.cal-head.sat{color:#3B82F6;}
-.cal-cell{border-radius:6px;padding:4px;border:1px solid transparent;cursor:pointer;min-height:68px;}
+.cal-cell{border-radius:4px;padding:3px 2px;border:1px solid transparent;cursor:pointer;min-height:52px;}
 .cal-cell:hover{background:var(--accent-light);border-color:var(--accent-border);}
 .cal-cell.today{background:var(--accent-light);border-color:var(--accent-border);}
 .cal-cell.cal-sel{border-color:var(--accent) !important;background:#DBEAFE !important;}
 .cal-cell.other-month .cal-day{color:#D1D5DB;}
-.cal-day{font-size:13px;font-weight:500;color:var(--text);text-align:right;margin-bottom:3px;}
+.cal-day{font-size:12px;font-weight:500;color:var(--text);text-align:right;margin-bottom:2px;}
 .cal-cell.sun .cal-day{color:#EF4444;}.cal-cell.sat .cal-day{color:#3B82F6;}
 .cal-cell.today .cal-day{font-weight:700;color:var(--accent);}
-.sb{border-radius:3px;padding:3px 4px;margin-bottom:2px;font-size:11px;font-weight:600;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sb{border-radius:3px;padding:2px 3px;margin-bottom:1px;font-size:9px;font-weight:600;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .sb-plan{opacity:.85;}.sb-done{opacity:1;}
 .cal-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;}
 .cal-leg{display:flex;align-items:center;gap:4px;font-size:var(--fs-xs);color:var(--muted);}
@@ -371,12 +371,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
   <div class="view" id="view-plan">
     <div class="page">
       <!-- 月ナビ -->
-      <div class="rec-sec">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;">
+      <div class="rec-sec" style="padding:12px 10px 10px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:6px;">
           <div style="font-size:var(--fs-xs);font-weight:600;color:var(--muted);display:flex;align-items:center;gap:5px;white-space:nowrap;flex-shrink:0;"><i class="ti ti-calendar-event"></i> 同行予定</div>
           <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
             <button class="cal-nav-btn" onclick="planCalChangeMonth(-1)">&#8249;</button>
-            <div class="cal-month" id="plan-cal-month" style="white-space:nowrap;min-width:90px;text-align:center;"></div>
+            <div class="cal-month" id="plan-cal-month" style="white-space:nowrap;text-align:center;font-size:15px;min-width:72px;"></div>
             <button class="cal-nav-btn" onclick="planCalChangeMonth(1)">&#8250;</button>
           </div>
         </div>
@@ -726,17 +726,17 @@ function renderCalendar(){
            <div class="cal-leg"><div class="cal-leg-box" style="background:${col.done};"></div>${name.split(' ')[0]} 済</div>`;
   }).join('');
   container.innerHTML=`
-    <div class="rec-sec">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px;">
+    <div class="rec-sec" style="padding:12px 10px 10px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:6px;">
         <div style="font-size:var(--fs-xs);font-weight:600;color:var(--muted);display:flex;align-items:center;gap:5px;white-space:nowrap;flex-shrink:0;"><i class="ti ti-calendar-event"></i> 同行カレンダー</div>
         <div style="display:flex;align-items:center;gap:4px;flex-shrink:0;">
           <button class="cal-nav-btn" onclick="calChangeMonth(-1)">&#8249;</button>
-          <div class="cal-month" style="white-space:nowrap;min-width:90px;text-align:center;">${calYear}年 ${calMonth+1}月</div>
+          <div class="cal-month" style="white-space:nowrap;text-align:center;font-size:15px;min-width:72px;">${calYear}/${calMonth+1}</div>
           <button class="cal-nav-btn" onclick="calChangeMonth(1)">&#8250;</button>
         </div>
       </div>
       <div class="cal-grid">${['日','月','火','水','木','金','土'].map((d,i)=>`<div class="cal-head${i===0?' sun':i===6?' sat':''}">${d}</div>`).join('')}</div>
-      <div class="cal-grid" style="margin-top:2px;">${cells}</div>
+      <div class="cal-grid" style="margin-top:1px;">${cells}</div>
       <div class="cal-legend">${legendHtml}</div>
       <div id="cal-detail" style="display:none;"></div>
     </div>`;
@@ -815,7 +815,7 @@ function renderPlanCal(){
   const first=new Date(planCalYear,planCalMonth,1);
   const last=new Date(planCalYear,planCalMonth+1,0);
   const monthEl=document.getElementById('plan-cal-month');
-  if(monthEl)monthEl.textContent=`${planCalYear}年 ${planCalMonth+1}月`;
+  if(monthEl)monthEl.textContent=`${planCalYear}/${planCalMonth+1}`;
 
   // 予定・済みのマップ（seniorが空のデータは除外）
   const planMap={}, doneMap={};
