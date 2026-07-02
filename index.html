@@ -740,8 +740,10 @@ async function saveEdit(){
     keyman:document.getElementById('ec-km').value
   };
   const issue1=document.getElementById('ec-issue1').value.trim();
-  const uchiteSel=document.getElementById('ec-uchite-sel').value;
-  const uchiteDetail=document.getElementById('ec-uchite-detail').value.trim();
+  const uchiteSelEl=document.getElementById('ec-uchite-sel');
+  const uchiteDetailEl=document.getElementById('ec-uchite-detail');
+  const uchiteSel=uchiteSelEl?uchiteSelEl.value:(info.uchiteSel||'');
+  const uchiteDetail=uchiteDetailEl?uchiteDetailEl.value.trim():(info.uchiteDetail||'');
   const updated={
     ...info,contact,issue1,uchiteSel,uchiteDetail,
     hqConstraint:'hq' in editConst?editConst.hq:info.hqConstraint,
@@ -927,10 +929,98 @@ function renderRegList(){
 }
 // ── 起動時自動読み込み ──
 async function autoLoad(){
-  await loadMembers();
-  await syncStoresSilent();
-  await loadStoreInfo();
-  await loadRecords();
+  // ① キャッシュがあれば即座に画面を描画（体感速度向上）
+  if(stores.length>0){renderDash();}
+  setSyncDot('spin','更新中...');
+  try{
+    // ② getAll で1回のリクエストで全データ取得
+    const res=await fetch(GAS+'?action=getAll');
+    const json=await res.json();
+    if(!json.stores)throw new Error('データ形式エラー');
+
+    // メンバー更新
+    if(json.members&&json.members.length>0){
+      MEMBERS=json.members.map((name,i)=>{
+        const col=AVATAR_COLORS[i%AVATAR_COLORS.length];
+        return{name,color:col.color,tc:col.tc};
+      });
+    }
+
+    // 店舗データ更新
+    const RANKS=['S','A','B','C','D','E'];
+    json.stores.forEach(row=>{
+      if(!row.name)return;
+      const rank=RANKS.includes(row.rank)?row.rank:'';
+      const ex=stores.find(s=>s.name===row.name);
+      if(ex){
+        ex.chain=row.chain;ex.pic=row.pic;ex.rank=rank;
+        ex.priority=row.priority||'';ex.pair=row.pair||'';
+        ex.location=row.location||'';ex.shopAuth=row.shopAuth||'';
+        ex.monthAvg=row.monthAvg||'';ex.prevResult=row.prevResult;
+        ex.note=row.note;ex.address=row.address||'';
+        MONTH_KEYS.forEach(k=>{ex[k]=row[k]||'';});
+      }else{
+        const ns={name:row.name,chain:row.chain||'',rank,
+          priority:row.priority||'',pair:row.pair||'',
+          location:row.location||'',shopAuth:row.shopAuth||'',
+          monthAvg:row.monthAvg||'',pic:row.pic||'',
+          prevResult:row.prevResult||'',note:row.note||'',
+          address:row.address||''};
+        MONTH_KEYS.forEach(k=>{ns[k]=row[k]||'';});
+        stores.push(ns);
+      }
+    });
+
+    // 店舗情報更新
+    if(json.info){
+      json.info.forEach(item=>{
+        if(!item.storeName)return;
+        let goalIdx=null;
+        if(item.goal!==null&&item.goal!==''){
+          const idx=GOALS.indexOf(item.goal);
+          goalIdx=idx>=0?idx:null;
+        }
+        const existing=sInfo[item.storeName]||{};
+        sInfo[item.storeName]={
+          ...existing,goal:goalIdx,phase:Number(item.phase||0),
+          lastVisit:fmtDate(item.lastVisit||existing.lastVisit||''),
+          contact:{name:item.contactName||'',role:item.contactRole||'',
+            auth:item.contactAuth||'',rel:item.contactRel||'',keyman:item.contactKM||''},
+          issue1:item.issue1||'',uchiteSel:item.uchiteSel||'',
+          uchiteDetail:item.uchiteDetail||'',popOk:item.popOk||'',
+          promoOk:item.promoOk||'',hqConstraint:item.hqConstraint||''
+        };
+      });
+    }
+
+    // 訪問記録更新
+    if(json.records){
+      const fetched=json.records.filter(r=>r.storeName&&!deletedIds.has(String(r.id))).map(r=>{
+        let goalIdx=null;
+        if(r.goal!==null&&r.goal!==''){
+          const idx=GOALS.indexOf(r.goal);goalIdx=idx>=0?idx:null;
+        }
+        return{id:r.id,storeName:r.storeName,date:fmtDate(r.date),fielder:r.fielder,
+          goal:goalIdx,uchiteSel:r.uchiteSel||'',uchiteDetail:r.uchiteDetail||'',
+          phase:Number(r.phase||0),result:r.result,
+          memo:r.memo||'',next:r.next||'',nextDate:fmtDate(r.nextDate),priority:r.priority||''};
+      });
+      if(isAdmin()){records=fetched;}
+      else{
+        records=records.filter(r=>r.fielder&&r.fielder!==cu);
+        records=records.concat(fetched.filter(r=>r.fielder===cu));
+      }
+    }
+
+    sv();
+    setSyncDot('ok','更新完了 '+new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'}));
+    renderDash();
+    if(detailName&&document.getElementById('view-detail').classList.contains('active')){
+      renderDetail(detailName);
+    }
+  }catch(e){
+    setSyncDot('err','更新失敗（キャッシュ表示中）');
+  }
 }
 
 async function loadMembers(){
