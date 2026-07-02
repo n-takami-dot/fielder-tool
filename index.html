@@ -12,12 +12,24 @@
 <title>フィールド管理</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
 <style>
-*{box-sizing:border-box;margin:0;padding:0;}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
 :root{
   --accent:#2563EB;--accent-light:#EFF6FF;--accent-border:#BFDBFE;
   --text:#111;--sub:#6B7280;--muted:#9CA3AF;--border:#E5E7EB;--bg:#F9FAFB;--card:#fff;
-  --fs-xs:13px;--fs-sm:15px;--fs-md:17px;--fs-lg:19px;--fs-xl:22px;--fs-2xl:28px;
+  --fs-xs:14px;--fs-sm:16px;--fs-md:18px;--fs-lg:20px;--fs-xl:23px;--fs-2xl:30px;
 }
+/* フォントサイズ4段階 */
+body.fs-small {--fs-xs:12px;--fs-sm:14px;--fs-md:16px;--fs-lg:18px;--fs-xl:21px;--fs-2xl:26px;}
+body.fs-medium{--fs-xs:14px;--fs-sm:16px;--fs-md:18px;--fs-lg:20px;--fs-xl:23px;--fs-2xl:30px;}
+body.fs-large {--fs-xs:16px;--fs-sm:18px;--fs-md:20px;--fs-lg:22px;--fs-xl:25px;--fs-2xl:33px;}
+body.fs-xlarge{--fs-xs:18px;--fs-sm:20px;--fs-md:23px;--fs-lg:25px;--fs-xl:28px;--fs-2xl:36px;}
+/* 文字サイズバー */
+.fs-bar{background:var(--card);border-bottom:0.5px solid var(--border);padding:7px 14px;display:flex;align-items:center;gap:8px;overflow-x:auto;scrollbar-width:none;}
+.fs-bar::-webkit-scrollbar{display:none;}
+.fs-bar-label{font-size:12px;color:var(--muted);white-space:nowrap;flex-shrink:0;display:flex;align-items:center;gap:4px;}
+.fs-btn{padding:4px 13px;border-radius:99px;border:0.5px solid var(--border);background:var(--card);color:var(--sub);cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;}
+.fs-btn.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+.fs-btn.fs-s{font-size:12px;}.fs-btn.fs-m{font-size:14px;}.fs-btn.fs-l{font-size:16px;}.fs-btn.fs-xl{font-size:18px;}
 body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;background:var(--bg);min-height:100vh;font-size:var(--fs-md);}
 .screen{display:none;}.screen.active{display:block;}
 .view{display:none;}.view.active{display:block;}
@@ -45,7 +57,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 
 /* ── タブナビ ── */
 .tabnav{background:var(--card);border-bottom:0.5px solid var(--border);display:flex;}
-.tnb{flex:1;font-size:var(--fs-xs);padding:11px 4px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.tnb{flex:1;font-size:var(--fs-xs);padding:12px 4px;border:none;background:transparent;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;display:flex;flex-direction:column;align-items:center;gap:3px;white-space:nowrap;}
 .tnb i{font-size:22px;}
 .tnb.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
 
@@ -58,7 +70,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .kpi-sub{font-size:var(--fs-xs);color:var(--sub);}
 .filter-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 .filter-scroll::-webkit-scrollbar{display:none;}
-.filter-chip{flex-shrink:0;font-size:var(--fs-xs);padding:6px 14px;border:0.5px solid var(--border);border-radius:99px;background:var(--card);color:var(--sub);cursor:pointer;-webkit-appearance:none;appearance:none;}
+.filter-chip{flex-shrink:0;font-size:var(--fs-xs);padding:6px 14px;border:0.5px solid var(--border);border-radius:99px;background:var(--card);color:var(--sub);cursor:pointer;-webkit-appearance:none;appearance:none;white-space:nowrap;}
 .store-list{display:flex;flex-direction:column;gap:10px;}
 .store-card{background:var(--card);border:0.5px solid var(--border);border-radius:12px;padding:14px 16px;cursor:pointer;}
 .store-card:active{background:var(--accent-light);}
@@ -184,7 +196,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 .res-tile.sel-f{background:#FEE2E2;border-color:#DC2626;color:#991B1B;}
 
 /* ボタン */
-.save-btn{width:100%;padding:18px;font-size:var(--fs-md);font-weight:600;border:none;border-radius:12px;background:var(--accent);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;}
+.save-btn{width:100%;padding:18px;font-size:var(--fs-md);font-weight:600;border:none;border-radius:12px;background:var(--accent);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;white-space:nowrap;}
 .save-btn:active{opacity:.85;}
 .save-btn:disabled{opacity:.5;}
 .clear-btn{width:100%;padding:14px;font-size:var(--fs-sm);border:0.5px solid var(--border);border-radius:12px;background:var(--card);color:var(--sub);cursor:pointer;margin-top:10px;}
@@ -288,6 +300,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
       <a id="admin-link" href="admin.html" style="display:none;font-size:var(--fs-xs);padding:5px 10px;border:0.5px solid var(--accent);border-radius:99px;background:var(--accent-light);color:var(--accent);text-decoration:none;font-weight:600;white-space:nowrap;"><i class="ti ti-chart-bar"></i> 管理</a>
       <button class="t-switch" onclick="logout()">切替</button>
     </div>
+  </div>
+  <div class="fs-bar">
+    <span class="fs-bar-label"><i class="ti ti-text-size" style="font-size:14px;"></i>文字</span>
+    <button class="fs-btn fs-s" onclick="setFontSize('small')">小</button>
+    <button class="fs-btn fs-m" onclick="setFontSize('medium')">中</button>
+    <button class="fs-btn fs-l" onclick="setFontSize('large')">大</button>
+    <button class="fs-btn fs-xl" onclick="setFontSize('xlarge')">特大</button>
   </div>
   <div class="tabnav">
     <button class="tnb active" id="nb-dash" onclick="goView('dash')"><i class="ti ti-layout-dashboard"></i>一覧</button>
@@ -399,6 +418,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Hiragino Sans',sans-serif;bac
 </div>
 
 <script>
+// ── 文字サイズ設定 ──
+const FS_KEY='fd_font_size';
+function setFontSize(size){
+  document.body.className=document.body.className
+    .replace(/\bfs-small\b|\bfs-medium\b|\bfs-large\b|\bfs-xlarge\b/g,'').trim()+' fs-'+size;
+  try{localStorage.setItem(FS_KEY,size);}catch(e){}
+  document.querySelectorAll('.fs-btn').forEach(b=>{
+    const isActive=(size==='small'&&b.classList.contains('fs-s'))
+      ||(size==='medium'&&b.classList.contains('fs-m'))
+      ||(size==='large'&&b.classList.contains('fs-l'))
+      ||(size==='xlarge'&&b.classList.contains('fs-xl'));
+    b.classList.toggle('active',isActive);
+  });
+}
+function initFontSize(){
+  let size='medium';
+  try{size=localStorage.getItem(FS_KEY)||'medium';}catch(e){}
+  setFontSize(size);
+}
+
 const GAS='https://script.google.com/macros/s/AKfycbxpnXDwE36Wsk5-RNDvwgWJFdmi8MUEgj0Acbx-nZGENv-tSnUKpgEp14CaoFyJKJPq/exec';
 const GOALS=['平台獲得','売場改善','多面展開','取り扱いアイテム増'];
 const GCLS=['g0','g1','g2','g3'];
@@ -446,12 +485,14 @@ let selGoal=null,selPhase=null,curRes=null,editConst={},goalChangeMode=false,pha
 let fGoal='',fRank='',fPhase='',fPair=false,fPriority='',fLocation='';
 
 function ld(){
-  // バージョンチェック：古いデータ構造の場合はクリア（ログインユーザーは保持）
+  // バージョンチェック：古いデータ構造の場合はクリア（ログインユーザー・文字サイズは保持）
   const savedVersion=localStorage.getItem(VK);
   if(savedVersion!==APP_VERSION){
     const savedCu=localStorage.getItem(CK);
+    const savedFs=localStorage.getItem(FS_KEY);
     localStorage.clear();
     if(savedCu)localStorage.setItem(CK,savedCu);
+    if(savedFs)localStorage.setItem(FS_KEY,savedFs);
     localStorage.setItem(VK,APP_VERSION);
   }
   try{stores=JSON.parse(localStorage.getItem(SK)||'[]');}catch(e){stores=[];}
@@ -1198,7 +1239,7 @@ function selUchite(btn,val){
   if(rSel)rSel.value=val;
 }
 
-ld();if(cu){login(cu);}else{renderLogin();loadMembers();}
+initFontSize();ld();if(cu){login(cu);}else{renderLogin();loadMembers();}
 
 // URLパラメータで店舗が指定されている場合は直接詳細画面を開く
 function checkUrlStore(){
