@@ -1,7 +1,7 @@
 // Service Worker：常にネットワークから取得（キャッシュなし）
 // オフライン対応より常に最新版を優先する設計
 
-const CACHE_NAME = 'fielder-tool-v57';
+const CACHE_NAME = 'fielder-tool-v58';
 
 self.addEventListener('install', event => {
   self.skipWaiting();
