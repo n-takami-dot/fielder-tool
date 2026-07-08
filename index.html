@@ -543,6 +543,7 @@ function login(name){
   autoLoad().then(()=>checkUrlStore());
 }
 function logout(){try{localStorage.removeItem(CK);}catch(e){}cu=null;renderLogin();}
+let lastRefresh=0;
 function goView(v,sname){
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.tnb').forEach(el=>el.classList.remove('active'));
@@ -550,7 +551,16 @@ function goView(v,sname){
   document.getElementById('view-'+v).classList.add('active');
   const nb=document.getElementById('nb-'+v);if(nb)nb.classList.add('active');
   window.scrollTo(0,0);
-  if(v==='dash')renderDash();
+  if(v==='dash'){
+    renderDash();
+    // 前回更新から30秒以上経過していればバックグラウンドで最新取得
+    const now=Date.now();
+    if(now-lastRefresh>30000){
+      lastRefresh=now;
+      loadStoreInfo();
+      loadRecords();
+    }
+  }
   if(v==='rec')initRec();
   if(v==='reg')renderRegList();
 }
@@ -1114,10 +1124,11 @@ async function loadStoreInfo(){
     if(!json.info)return;
     json.info.forEach(item=>{
       if(!item.storeName)return;
-      // ゴール名からインデックスに変換
+      // ゴール名からインデックスに変換（空白trim対応）
       let goalIdx=null;
-      if(item.goal!==null&&item.goal!==''){
-        const idx=GOALS.indexOf(item.goal);
+      if(item.goal!==null&&item.goal!==undefined&&String(item.goal).trim()!==''){
+        const goalStr=String(item.goal).trim();
+        const idx=GOALS.findIndex(g=>g===goalStr);
         goalIdx=idx>=0?idx:null;
       }
       const existing=sInfo[item.storeName]||{};
@@ -1240,6 +1251,17 @@ function selUchite(btn,val){
 }
 
 initFontSize();ld();if(cu){login(cu);}else{renderLogin();loadMembers();}
+// アプリがバックグラウンドから復帰した時に最新データを取得
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'&&cu){
+    const now=Date.now();
+    if(now-lastRefresh>30000){
+      lastRefresh=now;
+      loadStoreInfo();
+      loadRecords();
+    }
+  }
+});
 
 // URLパラメータで店舗が指定されている場合は直接詳細画面を開く
 function checkUrlStore(){
